@@ -57,35 +57,87 @@ game_controller = GameController(
     ControllerOptions(world_width, world_height, cell_size)
 )
 
+
 # Create schools of fish and add to the world
-
-shoal_radius = 128.0
 spawn_region_size = 512.0
-red_school = School(
-    SchoolParameters(
-        128.0,
-        48.0,
-        1,
-        1.0,
-        1.8,
-        1.0,
-        get_random_shoal_location(
-            game_controller.model.player.camera_width,
-            game_controller.model.player.camera_height,
-            world_height,
-            world_width,
-        ),
-        shoal_radius,
-        1.0,
-        Rect(
-            world_width / 2.0, world_height / 2.0, spawn_region_size, spawn_region_size
-        ),
-        32,
-    ),
-    FishSettings(FishType.RED, 32.0, 32.0, 200.0, 0.5),
-)
-game_controller.add_school(red_school)
 
+num_red_schools = 10
+for _ in range(num_red_schools):
+
+    red_school = School(
+        SchoolParameters(
+            128.0,
+            48.0,
+            1,
+            1.0,
+            1.8,
+            1.0,
+            get_random_shoal_location(
+                game_controller.model.player.camera_width,
+                game_controller.model.player.camera_height,
+                world_height,
+                world_width,
+            ),
+            128.0,
+            1.2,
+            get_random_spawn_region(
+                spawn_region_size, spawn_region_size, world_width, world_height
+            ),
+            32,
+        ),
+        FishSettings(FishType.RED, 32.0, 32.0, 175.0, 0.5),
+    )
+    game_controller.add_school(red_school)
+
+num_yellow_schools = 4
+for _ in range(num_yellow_schools):
+    yellow_school = School(
+        SchoolParameters(
+            128.0,
+            48.0,
+            1,
+            1.0,
+            1.8,
+            1.0,
+            None,
+            1.0,
+            1.0,
+            get_random_spawn_region(
+                spawn_region_size, spawn_region_size, world_width, world_height
+            ),
+            50,
+        ),
+        FishSettings(FishType.YELLOW, 30.0, 30.0, 250.0, 0.8),
+    )
+    game_controller.add_school(yellow_school)
+
+
+num_green_schools = 5
+for _ in range(num_green_schools):
+    green_school = School(
+        SchoolParameters(
+            256.0,
+            96.0,
+            2,
+            1.0,
+            1.8,
+            1.0,
+            get_random_shoal_location(
+                game_controller.model.player.camera_width,
+                game_controller.model.player.camera_height,
+                world_height,
+                world_width,
+            ),
+            128.0,
+            1.0,
+            get_random_spawn_region(
+                spawn_region_size, spawn_region_size, world_width, world_height
+            ),
+            32,
+        ),
+        FishSettings(FishType.GREEN, 48.0, 48.0, 125.0, 0.4),
+    )
+    game_controller.add_school(green_school)
 
 # Start the game loop:
 game_controller.start_game()
