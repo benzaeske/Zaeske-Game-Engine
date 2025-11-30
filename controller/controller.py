@@ -17,7 +17,7 @@ class ControllerOptions:
     """
     :param world_width: The size of the world model. This must be divisible by the grid cell size
     :param world_height: The size of the world model. This must be divisible by the grid cell size
-    :param grid_cell_size: The map will be divided into grids of this size. In order for flocking to work, must be at least as large as the smallest coherence radius of the boids being used
+    :param grid_cell_size: The map will be divided into grids of this size. In order for schooling to work properly, this must be at least as large as the smallest coherence radius of the fish being
     """
 
     def __init__(
@@ -33,8 +33,11 @@ class ControllerOptions:
 
 class GameController:
     """
-    Orchestration class for running the current state of the game. Contains a model which is the simulated world and a view that is responsible for drawing on the screen.
-    In the current implementation, the simulated world and the screen size are the same, but eventually the screen will only be displaying part of a larger simulation.
+    Orchestration class for running the current state of the game. Contains a model which is the simulated world, a view that is responsible for drawing on the screen,
+    and a 'player' that is essentially a camera that can be moved around the world using WASD and has dimensions equal to the screen size used.\n
+    The model tracks coordinates using a standard 2-dimensional x, y plane with (0,0) being the bottom left of the map.
+    The view is currently implemented using pygame which draws to the screen on an inverted y-axis, so coordinates must be converted when coming from the model\n
+    The world model can be any arbitrary size as long as it is bigger than the screen size. The entire world model is updated each frame, but only the grid cells within the player's 'camera' range are drawn each frame
     """
 
     def __init__(

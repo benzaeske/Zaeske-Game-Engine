@@ -12,6 +12,11 @@ from model.utils.vectorutils import limit_magnitude
 
 
 class School:
+    """
+    Represents a school of fish. Responsible for creating Fish entities with the given settings passed to it. \n
+    All fish created by a school share its school_id
+    """
+
     def __init__(
         self,
         school_params: SchoolParameters,

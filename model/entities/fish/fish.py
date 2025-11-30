@@ -10,6 +10,10 @@ from model.entities.school.schoolparameters import SchoolParameters
 
 
 class Fish(GameEntity):
+    """
+    A fish entity with functions for applying boid's algorithm each frame to mimic schooling behavior
+    """
+
     def __init__(
         self,
         fish_settings: FishSettings,
@@ -80,7 +84,8 @@ class Fish(GameEntity):
 
     def get_surface(self):
         """
-        Gets the surface of this entity rotated according to its velocity
+        Gets the surface of this entity rotated according to its velocity.\n
+        This function is currently the most expensive thing being done when drawing the screen and will tank FPS if there are too many fish to display at once
         """
         return pygame.transform.rotate(
             self.surface, math.degrees(math.atan2(self.velocity.y, self.velocity.x))

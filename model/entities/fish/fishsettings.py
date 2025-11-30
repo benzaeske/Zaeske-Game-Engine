@@ -10,6 +10,17 @@ class FishType(Enum):
 
 
 class FishSettings:
+    """
+    Defines properties for an individual Fish entity
+    :param fish_type: The type of fish to use. This determines which fish sprite gets loaded from the images directory
+    :param width: The width of the fish in the model. The fish sprite will be initially scaled to this size
+    :param height: The height of the fish in the model. The fish sprite will be initially scaled to this size
+    :param max_speed: The maximum allowed magnitude of this Fish's velocity
+    :param max_acceleration: The maximum magnitude of this Fish's acceleration per frame
+    :param initial_position: The initial position of the Fish
+    :param initial_velocity: The initial velocity of the Fish
+    """
+
     def __init__(
         self,
         fish_type: FishType,

@@ -8,7 +8,8 @@ from pygame.font import Font
 
 class View:
     """
-    The View is responsible for drawing everything on the screen using pygame functions, but should know nothing about the size or shape of the model it is drawing
+    The View is responsible for drawing everything on the screen using pygame functions, but should know nothing about the size or shape of the model it is drawing.\n
+    Pygame uses an inverted y-axis which is why coordinates are being converted when coming from the model.
     """
 
     def __init__(

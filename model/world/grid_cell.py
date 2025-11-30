@@ -5,6 +5,12 @@ from model.entities.fish.fish import Fish
 
 
 class GridCell:
+    """
+    An individual grid cell in the model's grid space.\n
+    Currently stores the fish that are within its boundaries as well as a random blue background color.\n
+    The view draws background based on the grid cells that are within the player's camera range
+    """
+
     def __init__(
         self,
         size: float,
