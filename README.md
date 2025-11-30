@@ -4,7 +4,7 @@ The current state of the game is an ocean simulation with multiple schools of di
 
 The underlying code uses Boid's algorithm each frame on entities that move according to a position, velocity and acceleration. The model uses spatial partioning and divides the world space into a grid of smaller cells in order to get increased efficiency when calculating forces between a large amount of entities.
 
-At a glance, Boid's algorithm was developed to simulate the flocking behavior of birds or fish. There is no overarching control or logic that is being applied to every entity at once. Instead each entity decides how to move in each frame following 3 simple rules:
+At a glance, Boid's algorithm was developed to simulate the flocking behavior of birds or fish. There is no overarching control or logic that is being applied to every entity at once. Instead each entity decides how to move in each frame based on their closest neighbors following these rules:
 1. Each entity attempts to move towards the average position of its neighbors.  In the code, this is called coherence
 2. Each entity attempts to align its velocity with that of its neighbors. In the code, this is called alignment
 3. Each entity attempts to avoid neighbors that are very close. In the code, this is called avoidance
