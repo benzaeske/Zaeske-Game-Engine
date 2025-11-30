@@ -1,7 +1,7 @@
 import pygame
 from pygame import Surface, Vector2
 
-from model.entities.fish import Fish
+from model.entities.fish.fish import Fish
 
 
 class GridCell:

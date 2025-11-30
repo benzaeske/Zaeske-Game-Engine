@@ -6,9 +6,9 @@ import pygame
 from pygame import Surface
 from pygame.key import ScancodeWrapper
 
-from model.entities.fish import Fish
+from model.entities.fish.fish import Fish
 from model.entities.gameentity import GameEntity
-from model.entities.school import School
+from model.entities.school.school import School
 from model.player.player import Player
 from model.world.grid_cell import GridCell
 

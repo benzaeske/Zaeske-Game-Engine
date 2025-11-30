@@ -7,7 +7,7 @@ from pygame import Vector2, Surface
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.school import School
+from model.entities.school.school import School
 from model.player.player import Turtle
 from model.world.world import SpatialPartitioningModel
 from view.view import View
