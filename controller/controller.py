@@ -7,9 +7,9 @@ from pygame import Vector2, Surface
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.gameentity import GameEntity
-from model.entities.player import Turtle
-from model.world.spatial_partitioning_model import SpatialPartitioningModel
+from model.entities.school.school import School
+from model.player.player import Turtle
+from model.world.world import SpatialPartitioningModel
 from view.view import View
 
 
@@ -17,7 +17,7 @@ class ControllerOptions:
     """
     :param world_width: The size of the world model. This must be divisible by the grid cell size
     :param world_height: The size of the world model. This must be divisible by the grid cell size
-    :param grid_cell_size: The map will be divided into grids of this size. In order for flocking to work, must be at least as large as the smallest coherence radius of the boids being used
+    :param grid_cell_size: The map will be divided into grids of this size. In order for schooling to work properly, this must be at least as large as the smallest coherence radius of the fish being
     """
 
     def __init__(
@@ -25,18 +25,19 @@ class ControllerOptions:
         world_width: float,
         world_height: float,
         grid_cell_size: float,
-        background_color: Tuple[int, int, int],
     ) -> None:
         self.world_width: float = world_width
         self.world_height: float = world_height
         self.grid_cell_size: float = grid_cell_size
-        self.background_color: Tuple[int, int, int] = background_color
 
 
 class GameController:
     """
-    Orchestration class for running the current state of the game. Contains a model which is the simulated world and a view that is responsible for drawing on the screen.
-    In the current implementation, the simulated world and the screen size are the same, but eventually the screen will only be displaying part of a larger simulation.
+    Orchestration class for running the current state of the game. Contains a model which is the simulated world, a view that is responsible for drawing on the screen,
+    and a 'player' that is essentially a camera that can be moved around the world using WASD and has dimensions equal to the screen size used.\n
+    The model tracks coordinates using a standard 2-dimensional x, y plane with (0,0) being the bottom left of the map.
+    The view is currently implemented using pygame which draws to the screen on an inverted y-axis, so coordinates must be converted when coming from the model\n
+    The world model can be any arbitrary size as long as it is bigger than the screen size. The entire world model is updated each frame, but only the grid cells within the player's 'camera' range are drawn each frame
     """
 
     def __init__(
@@ -44,9 +45,7 @@ class GameController:
         options: ControllerOptions,
     ) -> None:
         pygame.init()
-        self.view: View = View(
-            options.background_color,
-        )
+        self.view: View = View()
         self.model: SpatialPartitioningModel = SpatialPartitioningModel(
             options.world_width,
             options.world_height,
@@ -69,7 +68,7 @@ class GameController:
 
     def start_game(self):
         self.game_start = time.time()
-        # Loop frames
+        self.model.hatch_schools()
         while True:
             self.do_game_loop()
 
@@ -96,7 +95,7 @@ class GameController:
             sys.exit()
 
     def update_model(self) -> None:
-        self.model.update_model(self.dt, Vector2(self.mouse_pos), self.key_presses)
+        self.model.update_model(self.dt, self.key_presses)
 
     def draw_background(self) -> None:
         for grid_cell in self.model.get_grid_cells_in_camera_range():
@@ -107,7 +106,11 @@ class GameController:
                 ),
             )
 
-        self.view.print_fps(self.clock.get_fps())
+        self.view.print_info_to_screen(
+            self.clock.get_fps(),
+            int(self.model.player.position.x),
+            int(self.model.player.position.y),
+        )
 
     def draw_game_entities(self) -> None:
         for entity in self.model.get_entities_in_camera_range():
@@ -135,8 +138,8 @@ class GameController:
         view_y = view_center_y - blit_surface.get_height() / 2
         return view_x, view_y
 
-    def add_game_entity(self, entity: GameEntity) -> None:
-        self.model.add_game_entity(entity)
+    def add_school(self, school: School) -> None:
+        self.model.add_school(school)
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self.dt > self.max_dt:

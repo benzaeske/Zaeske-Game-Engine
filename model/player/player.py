@@ -41,7 +41,7 @@ class Player(ABC):
         dt: float,
     ) -> None:
         """
-        Moves the player according to the keys pressed. Movement is scaled with delta time like all other entities.
+        Moves the playeraaaa according to the keys pressed. Movement is scaled with delta time like all other entities.
         Limits the camera position to be confined within positive x,y coordinates and under the provided world boundary.
         """
         velocity: Vector2 = Vector2(0.0, 0.0)
@@ -74,7 +74,7 @@ class Player(ABC):
 
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
         """
-        Returns the coordinates to center the player surface on the screen
+        Returns the coordinates to center the playeraaaa surface on the screen
         """
         return (
             self.camera_w_adjust - self.surface_width / 2,

@@ -8,7 +8,8 @@ from pygame.font import Font
 
 class View:
     """
-    The View is responsible for drawing everything on the screen using pygame functions, but should know nothing about the size or shape of the model it is drawing
+    The View is responsible for drawing everything on the screen using pygame functions, but should know nothing about the size or shape of the model it is drawing.\n
+    Pygame uses an inverted y-axis which is why coordinates are being converted when coming from the model.
     """
 
     def __init__(
@@ -63,11 +64,24 @@ class View:
     def draw_surface(self, surface: Surface, dest: Tuple[float, float]) -> None:
         self.screen.blit(surface, dest)
 
-    def print_fps(self, fps: float) -> None:
+    def print_info_to_screen(self, fps: float, player_x: int, player_y: int) -> None:
         fps_surface: Surface = self.font.render(
             str(math.floor(fps)), True, (255, 255, 255)
         )
         self.screen.blit(fps_surface, fps_surface.get_rect(x=0, y=0))
+        x_surface: Surface = self.font.render(
+            "x: " + str(player_x), True, (255, 255, 255)
+        )
+        self.screen.blit(x_surface, x_surface.get_rect(x=0, y=fps_surface.get_height()))
+        y_surface: Surface = self.font.render(
+            "y: " + str(player_y), True, (255, 255, 255)
+        )
+        self.screen.blit(
+            y_surface,
+            y_surface.get_rect(
+                x=0, y=fps_surface.get_height() + x_surface.get_height()
+            ),
+        )
 
     @staticmethod
     def update_screen() -> None:

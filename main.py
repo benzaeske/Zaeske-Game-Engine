@@ -1,103 +1,143 @@
 import random
 
-from pygame import Vector2
+from pygame import Vector2, Rect
 
 from controller.controller import GameController, ControllerOptions
-from model.entities.boid import FlockingParameters, FishFactory, FishTypes
+from model.entities.fish.fishsettings import FishSettings, FishType
+from model.entities.school.school import School
+from model.entities.school.schoolparameters import SchoolParameters
+
+
+##########################################
+# Helper functions for creating the world:
+##########################################
+
+
+def get_random_spawn_region(
+    spawn_region_w: float,
+    spawn_region_h: float,
+    world_width_in: float,
+    world_height_in: float,
+) -> Rect:
+    """
+    Creates a spawn region of the specified dimensions at a random location inside the world. The spawn region generated is guaranteed to be entirely within the world.
+    """
+    return Rect(
+        random.uniform(0, world_width_in - spawn_region_w),
+        random.uniform(0, world_height_in - spawn_region_h),
+        spawn_region_w,
+        spawn_region_h,
+    )
+
+
+def get_random_shoal_location(
+    camera_width: float,
+    camera_height: float,
+    world_width_in: float,
+    world_height_in: float,
+) -> Vector2:
+    """
+    Creates a random shoal location that is guaranteed to be within the bounds of where the player can move
+    """
+    return Vector2(
+        random.uniform(camera_width / 2, world_width_in - (camera_width / 2)),
+        random.uniform(camera_height / 2, world_height_in - (camera_height / 2)),
+    )
+
+
+########################
+# Create the game world:
+########################
 
 world_width = 6400.0
 world_height = 6400.0
 cell_size = 128.0
-background_color = (0, 0, 0)
 
 game_controller = GameController(
-    ControllerOptions(world_width, world_height, cell_size, background_color)
+    ControllerOptions(world_width, world_height, cell_size)
 )
 
 
-def get_red_school_with_random_target(school_id: int):
-    return FishFactory(
-        FishTypes.RED,
-        FlockingParameters(
+# Create schools of fish and add to the world
+spawn_region_size = 512.0
+
+num_red_schools = 10
+for _ in range(num_red_schools):
+
+    red_school = School(
+        SchoolParameters(
             128.0,
             48.0,
+            1,
             1.0,
             1.8,
             1.0,
-            school_id,
-            Vector2(
-                random.randint(int(cell_size), int(world_width - cell_size)),
-                random.randint(int(cell_size), int(world_height - cell_size)),
+            get_random_shoal_location(
+                game_controller.model.player.camera_width,
+                game_controller.model.player.camera_height,
+                world_height,
+                world_width,
             ),
-            1.0,
+            128.0,
+            1.2,
+            get_random_spawn_region(
+                spawn_region_size, spawn_region_size, world_width, world_height
+            ),
+            32,
         ),
-        32.0,
-        32.0,
-        200.0,
-        1.0,
-        (0.0, game_controller.model.world_width),
-        (0.0, game_controller.model.world_height),
-        1,
+        FishSettings(FishType.RED, 32.0, 32.0, 175.0, 0.5),
     )
+    game_controller.add_school(red_school)
+
+num_yellow_schools = 4
+for _ in range(num_yellow_schools):
+    yellow_school = School(
+        SchoolParameters(
+            128.0,
+            48.0,
+            1,
+            1.0,
+            1.8,
+            1.0,
+            None,
+            1.0,
+            1.0,
+            get_random_spawn_region(
+                spawn_region_size, spawn_region_size, world_width, world_height
+            ),
+            50,
+        ),
+        FishSettings(FishType.YELLOW, 30.0, 30.0, 250.0, 0.8),
+    )
+    game_controller.add_school(yellow_school)
 
 
-# Fishy
-red_school_count: int = 10
-red_count: int = 50
-for x in range(red_school_count):
-    school: FishFactory = get_red_school_with_random_target(x)
-    for _ in range(red_count):
-        game_controller.add_game_entity(school.create_random_boid())
+num_green_schools = 5
+for _ in range(num_green_schools):
+    green_school = School(
+        SchoolParameters(
+            256.0,
+            96.0,
+            2,
+            1.0,
+            1.8,
+            1.0,
+            get_random_shoal_location(
+                game_controller.model.player.camera_width,
+                game_controller.model.player.camera_height,
+                world_height,
+                world_width,
+            ),
+            128.0,
+            1.0,
+            get_random_spawn_region(
+                spawn_region_size, spawn_region_size, world_width, world_height
+            ),
+            32,
+        ),
+        FishSettings(FishType.GREEN, 48.0, 48.0, 125.0, 0.4),
+    )
+    game_controller.add_school(green_school)
 
-green_school_1 = FishFactory(
-    FishTypes.GREEN,
-    FlockingParameters(
-        256.0,
-        96.0,
-        1.0,
-        1.8,
-        1.0,
-        red_school_count + 1,
-        None,
-        1.0,
-    ),
-    48.0,
-    48.0,
-    150.0,
-    1.0,
-    (0.0, game_controller.model.world_width),
-    (0.0, game_controller.model.world_height),
-    2,
-)
-
-yellow_school_1 = FishFactory(
-    FishTypes.YELLOW,
-    FlockingParameters(
-        128.0,
-        48.0,
-        1.0,
-        1.8,
-        1.0,
-        red_school_count + 2,
-        None,
-        1.0,
-    ),
-    32.0,
-    32.0,
-    300.0,
-    1.5,
-    (0.0, game_controller.model.world_width),
-    (0.0, game_controller.model.world_height),
-    1,
-)
-
-
-green_count: int = 300
-for x in range(green_count):
-    game_controller.add_game_entity(green_school_1.create_random_boid())
-
-yellow_count: int = 300
-for x in range(yellow_count):
-    game_controller.add_game_entity(yellow_school_1.create_random_boid())
-
+# Start the game loop:
 game_controller.start_game()

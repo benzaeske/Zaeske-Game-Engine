@@ -1,20 +1,25 @@
 import pygame
 from pygame import Surface, Vector2
 
-from model.entities.gameentity import GameEntity
+from model.entities.fish.fish import Fish
 
 
 class GridCell:
+    """
+    An individual grid cell in the model's grid space.\n
+    Currently stores the fish that are within its boundaries as well as a random blue background color.\n
+    The view draws background based on the grid cells that are within the player's camera range
+    """
+
     def __init__(
         self,
         size: float,
         row: int,
         col: int,
-        camera_height: float,
         background_surface: Surface = None,
     ):
         self.size: float = size
-        self.entities: list[GameEntity] = []
+        self.fish: list[Fish] = []
         if background_surface is None:
             self.background_surface: Surface = pygame.Surface((size, size))
             self.background_surface.fill((0, 0, 0))
