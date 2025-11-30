@@ -7,7 +7,7 @@ from pygame import Vector2, Surface
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.gameentity import GameEntity
+from model.entities.school import School
 from model.player.player import Turtle
 from model.world.world import SpatialPartitioningModel
 from view.view import View
@@ -25,12 +25,10 @@ class ControllerOptions:
         world_width: float,
         world_height: float,
         grid_cell_size: float,
-        background_color: Tuple[int, int, int],
     ) -> None:
         self.world_width: float = world_width
         self.world_height: float = world_height
         self.grid_cell_size: float = grid_cell_size
-        self.background_color: Tuple[int, int, int] = background_color
 
 
 class GameController:
@@ -44,9 +42,7 @@ class GameController:
         options: ControllerOptions,
     ) -> None:
         pygame.init()
-        self.view: View = View(
-            options.background_color,
-        )
+        self.view: View = View()
         self.model: SpatialPartitioningModel = SpatialPartitioningModel(
             options.world_width,
             options.world_height,
@@ -63,13 +59,13 @@ class GameController:
         self.dt: float = 0.0
         # Used to trigger logging when dt exceeds the max value required for 60fps
         self.max_dt: float = 0.017
-        # Tracking playeraaaa inputs
+        # Tracking player inputs
         self.mouse_pos: Tuple[int, int] = (0, 0)
         self.key_presses: ScancodeWrapper = ScancodeWrapper(())
 
     def start_game(self):
         self.game_start = time.time()
-        # Loop frames
+        self.model.hatch_schools()
         while True:
             self.do_game_loop()
 
@@ -135,8 +131,8 @@ class GameController:
         view_y = view_center_y - blit_surface.get_height() / 2
         return view_x, view_y
 
-    def add_game_entity(self, entity: GameEntity) -> None:
-        self.model.add_game_entity(entity)
+    def add_school(self, school: School) -> None:
+        self.model.add_school(school)
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self.dt > self.max_dt:

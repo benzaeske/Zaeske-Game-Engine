@@ -15,7 +15,7 @@ class SchoolParameters:
         self,
         cohere_distance: float,
         avoid_distance: float,
-        interaction_cell_radius: int,
+        interaction_cell_range: int,
         cohere_k: float,
         avoid_k: float,
         align_k: float,
@@ -27,7 +27,7 @@ class SchoolParameters:
     ) -> None:
         self.cohere_distance: float = cohere_distance
         self.avoid_distance: float = avoid_distance
-        self.interaction_cell_radius: int = interaction_cell_radius
+        self.interaction_cell_range: int = interaction_cell_range
         self.cohere_k: float = cohere_k
         self.avoid_k: float = avoid_k
         self.align_k: float = align_k

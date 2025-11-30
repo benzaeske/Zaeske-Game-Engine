@@ -1,7 +1,7 @@
 import pygame
 from pygame import Surface, Vector2
 
-from model.entities.gameentity import GameEntity
+from model.entities.fish import Fish
 
 
 class GridCell:
@@ -10,11 +10,10 @@ class GridCell:
         size: float,
         row: int,
         col: int,
-        camera_height: float,
         background_surface: Surface = None,
     ):
         self.size: float = size
-        self.entities: list[GameEntity] = []
+        self.fish: list[Fish] = []
         if background_surface is None:
             self.background_surface: Surface = pygame.Surface((size, size))
             self.background_surface.fill((0, 0, 0))
