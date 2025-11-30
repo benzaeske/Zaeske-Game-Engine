@@ -103,7 +103,11 @@ class GameController:
                 ),
             )
 
-        self.view.print_fps(self.clock.get_fps())
+        self.view.print_info_to_screen(
+            self.clock.get_fps(),
+            int(self.model.player.position.x),
+            int(self.model.player.position.y),
+        )
 
     def draw_game_entities(self) -> None:
         for entity in self.model.get_entities_in_camera_range():
