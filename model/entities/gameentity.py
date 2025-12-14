@@ -1,3 +1,5 @@
+import uuid
+
 from pygame import Surface, Vector2, Rect
 
 from model.utils.vectorutils import limit_magnitude, safe_normalize
@@ -8,8 +10,6 @@ class GameEntity:
     def __init__(
         self,
         sprite: Surface,
-        sprite_width: float = 1.0,
-        sprite_height: float = 1.0,
         hitbox_width: float = 0.0,
         hitbox_height: float = 0.0,
         start_pos: Vector2 = Vector2(0.0, 0.0),
@@ -17,11 +17,12 @@ class GameEntity:
         max_speed: float = 1.0,
         max_acceleration: float = 0.1,
     ):
+        self.uuid: uuid.UUID = uuid.uuid4()
         # The sprite is what is drawn on screen.
         # The width and height adjusts are for easy calculations when converting the model coordinates to screen coordinates when drawing
         self.sprite: Surface = sprite
-        self.sprite_width_adj: float = sprite_width / 2
-        self.sprite_height_adj: float = sprite_height / 2
+        self.sprite_width_adj: float = sprite.get_width() / 2
+        self.sprite_height_adj: float = sprite.get_height() / 2
         self.position: Vector2 = start_pos
         # The hitbox is how big the entity actually is when performing hit detection.
         # The sprite and the hitbox are on top of each other's centers

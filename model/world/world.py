@@ -53,6 +53,10 @@ class SpatialPartitioningModel:
                 self.spawn_fish_in_grid_space(school.hatch_fish())
 
     def update_model(self, dt: float, key_presses: ScancodeWrapper) -> None:
+        self.update_fish(dt)
+        self.player.move_player(key_presses, dt)
+
+    def update_fish(self, dt: float):
         # Have all the fish make schooling decisions based on their current location and velocity
         for row in range(self.grid_height):
             for col in range(self.grid_width):
@@ -79,9 +83,6 @@ class SpatialPartitioningModel:
         # This must be done after all entities have moved otherwise we run the risk of processing an entity's position update twice
         for cell_fish in fish_changed_cells:
             self.grid_space[cell_fish[0]][cell_fish[1]].fish.append(cell_fish[2])
-
-        # Perform player updates
-        self.player.move_player(key_presses, dt)
 
     def find_neighbors_and_make_schooling_decisions(self, current_fish: Fish) -> None:
         """
