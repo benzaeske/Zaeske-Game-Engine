@@ -3,14 +3,14 @@ from enum import Enum
 from pygame import Vector2
 
 
-class JellyFishType(Enum):
+class JellyfishType(Enum):
     RED = 0
 
 
 class JellyfishSettings:
     def __init__(
         self,
-        jelly_type: JellyFishType,
+        jelly_type: JellyfishType,
         width: float,
         height: float,
         start_position: Vector2,
@@ -20,7 +20,7 @@ class JellyfishSettings:
         health: float,
         damage: float,
     ):
-        self.jelly_type: JellyFishType = jelly_type
+        self.jelly_type: JellyfishType = jelly_type
         self.width: float = width
         self.height: float = height
         self.start_position: Vector2 = start_position

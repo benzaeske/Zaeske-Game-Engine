@@ -7,6 +7,7 @@ from pygame import Vector2, Surface
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
+from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
 from model.entities.school.school import School
 from model.player.player import Turtle
 from model.world.world import SpatialPartitioningModel
@@ -140,6 +141,9 @@ class GameController:
 
     def add_school(self, school: School) -> None:
         self.model.add_school(school)
+
+    def set_jellyfish_spawner(self, spawner: JellyfishSpawner) -> None:
+        self.model.set_jellyfish_spawner(spawner)
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self.dt > self.max_dt:

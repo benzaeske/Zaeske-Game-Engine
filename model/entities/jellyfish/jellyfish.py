@@ -1,14 +1,13 @@
-import pygame
-from pygame import Surface, Vector2
+from pygame import Vector2, Surface
 
 from model.entities.gameentity import GameEntity
-from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyFishType
+from model.entities.jellyfish.jellyfishsettings import JellyfishSettings
 
 
 class Jellyfish(GameEntity):
-    def __init__(self, options: JellyfishSettings):
+    def __init__(self, jellyfish_sprite: Surface, options: JellyfishSettings):
         super().__init__(
-            self.get_jelly_sprite(options.jelly_type, options.width, options.height),
+            jellyfish_sprite,
             options.width * 0.75,
             options.height * 0.75,
             options.start_position,
@@ -18,17 +17,6 @@ class Jellyfish(GameEntity):
         )
         self.health = options.health
         self.damage = options.damage
-
-    @staticmethod
-    def get_jelly_sprite(
-        jelly_type: JellyFishType, width: float, height: float
-    ) -> Surface:
-        match jelly_type:
-            case JellyFishType.RED:
-                surface: Surface = pygame.image.load(
-                    "images/red_jellyfish.png"
-                ).convert_alpha()
-                return pygame.transform.scale(surface, (width, height))
 
     def accelerate_towards_player(self, player_position: Vector2):
         self.target(player_position - self.position, 1.0)

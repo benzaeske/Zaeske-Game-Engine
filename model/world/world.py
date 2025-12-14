@@ -8,6 +8,8 @@ from pygame.key import ScancodeWrapper
 
 from model.entities.fish.fish import Fish
 from model.entities.gameentity import GameEntity
+from model.entities.jellyfish.jellyfish import Jellyfish
+from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
 from model.entities.school.school import School
 from model.player.player import Player
 from model.world.grid_cell import GridCell
@@ -34,6 +36,7 @@ class SpatialPartitioningModel:
         self.grid_height: int = int(self.world_height / self.cell_size)
         self.player: Player = player
         self.schools: dict[UUID, School] = {}
+        self.jellyfish_spawner: JellyfishSpawner | None = None
         self.grid_space: list[list[GridCell]] = self.initialize_grid_space()
 
     def initialize_grid_space(self) -> list[list[GridCell]]:
@@ -54,7 +57,10 @@ class SpatialPartitioningModel:
 
     def update_model(self, dt: float, key_presses: ScancodeWrapper) -> None:
         self.update_fish(dt)
+        # TODO spawn jellyfish
+        # TODO move jellyfish
         self.player.move_player(key_presses, dt)
+        # TODO collision detection with player/jellies
 
     def update_fish(self, dt: float):
         # Have all the fish make schooling decisions based on their current location and velocity
@@ -109,6 +115,31 @@ class SpatialPartitioningModel:
 
     def add_school(self, school: School) -> None:
         self.schools[school.school_id] = school
+
+    def set_jellyfish_spawner(self, spawner: JellyfishSpawner) -> None:
+        self.jellyfish_spawner = spawner
+
+    def spawn_jellyfish(self):
+        for _ in range(self.jellyfish_spawner.amount):
+            new_jelly: Jellyfish = self.jellyfish_spawner.spawn_jellyfish(
+                self.player.position,
+                self.player.camera_width,
+                self.player.camera_height,
+                self.world_width,
+                self.world_height,
+            )
+            self.grid_space[int(new_jelly.position.y / self.cell_size)][
+                int(new_jelly.position.x / self.cell_size)
+            ].jellyfish[new_jelly.uuid] = new_jelly
+
+    def update_jellyfish(self, dt: float):
+        # Move all the jellies
+        for row in range(self.grid_height):
+            for col in range(self.grid_width):
+                for jellyfish in self.grid_space[row][col].jellyfish.values():
+                    jellyfish.accelerate_towards_player(self.player.position)
+                    jellyfish.update_position(self.world_width, self.world_height, dt)
+        # Do collision detection after they've moved to make sure they don't step on each other
 
     def get_grid_cells_in_range(
         self, x_range: Tuple[float, float], y_range: Tuple[float, float]
