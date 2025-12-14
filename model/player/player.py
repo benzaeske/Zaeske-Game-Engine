@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple
 
 import pygame
-from pygame import Surface, Vector2
+from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
 from model.utils.vectorutils import limit_magnitude
@@ -22,8 +22,8 @@ class Player(ABC):
         start_pos: Vector2 = Vector2(0.0, 0.0),
         max_speed: float = 1.0,
     ) -> None:
-        self.width: float = hitbox_width
-        self.height: float = hitbox_height
+        self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
+        self.hitbox.center = (int(start_pos.x), int(start_pos.y))
         self.surface_width: float = surface_width
         self.surface_height: float = surface_height
         self.camera_width: float = camera_width
@@ -41,7 +41,7 @@ class Player(ABC):
         dt: float,
     ) -> None:
         """
-        Moves the playeraaaa according to the keys pressed. Movement is scaled with delta time like all other entities.
+        Moves the player according to the keys pressed. Movement is scaled with delta time like all other entities.
         Limits the camera position to be confined within positive x,y coordinates and under the provided world boundary.
         """
         velocity: Vector2 = Vector2(0.0, 0.0)
@@ -65,6 +65,8 @@ class Player(ABC):
             self.position.y = self.camera_h_adjust
         if self.position.y + self.camera_h_adjust >= self.world_boundary[1]:
             self.position.y = self.world_boundary[1] - self.camera_h_adjust - 1
+        # Update Hitbox
+        self.hitbox.center = (int(self.position.x), int(self.position.y))
         # Update facing direction for drawing
         if velocity.x != 0:
             if velocity.x > 0:
@@ -74,7 +76,7 @@ class Player(ABC):
 
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
         """
-        Returns the coordinates to center the playeraaaa surface on the screen
+        Returns the coordinates to center the player surface on the screen
         """
         return (
             self.camera_w_adjust - self.surface_width / 2,
@@ -107,7 +109,7 @@ class Turtle(Player):
         self.surface_right = pygame.transform.scale(
             self.surface_right, (surface_width, surface_height)
         )
-        turtle_speed: float = 500.0
+        turtle_speed: float = 256.0
         super().__init__(
             hitbox_width,
             hitbox_height,

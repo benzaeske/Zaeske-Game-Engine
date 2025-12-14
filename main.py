@@ -49,9 +49,9 @@ def get_random_shoal_location(
 # Create the game world:
 ########################
 
-world_width = 6400.0
-world_height = 6400.0
-cell_size = 128.0
+world_width = 10240.0
+world_height = 7680.0
+cell_size = 256.0
 
 game_controller = GameController(
     ControllerOptions(world_width, world_height, cell_size)
@@ -118,7 +118,7 @@ for _ in range(num_green_schools):
         SchoolParameters(
             256.0,
             96.0,
-            2,
+            1,
             1.0,
             1.8,
             1.0,

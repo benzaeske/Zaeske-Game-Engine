@@ -44,6 +44,7 @@ class GameEntity:
         self.position.x = (self.position.x + world_w) % world_w
         self.position.y = (self.position.y + world_h) % world_h
         self.acceleration *= 0.0
+        self.hitbox.center = (int(self.position.x), int(self.position.y))
 
     def target(self, target_dir: Vector2, k: float) -> None:
         """
