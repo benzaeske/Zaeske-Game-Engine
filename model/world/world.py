@@ -38,7 +38,7 @@ class SpatialPartitioningModel:
         self.schools: dict[UUID, School] = {}
         self.jellyfish_spawner: JellyfishSpawner | None = None
         self.jelly_spawner_delay: float = 10.0
-        self.jelly_spawner_timer: float = self.jelly_spawner_delay
+        self.jelly_spawner_timer: float = 0.0
         self.grid_space: list[list[GridCell]] = self.initialize_grid_space()
 
     def initialize_grid_space(self) -> list[list[GridCell]]:
@@ -130,27 +130,50 @@ class SpatialPartitioningModel:
         self.jellyfish_spawner = spawner
 
     def spawn_jellyfish(self, dt: float):
-        # Decrement the timer
         self.jelly_spawner_timer -= dt
-        # Spawn jellyfish and reset the timer if it reaches 0
         if self.jelly_spawner_timer <= 0:
             for _ in range(self.jellyfish_spawner.amount):
-                self.jellyfish_spawner.spawn_jellyfish(
+                # create the jelly from the spawner
+                new_jelly: Jellyfish = self.jellyfish_spawner.spawn_jellyfish(
                     self.player.position,
                     self.player.camera_w_adjust,
                     self.player.camera_h_adjust,
                     self.world_width,
                     self.world_height
                 )
+                # Add the jelly to gridspace
+                self.grid_space[int(new_jelly.position.y / self.cell_size)][
+                    int(new_jelly.position.x / self.cell_size)
+                ].jellyfish[new_jelly.uuid] = new_jelly
+            # reset jelly spawn timer
             self.jelly_spawner_timer = self.jelly_spawner_delay
 
     def update_jellyfish(self, dt: float):
-        # Move all the jellies
+        # Apply acceleration to all the jellies
         for row in range(self.grid_height):
             for col in range(self.grid_width):
                 for jellyfish in self.grid_space[row][col].jellyfish.values():
                     jellyfish.accelerate_towards_player(self.player.position)
-                    jellyfish.update_position(self.world_width, self.world_height, dt)
+
+        # Track jellies that change cells when they move
+        jellies_changed_cells: list[Tuple[int, int, Jellyfish]] = []
+        # Move all the jellyfish: this should only be done after all accelerations have been applied to them for the current frame
+        for row in range(self.grid_height):
+            for col in range(self.grid_width):
+                for key in list(self.grid_space[row][col].jellyfish.keys()):
+                    jelly = self.grid_space[row][col].jellyfish[key]
+                    jelly.update_position(self.world_width, self.world_height, dt)
+                    # Check if we are in a new grid cell after moving
+                    new_r = int(jelly.position.y / self.cell_size)
+                    new_c = int(jelly.position.x / self.cell_size)
+                    if new_r != row or new_c != col:
+                        del self.grid_space[row][col].jellyfish[key]
+                        jellies_changed_cells.append((new_r, new_c, jelly))
+
+        # Update grid cells with jellyfish that moved into new cells:
+        # This must be done after all jellyfish have moved otherwise we run the risk of processing a jellyfish's position update twice
+        for cell_jelly in jellies_changed_cells:
+            self.grid_space[cell_jelly[0]][cell_jelly[1]].jellyfish[cell_jelly[2].uuid] = cell_jelly[2]
 
     ########################
     ### Helper Functions ###
@@ -195,6 +218,7 @@ class SpatialPartitioningModel:
         for r in range(bottom, top + 1):
             for c in range(left, right + 1):
                 entities.extend(self.grid_space[r][c].fish)
+                entities.extend(self.grid_space[r][c].jellyfish.values())
         return entities
 
     def get_entities_in_camera_range(self):

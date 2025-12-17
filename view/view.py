@@ -3,7 +3,6 @@ from typing import Tuple
 
 import pygame
 from pygame import Surface
-from pygame.font import Font
 
 
 class View:
@@ -32,7 +31,7 @@ class View:
         self.background: Surface = self._get_background()
 
         # Font
-        self.font: Font = pygame.font.SysFont("Arial", 48)
+        #self.font: Font = pygame.font.SysFont("Arial", 48)
 
         print(
             "Initialized view with pygame screen Surface dimensions: ",

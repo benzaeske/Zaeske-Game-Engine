@@ -24,7 +24,7 @@ class JellyfishSpawner:
         match jelly_type:
             case JellyfishType.RED:
                 surface: Surface = pygame.image.load(
-                    "images/red_jellyfish.png"
+                    "images/red_jelly.png"
                 ).convert_alpha()
                 return pygame.transform.scale(surface, (width, height))
 
