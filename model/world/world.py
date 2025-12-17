@@ -60,7 +60,7 @@ class SpatialPartitioningModel:
     def update_model(self, dt: float, key_presses: ScancodeWrapper) -> None:
         self.update_fish(dt)
         self.spawn_jellyfish(dt)
-        # TODO move jellyfish
+        self.update_jellyfish(dt)
         self.player.move_player(key_presses, dt)
         # TODO collision detection with player/jellies
 
