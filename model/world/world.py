@@ -37,6 +37,8 @@ class SpatialPartitioningModel:
         self.player: Player = player
         self.schools: dict[UUID, School] = {}
         self.jellyfish_spawner: JellyfishSpawner | None = None
+        self.jelly_spawner_delay: float = 10.0
+        self.jelly_spawner_timer: float = self.jelly_spawner_delay
         self.grid_space: list[list[GridCell]] = self.initialize_grid_space()
 
     def initialize_grid_space(self) -> list[list[GridCell]]:
@@ -57,10 +59,22 @@ class SpatialPartitioningModel:
 
     def update_model(self, dt: float, key_presses: ScancodeWrapper) -> None:
         self.update_fish(dt)
-        # TODO spawn jellyfish
+        self.spawn_jellyfish(dt)
         # TODO move jellyfish
         self.player.move_player(key_presses, dt)
         # TODO collision detection with player/jellies
+
+    ##############################
+    ######## Fish functions ######
+    ##############################
+
+    def add_school(self, school: School) -> None:
+        self.schools[school.school_id] = school
+
+    def spawn_fish_in_grid_space(self, new_fish: Fish) -> None:
+        self.grid_space[int(new_fish.position.y / self.cell_size)][
+            int(new_fish.position.x / self.cell_size)
+        ].fish.append(new_fish)
 
     def update_fish(self, dt: float):
         # Have all the fish make schooling decisions based on their current location and velocity
@@ -108,29 +122,27 @@ class SpatialPartitioningModel:
                 neighbors.extend(self.grid_space[grid_r][grid_c].fish)
         current_fish.make_schooling_decisions(neighbors, school.school_params)
 
-    def spawn_fish_in_grid_space(self, new_fish: Fish) -> None:
-        self.grid_space[int(new_fish.position.y / self.cell_size)][
-            int(new_fish.position.x / self.cell_size)
-        ].fish.append(new_fish)
-
-    def add_school(self, school: School) -> None:
-        self.schools[school.school_id] = school
+    ##############################
+    ##### Jellyfish functions ####
+    ##############################
 
     def set_jellyfish_spawner(self, spawner: JellyfishSpawner) -> None:
         self.jellyfish_spawner = spawner
 
-    def spawn_jellyfish(self):
-        for _ in range(self.jellyfish_spawner.amount):
-            new_jelly: Jellyfish = self.jellyfish_spawner.spawn_jellyfish(
-                self.player.position,
-                self.player.camera_width,
-                self.player.camera_height,
-                self.world_width,
-                self.world_height,
-            )
-            self.grid_space[int(new_jelly.position.y / self.cell_size)][
-                int(new_jelly.position.x / self.cell_size)
-            ].jellyfish[new_jelly.uuid] = new_jelly
+    def spawn_jellyfish(self, dt: float):
+        # Decrement the timer
+        self.jelly_spawner_timer -= dt
+        # Spawn jellyfish and reset the timer if it reaches 0
+        if self.jelly_spawner_timer <= 0:
+            for _ in range(self.jellyfish_spawner.amount):
+                self.jellyfish_spawner.spawn_jellyfish(
+                    self.player.position,
+                    self.player.camera_w_adjust,
+                    self.player.camera_h_adjust,
+                    self.world_width,
+                    self.world_height
+                )
+            self.jelly_spawner_timer = self.jelly_spawner_delay
 
     def update_jellyfish(self, dt: float):
         # Move all the jellies
@@ -139,7 +151,10 @@ class SpatialPartitioningModel:
                 for jellyfish in self.grid_space[row][col].jellyfish.values():
                     jellyfish.accelerate_towards_player(self.player.position)
                     jellyfish.update_position(self.world_width, self.world_height, dt)
-        # Do collision detection after they've moved to make sure they don't step on each other
+
+    ########################
+    ### Helper Functions ###
+    ########################
 
     def get_grid_cells_in_range(
         self, x_range: Tuple[float, float], y_range: Tuple[float, float]
