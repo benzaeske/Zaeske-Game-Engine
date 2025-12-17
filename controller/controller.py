@@ -82,6 +82,7 @@ class GameController:
         model_update_time = time.time() - model_update_time
         view_update_time = time.time()
         self.draw_background()
+        self.draw_fps_menu()
         self.draw_game_entities()
         self.view.update_screen()
         view_update_time = time.time() - view_update_time
@@ -107,6 +108,7 @@ class GameController:
                 ),
             )
 
+    def draw_fps_menu(self) -> None:
         self.view.print_info_to_screen(
             self.clock.get_fps(),
             int(self.model.player.position.x),
