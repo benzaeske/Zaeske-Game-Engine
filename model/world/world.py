@@ -141,9 +141,20 @@ class SpatialPartitioningModel:
             self.jelly_spawner_timer = self.jelly_spawner_delay
 
     def update_jellyfish(self, dt: float):
+        cell_range: int = 1
         # Apply acceleration to all the jellies
         for jellyfish in self.jellyfish.values():
-            jellyfish.accelerate_towards_player(self.player.position)
+            neighbors: list[Jellyfish] = []
+            r: int = int(jellyfish.position.y / self.cell_size)
+            c: int = int(jellyfish.position.x / self.cell_size)
+            for dr in range(-cell_range, cell_range + 1):
+                for dc in range(-cell_range, cell_range + 1):
+                    grid_r: int = r + dr
+                    grid_r = (grid_r + self.grid_height) % self.grid_height
+                    grid_c: int = c + dc
+                    grid_c = (grid_c + self.grid_width) % self.grid_width
+                    neighbors.extend(self.grid_space[grid_r][grid_c].jellyfish.values())
+            jellyfish.update_acceleration(self.player.position, neighbors)
 
         # Move all the jellyfish: this should only be done after all accelerations have been applied to them for the current frame
         for jellyfish in self.jellyfish.values():
