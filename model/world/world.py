@@ -62,10 +62,27 @@ class SpatialPartitioningModel:
                 self.spawn_fish_in_grid_space(school.hatch_fish())
 
     def update_model(self, dt: float, key_presses: ScancodeWrapper) -> None:
+        self.process_player_jelly_collisions(dt)
         self.update_fish(dt)
         self.spawn_jellyfish(dt)
         self.update_jellyfish(dt)
         self.player.move_player(key_presses, dt)
+
+    def process_player_jelly_collisions(self, dt: float) -> None:
+        cell_range: int = 2
+        # Only process collisions for jellies that are within a cell range that can actually reach the player
+        neighbors: list[Jellyfish] = []
+        r: int = int(self.player.position.y / self.cell_size)
+        c: int = int(self.player.position.x / self.cell_size)
+        for dr in range(-cell_range, cell_range + 1):
+            for dc in range(-cell_range, cell_range + 1):
+                grid_r: int = r + dr
+                grid_r = (grid_r + self.grid_height) % self.grid_height
+                grid_c: int = c + dc
+                grid_c = (grid_c + self.grid_width) % self.grid_width
+                for jelly in self.grid_space[grid_r][grid_c].jellyfish.values():
+                    if jelly.hitbox.colliderect(self.player.hitbox):
+                        self.player.health -= (jelly.damage * dt)
 
     ##############################
     ######## Fish functions ######

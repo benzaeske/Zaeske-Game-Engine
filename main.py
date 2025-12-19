@@ -150,7 +150,7 @@ jellyfish_spawner = JellyfishSpawner(
         128.0,
         1.0,
         100,
-        1
+        10
     ),
     5
 )
