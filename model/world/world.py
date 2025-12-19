@@ -7,6 +7,7 @@ from pygame import Surface
 from pygame.key import ScancodeWrapper
 
 from model.entities.fish.fish import Fish
+from model.entities.fish.fishsettings import FishType
 from model.entities.gameentity import GameEntity
 from model.entities.jellyfish.jellyfish import Jellyfish
 from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
@@ -62,11 +63,27 @@ class SpatialPartitioningModel:
                 self.spawn_fish_in_grid_space(school.hatch_fish())
 
     def update_model(self, dt: float, key_presses: ScancodeWrapper) -> None:
+        self.process_player_fish_coherency(dt)
         self.process_player_jelly_collisions(dt)
         self.update_fish(dt)
         self.spawn_jellyfish(dt)
         self.update_jellyfish(dt)
         self.player.move_player(key_presses, dt)
+
+    def process_player_fish_coherency(self, dt: float) -> None:
+        r: int = int(self.player.position.y / self.cell_size)
+        c: int = int(self.player.position.x / self.cell_size)
+        cohere_red: bool = False
+        cohere_green: bool = False
+        for fish in self.grid_space[r][c].fish.values():
+            match self.schools.get(fish.school_id).fish_settings.fish_type:
+                case FishType.RED:
+                    cohere_red = True
+                case FishType.GREEN:
+                    cohere_green = True
+        if cohere_green:
+            self.player.update_hp(10 * dt)
+
 
     def process_player_jelly_collisions(self, dt: float) -> None:
         cell_range: int = 2

@@ -80,6 +80,11 @@ class Player(ABC):
             else:
                 self.facing_direction = -1
 
+    def update_hp(self, change: float) -> None:
+        self.health += change
+        if self.health > self.max_health:
+            self.health = self.max_health
+
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
         """
         Returns the coordinates to center the player surface on the screen
