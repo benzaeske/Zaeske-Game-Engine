@@ -2,7 +2,7 @@ import math
 from typing import Tuple
 
 import pygame
-from pygame import Surface
+from pygame import Surface, Rect
 
 
 class View:
@@ -60,8 +60,8 @@ class View:
     def draw_background(self, destination: Tuple[int, int] = (0, 0)) -> None:
         self.screen.blit(self.background, destination)
 
-    def draw_surface(self, surface: Surface, dest: Tuple[float, float]) -> None:
-        self.screen.blit(surface, dest)
+    def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
+        self.screen.blit(surface, dest, area)
 
     def print_info_to_screen(self, fps: float, player_x: int, player_y: int) -> None:
         fps_surface: Surface = self.font.render(

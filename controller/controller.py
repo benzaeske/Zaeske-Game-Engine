@@ -3,7 +3,7 @@ import time
 from typing import Tuple
 
 import pygame
-from pygame import Vector2, Surface
+from pygame import Vector2, Surface, Rect
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
@@ -84,6 +84,7 @@ class GameController:
         self.draw_background()
         #self.draw_fps_menu()
         self.draw_game_entities()
+        self.draw_player()
         self.view.update_screen()
         view_update_time = time.time() - view_update_time
         self.fps_logging(model_update_time, view_update_time)
@@ -122,10 +123,19 @@ class GameController:
         for jelly in self.model.jellyfish.values():
             jelly_surface = jelly.get_surface()
             self.view.draw_surface(jelly_surface, self.convert_model_pos_to_view_pos(jelly.position, jelly_surface))
+
+    def draw_player(self) -> None:
         self.view.draw_surface(
             self.model.player.get_surface(),
-            self.model.player.get_camera_adjusted_position(),
+            self.model.player.get_camera_adjusted_position()
         )
+        hp_bar_location = self.model.player.get_camera_adjusted_hp_pos()
+        self.view.draw_surface(self.model.player.max_hp_surface, hp_bar_location)
+        ratio: float = self.model.player.health / self.model.player.max_health
+        self.view.draw_surface(
+            self.model.player.current_hp_surface,
+            hp_bar_location,
+            (0, 0, ratio * self.model.player.current_hp_surface.get_width(), self.model.player.current_hp_surface.get_height()))
 
     def convert_model_pos_to_view_pos(
         self, model_pos: Vector2, blit_surface: Surface

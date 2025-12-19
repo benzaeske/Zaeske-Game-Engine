@@ -34,6 +34,12 @@ class Player(ABC):
         self.position: Vector2 = start_pos
         self.facing_direction: int = 1
         self.max_speed: float = max_speed
+        self.max_health: float = 100.0
+        self.health: float = self.max_health
+        self.max_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
+        self.max_hp_surface.fill((0, 0, 0))
+        self.current_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
+        self.current_hp_surface.fill((222, 0, 0))
 
     def move_player(
         self,
@@ -83,6 +89,15 @@ class Player(ABC):
             self.camera_h_adjust - self.surface_height / 2,
         )
 
+    def get_camera_adjusted_hp_pos(self) -> Tuple[float, float]:
+        """
+        Returns the coordinates to center the hp bar on the player's hitbox
+        """
+        return (
+            self.camera_w_adjust - self.hitbox.width / 2,
+            self.camera_h_adjust + self.hitbox.height / 2
+        )
+
     @abstractmethod
     def get_surface(self):
         pass
@@ -99,6 +114,7 @@ class Turtle(Player):
         hitbox_height: float = 100.0
         surface_width: float = 128.0
         surface_height: float = 128.0
+        turtle_speed: float = 256.0
         self.surface_left: Surface = pygame.image.load("images/turtle-side-left.png")
         self.surface_left = self.surface_left.convert_alpha()
         self.surface_left = pygame.transform.scale(
@@ -109,7 +125,6 @@ class Turtle(Player):
         self.surface_right = pygame.transform.scale(
             self.surface_right, (surface_width, surface_height)
         )
-        turtle_speed: float = 256.0
         super().__init__(
             hitbox_width,
             hitbox_height,
