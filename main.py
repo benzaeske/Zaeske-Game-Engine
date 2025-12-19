@@ -51,8 +51,8 @@ def get_random_shoal_location(
 # Create the game world:
 ########################
 
-world_width = 3840.0
-world_height = 3840.0
+world_width = 5120.0
+world_height = 5120.0
 cell_size = 128.0
 
 game_controller = GameController(
@@ -62,7 +62,7 @@ game_controller = GameController(
 # Create schools of fish and add to the world
 spawn_region_size = 512.0
 
-num_red_schools = 2
+num_red_schools = 5
 for _ in range(num_red_schools):
 
     red_school = School(
@@ -90,7 +90,7 @@ for _ in range(num_red_schools):
     )
     game_controller.add_school(red_school)
 
-num_yellow_schools = 0
+num_yellow_schools = 2
 for _ in range(num_yellow_schools):
     yellow_school = School(
         SchoolParameters(
@@ -113,7 +113,7 @@ for _ in range(num_yellow_schools):
     game_controller.add_school(yellow_school)
 
 
-num_green_schools = 2
+num_green_schools = 4
 for _ in range(num_green_schools):
     green_school = School(
         SchoolParameters(
@@ -152,7 +152,7 @@ jellyfish_spawner = JellyfishSpawner(
         100,
         10
     ),
-    5
+    2
 )
 game_controller.set_jellyfish_spawner(jellyfish_spawner)
 
