@@ -3,7 +3,7 @@ from typing import Tuple
 from uuid import UUID
 
 import pygame
-from pygame import Surface
+from pygame import Surface, Vector2
 from pygame.key import ScancodeWrapper
 
 from model.entities.fish.fish import Fish
@@ -76,19 +76,25 @@ class SpatialPartitioningModel:
     def process_player_fish_coherency(self, dt: float) -> None:
         r: int = int(self.player.position.y / self.cell_size)
         c: int = int(self.player.position.x / self.cell_size)
-        cohere_red: bool = False
-        cohere_green: bool = False
+        cohere_red: int = 0
+        cohere_green: int = 0
+        cohere_yellow: int = 0
         for fish in self.grid_space[r][c].fish.values():
             match self.schools.get(fish.school_id).fish_settings.fish_type:
                 case FishType.RED:
-                    cohere_red = True
+                    cohere_red += 1
                 case FishType.GREEN:
-                    cohere_green = True
-        if cohere_green:
-            self.player.update_hp(10 * dt)
-        if cohere_red:
+                    cohere_green += 1
+                case FishType.YELLOW:
+                    cohere_yellow += 1
+        # Set coherence amounts on player so other functions can reference it quickly
+        self.player.cohere_green = cohere_green
+        self.player.cohere_yellow = cohere_yellow
+        self.player.cohere_green_red = cohere_red
+        # Process immediate coherence effects
+        self.player.update_hp(1 * dt * cohere_green)
+        if cohere_yellow > 0:
             self.player.charge_shield(dt)
-
 
     def process_player_jelly_collisions(self, dt: float) -> None:
         cell_range: int = 1
@@ -192,15 +198,21 @@ class SpatialPartitioningModel:
                     grid_c = (grid_c + self.grid_width) % self.grid_width
                     for jelly_id in list(self.grid_space[grid_r][grid_c].jellyfish.keys()):
                         jelly = self.grid_space[grid_r][grid_c].jellyfish[jelly_id]
-                        if jelly.hitbox.colliderect(self.player.shield_hitbox):
+                        # find the closest point on the jelly's hitbox to the player's circular shield
+                        closest_point: Vector2 = Vector2(
+                            max(jelly.hitbox.left, min(int(self.player.position.x), jelly.hitbox.right)),
+                            max(jelly.hitbox.top, min(int(self.player.position.y), jelly.hitbox.bottom))
+                        )
+                        if closest_point.distance_squared_to(self.player.position) < self.player.shield_radius_squared:
                             self.player.shield -= 1
                             del self.jellyfish[jelly_id]
                             del self.grid_space[grid_r][grid_c].jellyfish[jelly_id]
 
+        # Avoid jelly neighbors
         neighbor_range: int = 1
-        # Apply acceleration to all the jellies
+        scared_range: int = 3
         for jellyfish in self.jellyfish.values():
-            neighbors: list[Jellyfish] = []
+            neighbor_jellies: list[Jellyfish] = []
             r: int = int(jellyfish.position.y / self.cell_size)
             c: int = int(jellyfish.position.x / self.cell_size)
             for dr in range(-neighbor_range, neighbor_range + 1):
@@ -209,8 +221,21 @@ class SpatialPartitioningModel:
                     grid_r = (grid_r + self.grid_height) % self.grid_height
                     grid_c: int = c + dc
                     grid_c = (grid_c + self.grid_width) % self.grid_width
-                    neighbors.extend(self.grid_space[grid_r][grid_c].jellyfish.values())
-            jellyfish.update_acceleration(self.player.position, neighbors)
+                    neighbor_jellies.extend(self.grid_space[grid_r][grid_c].jellyfish.values())
+
+            afraid_of_fish: list[Fish] = []
+            r: int = int(jellyfish.position.y / self.cell_size)
+            c: int = int(jellyfish.position.x / self.cell_size)
+            for dr in range(-scared_range, scared_range + 1):
+                for dc in range(-scared_range, scared_range + 1):
+                    grid_r: int = r + dr
+                    grid_r = (grid_r + self.grid_height) % self.grid_height
+                    grid_c: int = c + dc
+                    grid_c = (grid_c + self.grid_width) % self.grid_width
+                    for fish in self.grid_space[grid_r][grid_c].fish.values():
+                        if self.schools[fish.school_id].fish_settings.fish_type == FishType.RED:
+                            afraid_of_fish.append(fish)
+            jellyfish.update_acceleration(self.player.position, neighbor_jellies, afraid_of_fish)
 
         # Move all the jellyfish: this should only be done after all accelerations have been applied to them for the current frame
         for jellyfish in self.jellyfish.values():

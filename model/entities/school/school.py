@@ -52,7 +52,8 @@ class School:
             random.uniform(hatch_region.y, hatch_region.y + hatch_region.height),
         )
         initial_velocity = Vector2(
-            self.fish_settings.max_speed, self.fish_settings.max_speed
+            random.uniform(-self.fish_settings.max_speed, self.fish_settings.max_speed),
+            random.uniform(-self.fish_settings.max_speed, self.fish_settings.max_speed)
         )
         limit_magnitude(initial_velocity, self.fish_settings.max_speed)
         return Fish(

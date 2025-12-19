@@ -22,6 +22,7 @@ class Player(ABC):
         start_pos: Vector2 = Vector2(0.0, 0.0),
         max_speed: float = 1.0,
     ) -> None:
+        # Positional/physics variables
         self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
         self.hitbox.center = (int(start_pos.x), int(start_pos.y))
         self.surface_width: float = surface_width
@@ -34,21 +35,30 @@ class Player(ABC):
         self.position: Vector2 = start_pos
         self.facing_direction: int = 1
         self.max_speed: float = max_speed
+        # Health
         self.max_health: float = 100.0
         self.health: float = self.max_health
         self.max_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
         self.max_hp_surface.fill((0, 0, 0))
         self.current_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
         self.current_hp_surface.fill((222, 0, 0))
+        # Shield
         self.max_shield: int = 10
         self.shield: int = 0
-        self.shield_hitbox = Rect(0, 0, self.hitbox.width * 2, self.hitbox.height * 2)
-        self.shield_hitbox.center = self.hitbox.center
+        self.shield_radius: float = self.hitbox.width
+        self.shield_radius_squared: float = self.shield_radius * self.shield_radius
         self.shield_charge_delay: float = 2.0
         self.current_shield_charge_cooldown: float = 2.0
-        self.shield_surface: Surface = Surface((self.hitbox.width * 2, self.hitbox.height * 2)).convert_alpha()
         self.shield_alpha_scaling: int = 10
-        self.shield_surface.fill((0, 200, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)))
+        self.shield_surface: Surface = Surface((self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(self.shield_surface,
+                           (255, 255, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)),
+                           self.shield_surface.get_rect().center,
+                           self.shield_radius)
+        # Fish coherency
+        self.cohere_green: int = 0
+        self.cohere_yellow: int = 0
+        self.cohere_red: int = 0
 
     def move_player(
         self,
@@ -82,7 +92,6 @@ class Player(ABC):
             self.position.y = self.world_boundary[1] - self.camera_h_adjust - 1
         # Update Hitboxes
         self.hitbox.center = (int(self.position.x), int(self.position.y))
-        self.shield_hitbox.center = self.hitbox.center
         # Update facing direction for drawing
         if velocity.x != 0:
             if velocity.x > 0:
@@ -103,11 +112,13 @@ class Player(ABC):
             if self.current_shield_charge_cooldown <= 0:
                 self.current_shield_charge_cooldown = self.shield_charge_delay
                 self.shield += 1
-                self.update_shield_alpha()
 
     def update_shield_alpha(self) -> None:
-        self.shield_surface.fill(
-            (0, 200, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)))
+        self.shield_surface: Surface = Surface((self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(self.shield_surface,
+                           (255, 255, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)),
+                           self.shield_surface.get_rect().center,
+                           self.shield_radius)
 
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
         """
