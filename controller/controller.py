@@ -4,6 +4,7 @@ from typing import Tuple
 
 import pygame
 from pygame import Vector2, Surface, Rect
+from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
@@ -66,6 +67,8 @@ class GameController:
         # Tracking player inputs
         self.mouse_pos: Tuple[int, int] = (0, 0)
         self.key_presses: ScancodeWrapper = ScancodeWrapper(())
+        self.events: list[Event] = []
+        self.paused: bool = False
 
     def start_game(self):
         self.game_start = time.time()
@@ -76,28 +79,37 @@ class GameController:
     def do_game_loop(self) -> None:
         self.key_presses = pygame.key.get_pressed()
         self.mouse_pos = pygame.mouse.get_pos()
+        self.events = pygame.event.get()
         self.check_for_terminate()
-        model_update_time = time.time()
-        self.update_model()
-        model_update_time = time.time() - model_update_time
-        view_update_time = time.time()
-        self.draw_background()
-        #self.draw_fps_menu()
-        self.draw_game_entities()
-        self.draw_player()
-        self.view.update_screen()
-        view_update_time = time.time() - view_update_time
-        self.fps_logging(model_update_time, view_update_time)
+        self.check_for_pause()
+        if not self.paused:
+            model_update_time = time.time()
+            self.update_model()
+            model_update_time = time.time() - model_update_time
+            view_update_time = time.time()
+            self.draw_background()
+            #self.draw_fps_menu()
+            self.draw_game_entities()
+            self.draw_player()
+            self.view.update_screen()
+            view_update_time = time.time() - view_update_time
+            self.fps_logging(model_update_time, view_update_time)
         self.dt = self.clock.tick(self.fps) / 1000
 
     def check_for_terminate(self):
-        for event in pygame.event.get():
+        for event in self.events:
             if event.type == pygame.QUIT:
                 sys.exit()
         if self.key_presses[pygame.K_ESCAPE]:
             sys.exit()
         if self.model.player.health <= 0:
             sys.exit()
+
+    def check_for_pause(self):
+        for event in self.events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.paused = not self.paused
 
     def update_model(self) -> None:
         self.model.update_model(self.dt, self.key_presses)

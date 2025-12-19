@@ -91,6 +91,8 @@ for _ in range(num_red_schools):
     game_controller.add_school(red_school)
 
 num_yellow_schools = 1
+center_spawn_region = Rect(0, 0, spawn_region_size, spawn_region_size)
+center_spawn_region.center = (int(game_controller.model.player.position.x), int(game_controller.model.player.position.y))
 for _ in range(num_yellow_schools):
     yellow_school = School(
         SchoolParameters(
@@ -103,9 +105,7 @@ for _ in range(num_yellow_schools):
             None,
             1.0,
             1.0,
-            get_random_spawn_region(
-                spawn_region_size, spawn_region_size, world_width, world_height
-            ),
+            center_spawn_region,
             150,
         ),
         FishSettings(FishType.YELLOW, 30.0, 30.0, 300.0, 0.8),
@@ -152,7 +152,7 @@ jellyfish_spawner = JellyfishSpawner(
         100,
         10
     ),
-    4
+    1
 )
 game_controller.set_jellyfish_spawner(jellyfish_spawner)
 

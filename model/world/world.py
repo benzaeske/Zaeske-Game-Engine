@@ -183,6 +183,7 @@ class SpatialPartitioningModel:
                 ].jellyfish[new_jelly.uuid] = new_jelly
             # reset jelly spawn timer
             self.jelly_spawner_timer = self.jelly_spawner_delay
+            self.jellyfish_spawner.amount += 1
 
     def update_jellyfish(self, dt: float):
         if self.player.shield > 0:

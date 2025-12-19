@@ -47,8 +47,8 @@ class Player(ABC):
         self.shield: int = 0
         self.shield_radius: float = self.hitbox.width
         self.shield_radius_squared: float = self.shield_radius * self.shield_radius
-        self.shield_charge_delay: float = 2.0
-        self.current_shield_charge_cooldown: float = 2.0
+        self.shield_charge_delay: float = 1.5
+        self.current_shield_charge_cooldown: float = self.shield_charge_delay
         self.shield_alpha_scaling: int = 10
         self.shield_surface: Surface = Surface((self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(self.shield_surface,
