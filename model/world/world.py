@@ -63,12 +63,15 @@ class SpatialPartitioningModel:
                 self.spawn_fish_in_grid_space(school.hatch_fish())
 
     def update_model(self, dt: float, key_presses: ScancodeWrapper) -> None:
-        self.process_player_fish_coherency(dt)
-        self.process_player_jelly_collisions(dt)
+        self.update_player(dt)
         self.update_fish(dt)
         self.spawn_jellyfish(dt)
         self.update_jellyfish(dt)
         self.player.move_player(key_presses, dt)
+
+    def update_player(self, dt: float) -> None:
+        self.process_player_fish_coherency(dt)
+        self.process_player_jelly_collisions(dt)
 
     def process_player_fish_coherency(self, dt: float) -> None:
         r: int = int(self.player.position.y / self.cell_size)
@@ -83,12 +86,13 @@ class SpatialPartitioningModel:
                     cohere_green = True
         if cohere_green:
             self.player.update_hp(10 * dt)
+        if cohere_red:
+            self.player.charge_shield(dt)
 
 
     def process_player_jelly_collisions(self, dt: float) -> None:
-        cell_range: int = 2
+        cell_range: int = 1
         # Only process collisions for jellies that are within a cell range that can actually reach the player
-        neighbors: list[Jellyfish] = []
         r: int = int(self.player.position.y / self.cell_size)
         c: int = int(self.player.position.x / self.cell_size)
         for dr in range(-cell_range, cell_range + 1):
@@ -175,14 +179,32 @@ class SpatialPartitioningModel:
             self.jelly_spawner_timer = self.jelly_spawner_delay
 
     def update_jellyfish(self, dt: float):
-        cell_range: int = 1
+        if self.player.shield > 0:
+            shield_cell_range: int = 2
+            # Only process shield collisions for jellies that are within a cell range that can actually reach the player shield
+            r: int = int(self.player.position.y / self.cell_size)
+            c: int = int(self.player.position.x / self.cell_size)
+            for dr in range(-shield_cell_range, shield_cell_range + 1):
+                for dc in range(-shield_cell_range, shield_cell_range + 1):
+                    grid_r: int = r + dr
+                    grid_r = (grid_r + self.grid_height) % self.grid_height
+                    grid_c: int = c + dc
+                    grid_c = (grid_c + self.grid_width) % self.grid_width
+                    for jelly_id in list(self.grid_space[grid_r][grid_c].jellyfish.keys()):
+                        jelly = self.grid_space[grid_r][grid_c].jellyfish[jelly_id]
+                        if jelly.hitbox.colliderect(self.player.shield_hitbox):
+                            self.player.shield -= 1
+                            del self.jellyfish[jelly_id]
+                            del self.grid_space[grid_r][grid_c].jellyfish[jelly_id]
+
+        neighbor_range: int = 1
         # Apply acceleration to all the jellies
         for jellyfish in self.jellyfish.values():
             neighbors: list[Jellyfish] = []
             r: int = int(jellyfish.position.y / self.cell_size)
             c: int = int(jellyfish.position.x / self.cell_size)
-            for dr in range(-cell_range, cell_range + 1):
-                for dc in range(-cell_range, cell_range + 1):
+            for dr in range(-neighbor_range, neighbor_range + 1):
+                for dc in range(-neighbor_range, neighbor_range + 1):
                     grid_r: int = r + dr
                     grid_r = (grid_r + self.grid_height) % self.grid_height
                     grid_c: int = c + dc

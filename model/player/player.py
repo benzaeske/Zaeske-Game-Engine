@@ -40,6 +40,15 @@ class Player(ABC):
         self.max_hp_surface.fill((0, 0, 0))
         self.current_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
         self.current_hp_surface.fill((222, 0, 0))
+        self.max_shield: int = 10
+        self.shield: int = 0
+        self.shield_hitbox = Rect(0, 0, self.hitbox.width * 2, self.hitbox.height * 2)
+        self.shield_hitbox.center = self.hitbox.center
+        self.shield_charge_delay: float = 2.0
+        self.current_shield_charge_cooldown: float = 2.0
+        self.shield_surface: Surface = Surface((self.hitbox.width * 2, self.hitbox.height * 2)).convert_alpha()
+        self.shield_alpha_scaling: int = 10
+        self.shield_surface.fill((0, 200, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)))
 
     def move_player(
         self,
@@ -71,8 +80,9 @@ class Player(ABC):
             self.position.y = self.camera_h_adjust
         if self.position.y + self.camera_h_adjust >= self.world_boundary[1]:
             self.position.y = self.world_boundary[1] - self.camera_h_adjust - 1
-        # Update Hitbox
+        # Update Hitboxes
         self.hitbox.center = (int(self.position.x), int(self.position.y))
+        self.shield_hitbox.center = self.hitbox.center
         # Update facing direction for drawing
         if velocity.x != 0:
             if velocity.x > 0:
@@ -84,6 +94,20 @@ class Player(ABC):
         self.health += change
         if self.health > self.max_health:
             self.health = self.max_health
+        elif self.health < 0:
+            self.health = 0
+
+    def charge_shield(self, dt) -> None:
+        if self.shield < self.max_shield:
+            self.current_shield_charge_cooldown -= dt
+            if self.current_shield_charge_cooldown <= 0:
+                self.current_shield_charge_cooldown = self.shield_charge_delay
+                self.shield += 1
+                self.update_shield_alpha()
+
+    def update_shield_alpha(self) -> None:
+        self.shield_surface.fill(
+            (0, 200, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)))
 
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
         """
@@ -101,6 +125,12 @@ class Player(ABC):
         return (
             self.camera_w_adjust - self.hitbox.width / 2,
             self.camera_h_adjust + self.hitbox.height / 2
+        )
+
+    def get_camera_adjusted_shield_pos(self) -> Tuple[float, float]:
+        return (
+            self.camera_w_adjust - self.shield_surface.get_width() / 2,
+            self.camera_h_adjust - self.shield_surface.get_height() / 2
         )
 
     @abstractmethod

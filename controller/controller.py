@@ -136,6 +136,8 @@ class GameController:
             self.model.player.current_hp_surface,
             hp_bar_location,
             (0, 0, ratio * self.model.player.current_hp_surface.get_width(), self.model.player.current_hp_surface.get_height()))
+        if self.model.player.shield > 0:
+            self.view.draw_surface(self.model.player.shield_surface, self.model.player.get_camera_adjusted_shield_pos())
 
     def convert_model_pos_to_view_pos(
         self, model_pos: Vector2, blit_surface: Surface
