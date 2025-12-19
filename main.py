@@ -4,6 +4,8 @@ from pygame import Vector2, Rect
 
 from controller.controller import GameController, ControllerOptions
 from model.entities.fish.fishsettings import FishSettings, FishType
+from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyfishType
+from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
 from model.entities.school.school import School
 from model.entities.school.schoolparameters import SchoolParameters
 
@@ -49,19 +51,18 @@ def get_random_shoal_location(
 # Create the game world:
 ########################
 
-world_width = 6400.0
-world_height = 6400.0
+world_width = 5120.0
+world_height = 5120.0
 cell_size = 128.0
 
 game_controller = GameController(
     ControllerOptions(world_width, world_height, cell_size)
 )
 
-
 # Create schools of fish and add to the world
 spawn_region_size = 512.0
 
-num_red_schools = 10
+num_red_schools = 5
 for _ in range(num_red_schools):
 
     red_school = School(
@@ -89,7 +90,7 @@ for _ in range(num_red_schools):
     )
     game_controller.add_school(red_school)
 
-num_yellow_schools = 4
+num_yellow_schools = 2
 for _ in range(num_yellow_schools):
     yellow_school = School(
         SchoolParameters(
@@ -112,7 +113,7 @@ for _ in range(num_yellow_schools):
     game_controller.add_school(yellow_school)
 
 
-num_green_schools = 5
+num_green_schools = 4
 for _ in range(num_green_schools):
     green_school = School(
         SchoolParameters(
@@ -138,6 +139,22 @@ for _ in range(num_green_schools):
         FishSettings(FishType.GREEN, 48.0, 48.0, 125.0, 0.4),
     )
     game_controller.add_school(green_school)
+
+jellyfish_spawner = JellyfishSpawner(
+    JellyfishSettings(
+        JellyfishType.RED,
+        96.0,
+        96.0,
+        Vector2(0.0, 0.0),
+        Vector2(0.0, 0.0),
+        128.0,
+        1.0,
+        100,
+        10
+    ),
+    2
+)
+game_controller.set_jellyfish_spawner(jellyfish_spawner)
 
 # Start the game loop:
 game_controller.start_game()

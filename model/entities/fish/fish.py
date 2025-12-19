@@ -88,5 +88,5 @@ class Fish(GameEntity):
         This function is currently the most expensive thing being done when drawing the screen and will tank FPS if there are too many fish to display at once
         """
         return pygame.transform.rotate(
-            self.surface, math.degrees(math.atan2(self.velocity.y, self.velocity.x))
+            self.sprite, math.degrees(math.atan2(self.velocity.y, self.velocity.x))
         )

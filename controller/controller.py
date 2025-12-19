@@ -3,10 +3,11 @@ import time
 from typing import Tuple
 
 import pygame
-from pygame import Vector2, Surface
+from pygame import Vector2, Surface, Rect
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
+from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
 from model.entities.school.school import School
 from model.player.player import Turtle
 from model.world.world import SpatialPartitioningModel
@@ -81,7 +82,9 @@ class GameController:
         model_update_time = time.time() - model_update_time
         view_update_time = time.time()
         self.draw_background()
+        #self.draw_fps_menu()
         self.draw_game_entities()
+        self.draw_player()
         self.view.update_screen()
         view_update_time = time.time() - view_update_time
         self.fps_logging(model_update_time, view_update_time)
@@ -92,6 +95,8 @@ class GameController:
             if event.type == pygame.QUIT:
                 sys.exit()
         if self.key_presses[pygame.K_ESCAPE]:
+            sys.exit()
+        if self.model.player.health <= 0:
             sys.exit()
 
     def update_model(self) -> None:
@@ -106,6 +111,7 @@ class GameController:
                 ),
             )
 
+    def draw_fps_menu(self) -> None:
         self.view.print_info_to_screen(
             self.clock.get_fps(),
             int(self.model.player.position.x),
@@ -113,16 +119,27 @@ class GameController:
         )
 
     def draw_game_entities(self) -> None:
-        for entity in self.model.get_entities_in_camera_range():
-            entity_surface = entity.get_surface()
-            self.view.draw_surface(
-                entity_surface,
-                self.convert_model_pos_to_view_pos(entity.position, entity_surface),
-            )
+        for fish in self.model.fish.values():
+            fish_surface = fish.get_surface()
+            self.view.draw_surface(fish_surface, self.convert_model_pos_to_view_pos(fish.position, fish_surface))
+        for jelly in self.model.jellyfish.values():
+            jelly_surface = jelly.get_surface()
+            self.view.draw_surface(jelly_surface, self.convert_model_pos_to_view_pos(jelly.position, jelly_surface))
+
+    def draw_player(self) -> None:
         self.view.draw_surface(
             self.model.player.get_surface(),
-            self.model.player.get_camera_adjusted_position(),
+            self.model.player.get_camera_adjusted_position()
         )
+        hp_bar_location = self.model.player.get_camera_adjusted_hp_pos()
+        self.view.draw_surface(self.model.player.max_hp_surface, hp_bar_location)
+        ratio: float = self.model.player.health / self.model.player.max_health
+        self.view.draw_surface(
+            self.model.player.current_hp_surface,
+            hp_bar_location,
+            (0, 0, ratio * self.model.player.current_hp_surface.get_width(), self.model.player.current_hp_surface.get_height()))
+        if self.model.player.shield > 0:
+            self.view.draw_surface(self.model.player.shield_surface, self.model.player.get_camera_adjusted_shield_pos())
 
     def convert_model_pos_to_view_pos(
         self, model_pos: Vector2, blit_surface: Surface
@@ -140,6 +157,9 @@ class GameController:
 
     def add_school(self, school: School) -> None:
         self.model.add_school(school)
+
+    def set_jellyfish_spawner(self, spawner: JellyfishSpawner) -> None:
+        self.model.set_jellyfish_spawner(spawner)
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self.dt > self.max_dt:

@@ -2,8 +2,7 @@ import math
 from typing import Tuple
 
 import pygame
-from pygame import Surface
-from pygame.font import Font
+from pygame import Surface, Rect
 
 
 class View:
@@ -32,7 +31,7 @@ class View:
         self.background: Surface = self._get_background()
 
         # Font
-        self.font: Font = pygame.font.SysFont("Arial", 48)
+        #self.font: Font = pygame.font.SysFont("Arial", 48)
 
         print(
             "Initialized view with pygame screen Surface dimensions: ",
@@ -61,8 +60,8 @@ class View:
     def draw_background(self, destination: Tuple[int, int] = (0, 0)) -> None:
         self.screen.blit(self.background, destination)
 
-    def draw_surface(self, surface: Surface, dest: Tuple[float, float]) -> None:
-        self.screen.blit(surface, dest)
+    def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
+        self.screen.blit(surface, dest, area)
 
     def print_info_to_screen(self, fps: float, player_x: int, player_y: int) -> None:
         fps_surface: Surface = self.font.render(

@@ -1,4 +1,6 @@
-from pygame import Surface, Vector2
+import uuid
+
+from pygame import Surface, Vector2, Rect
 
 from model.utils.vectorutils import limit_magnitude, safe_normalize
 
@@ -7,20 +9,25 @@ class GameEntity:
 
     def __init__(
         self,
-        surface: Surface,
-        width: float = 1.0,
-        height: float = 1.0,
+        sprite: Surface,
+        hitbox_width: float = 0.0,
+        hitbox_height: float = 0.0,
         start_pos: Vector2 = Vector2(0.0, 0.0),
         start_v: Vector2 = Vector2(0.0, 0.0),
         max_speed: float = 1.0,
         max_acceleration: float = 0.1,
     ):
-        self.surface: Surface = surface
-        self.width: float = width
-        self.height: float = height
-
-        # Physics-related variables:
+        self.uuid: uuid.UUID = uuid.uuid4()
+        # The sprite is what is drawn on screen.
+        # The width and height adjusts are for easy calculations when converting the model coordinates to screen coordinates when drawing
+        self.sprite: Surface = sprite
+        self.sprite_width_adj: float = sprite.get_width() / 2
+        self.sprite_height_adj: float = sprite.get_height() / 2
         self.position: Vector2 = start_pos
+        # The hitbox is how big the entity actually is when performing hit detection.
+        # The sprite and the hitbox are on top of each other's centers
+        self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
+        self.hitbox.center = (int(self.position.x), int(self.position.y))
         self.velocity: Vector2 = start_v
         self.acceleration: Vector2 = Vector2(0.0, 0.0)
         self.max_speed: float = max_speed
@@ -38,6 +45,7 @@ class GameEntity:
         self.position.x = (self.position.x + world_w) % world_w
         self.position.y = (self.position.y + world_h) % world_h
         self.acceleration *= 0.0
+        self.hitbox.center = (int(self.position.x), int(self.position.y))
 
     def target(self, target_dir: Vector2, k: float) -> None:
         """
@@ -51,4 +59,4 @@ class GameEntity:
         self.acceleration += target_dir
 
     def get_surface(self):
-        return self.surface
+        return self.sprite
