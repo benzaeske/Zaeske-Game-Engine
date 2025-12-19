@@ -41,6 +41,10 @@ class SpatialPartitioningModel:
         self.jelly_spawner_timer: float = 0.0
         self.grid_space: list[list[GridCell]] = self.initialize_grid_space()
 
+        # rework
+        self.fish: dict[UUID, Fish] = {}
+        self.jellyfish: dict[UUID, Jellyfish] = {}
+
     def initialize_grid_space(self) -> list[list[GridCell]]:
         grid_space: list[list[GridCell]] = []
         for row in range(self.grid_height):
@@ -62,7 +66,6 @@ class SpatialPartitioningModel:
         self.spawn_jellyfish(dt)
         self.update_jellyfish(dt)
         self.player.move_player(key_presses, dt)
-        # TODO collision detection with player/jellies
 
     ##############################
     ######## Fish functions ######
@@ -72,37 +75,26 @@ class SpatialPartitioningModel:
         self.schools[school.school_id] = school
 
     def spawn_fish_in_grid_space(self, new_fish: Fish) -> None:
+        self.fish[new_fish.uuid] = new_fish
         self.grid_space[int(new_fish.position.y / self.cell_size)][
             int(new_fish.position.x / self.cell_size)
-        ].fish.append(new_fish)
+        ].fish[new_fish.uuid] = new_fish
 
     def update_fish(self, dt: float):
         # Have all the fish make schooling decisions based on their current location and velocity
-        for row in range(self.grid_height):
-            for col in range(self.grid_width):
-                for current_fish in self.grid_space[row][col].fish:
-                    self.find_neighbors_and_make_schooling_decisions(current_fish)
-
-        # A list of Tuples to help keep track of fish that move grid cells during their position updates
-        fish_changed_cells: list[Tuple[int, int, Fish]] = []
+        for current_fish in self.fish.values():
+            self.find_neighbors_and_make_schooling_decisions(current_fish)
         # Move all the fish: this should only be done after all schooling decisions have been made for the current frame
-        for row in range(self.grid_height):
-            for col in range(self.grid_width):
-                for i in range(len(self.grid_space[row][col].fish) - 1, -1, -1):
-                    f: Fish = self.grid_space[row][col].fish[i]
-                    f.update_position(self.world_width, self.world_height, dt)
-                    # Check if we are in a new grid cell after moving
-                    new_r = int(f.position.y / self.cell_size)
-                    new_c = int(f.position.x / self.cell_size)
-                    if new_r != row or new_c != col:
-                        # Remove the fish from the current list
-                        del self.grid_space[row][col].fish[i]
-                        # Track the fish that was just removed in the list of grid cell updates
-                        fish_changed_cells.append((new_r, new_c, f))
-        # Update grid cells with entities that moved into new cells:
-        # This must be done after all entities have moved otherwise we run the risk of processing an entity's position update twice
-        for cell_fish in fish_changed_cells:
-            self.grid_space[cell_fish[0]][cell_fish[1]].fish.append(cell_fish[2])
+        for current_fish in self.fish.values():
+            old_r = int(current_fish.position.y / self.cell_size)
+            old_c = int(current_fish.position.x / self.cell_size)
+            current_fish.update_position(self.world_width, self.world_height, dt)
+            # Check if we are in a new grid cell after moving
+            new_r = int(current_fish.position.y / self.cell_size)
+            new_c = int(current_fish.position.x / self.cell_size)
+            if new_r != old_r or new_c != old_c:
+                del self.grid_space[old_r][old_c].fish[current_fish.uuid]
+                self.grid_space[new_r][new_c].fish[current_fish.uuid] = current_fish
 
     def find_neighbors_and_make_schooling_decisions(self, current_fish: Fish) -> None:
         """
@@ -119,7 +111,7 @@ class SpatialPartitioningModel:
                 grid_r = (grid_r + self.grid_height) % self.grid_height
                 grid_c: int = c + dc
                 grid_c = (grid_c + self.grid_width) % self.grid_width
-                neighbors.extend(self.grid_space[grid_r][grid_c].fish)
+                neighbors.extend(self.grid_space[grid_r][grid_c].fish.values())
         current_fish.make_schooling_decisions(neighbors, school.school_params)
 
     ##############################
@@ -141,7 +133,7 @@ class SpatialPartitioningModel:
                     self.world_width,
                     self.world_height
                 )
-                # Add the jelly to gridspace
+                self.jellyfish[new_jelly.uuid] = new_jelly
                 self.grid_space[int(new_jelly.position.y / self.cell_size)][
                     int(new_jelly.position.x / self.cell_size)
                 ].jellyfish[new_jelly.uuid] = new_jelly
@@ -150,30 +142,20 @@ class SpatialPartitioningModel:
 
     def update_jellyfish(self, dt: float):
         # Apply acceleration to all the jellies
-        for row in range(self.grid_height):
-            for col in range(self.grid_width):
-                for jellyfish in self.grid_space[row][col].jellyfish.values():
-                    jellyfish.accelerate_towards_player(self.player.position)
+        for jellyfish in self.jellyfish.values():
+            jellyfish.accelerate_towards_player(self.player.position)
 
-        # Track jellies that change cells when they move
-        jellies_changed_cells: list[Tuple[int, int, Jellyfish]] = []
         # Move all the jellyfish: this should only be done after all accelerations have been applied to them for the current frame
-        for row in range(self.grid_height):
-            for col in range(self.grid_width):
-                for key in list(self.grid_space[row][col].jellyfish.keys()):
-                    jelly = self.grid_space[row][col].jellyfish[key]
-                    jelly.update_position(self.world_width, self.world_height, dt)
-                    # Check if we are in a new grid cell after moving
-                    new_r = int(jelly.position.y / self.cell_size)
-                    new_c = int(jelly.position.x / self.cell_size)
-                    if new_r != row or new_c != col:
-                        del self.grid_space[row][col].jellyfish[key]
-                        jellies_changed_cells.append((new_r, new_c, jelly))
-
-        # Update grid cells with jellyfish that moved into new cells:
-        # This must be done after all jellyfish have moved otherwise we run the risk of processing a jellyfish's position update twice
-        for cell_jelly in jellies_changed_cells:
-            self.grid_space[cell_jelly[0]][cell_jelly[1]].jellyfish[cell_jelly[2].uuid] = cell_jelly[2]
+        for jellyfish in self.jellyfish.values():
+            old_r = int(jellyfish.position.y / self.cell_size)
+            old_c = int(jellyfish.position.x / self.cell_size)
+            jellyfish.update_position(self.world_width, self.world_height, dt)
+            # Check if we are in a new grid cell after moving
+            new_r = int(jellyfish.position.y / self.cell_size)
+            new_c = int(jellyfish.position.x / self.cell_size)
+            if new_r != old_r or new_c != old_c:
+                del self.grid_space[old_r][old_c].jellyfish[jellyfish.uuid]
+                self.grid_space[new_r][new_c].jellyfish[jellyfish.uuid] = jellyfish
 
     ########################
     ### Helper Functions ###
@@ -217,8 +199,8 @@ class SpatialPartitioningModel:
         entities: list[GameEntity] = []
         for r in range(bottom, top + 1):
             for c in range(left, right + 1):
-                entities.extend(self.grid_space[r][c].fish)
-                entities.extend(self.grid_space[r][c].jellyfish.values())
+                entities.extend(self.grid_space[r][c].fish_old_impl)
+                entities.extend(self.grid_space[r][c].jellyfish_old_impl.values())
         return entities
 
     def get_entities_in_camera_range(self):

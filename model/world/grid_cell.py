@@ -22,8 +22,10 @@ class GridCell:
         background_surface: Surface = None,
     ):
         self.size: float = size
-        self.fish: list[Fish] = []
+        self.fish: dict[UUID, Fish] = {}
         self.jellyfish: dict[UUID, Jellyfish] = {}
+
+
         if background_surface is None:
             self.background_surface: Surface = pygame.Surface((size, size))
             self.background_surface.fill((0, 0, 0))

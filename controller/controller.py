@@ -116,12 +116,12 @@ class GameController:
         )
 
     def draw_game_entities(self) -> None:
-        for entity in self.model.get_entities_in_camera_range():
-            entity_surface = entity.get_surface()
-            self.view.draw_surface(
-                entity_surface,
-                self.convert_model_pos_to_view_pos(entity.position, entity_surface),
-            )
+        for fish in self.model.fish.values():
+            fish_surface = fish.get_surface()
+            self.view.draw_surface(fish_surface, self.convert_model_pos_to_view_pos(fish.position, fish_surface))
+        for jelly in self.model.jellyfish.values():
+            jelly_surface = jelly.get_surface()
+            self.view.draw_surface(jelly_surface, self.convert_model_pos_to_view_pos(jelly.position, jelly_surface))
         self.view.draw_surface(
             self.model.player.get_surface(),
             self.model.player.get_camera_adjusted_position(),
