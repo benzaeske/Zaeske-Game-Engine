@@ -96,6 +96,8 @@ class GameController:
                 sys.exit()
         if self.key_presses[pygame.K_ESCAPE]:
             sys.exit()
+        if self.model.player.health <= 0:
+            sys.exit()
 
     def update_model(self) -> None:
         self.model.update_model(self.dt, self.key_presses)
