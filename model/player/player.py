@@ -47,7 +47,7 @@ class Player(ABC):
         self.shield: int = 0
         self.shield_radius: float = self.hitbox.width
         self.shield_radius_squared: float = self.shield_radius * self.shield_radius
-        self.shield_charge_delay: float = 1.5
+        self.shield_charge_delay: float = 1.0
         self.current_shield_charge_cooldown: float = self.shield_charge_delay
         self.shield_alpha_scaling: int = 10
         self.shield_surface: Surface = Surface((self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA)
@@ -111,7 +111,17 @@ class Player(ABC):
             self.current_shield_charge_cooldown -= dt
             if self.current_shield_charge_cooldown <= 0:
                 self.current_shield_charge_cooldown = self.shield_charge_delay
-                self.shield += 1
+                self.increment_shield()
+
+    def increment_shield(self) -> None:
+        self.shield += 1
+        if self.shield > self.max_shield:
+            self.shield = self.max_shield
+
+    def decrement_shield(self) -> None:
+        self.shield -= 1
+        if self.shield < 0:
+            self.shield = 0
 
     def update_shield_alpha(self) -> None:
         self.shield_surface: Surface = Surface((self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA)

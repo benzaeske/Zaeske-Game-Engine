@@ -205,7 +205,7 @@ class SpatialPartitioningModel:
                             max(jelly.hitbox.top, min(int(self.player.position.y), jelly.hitbox.bottom))
                         )
                         if closest_point.distance_squared_to(self.player.position) < self.player.shield_radius_squared:
-                            self.player.shield -= 1
+                            self.player.decrement_shield()
                             del self.jellyfish[jelly_id]
                             del self.grid_space[grid_r][grid_c].jellyfish[jelly_id]
 
