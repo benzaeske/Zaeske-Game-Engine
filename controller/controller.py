@@ -8,9 +8,11 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
+from model.entities.gameentity import GameEntity
 from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
 from model.entities.school.school import School
 from model.player.player import Turtle
+from model.world.grid_cell import GridCell
 from model.world.world import SpatialPartitioningModel
 from view.view import View
 
@@ -115,13 +117,23 @@ class GameController:
         self.model.update_model(self.dt, self.key_presses)
 
     def draw_background(self) -> None:
-        for grid_cell in self.model.get_grid_cells_in_camera_range():
-            self.view.draw_surface(
-                grid_cell.background_surface,
-                self.convert_model_pos_to_view_pos(
-                    grid_cell.center_pos, grid_cell.background_surface
-                ),
-            )
+        # Loop over grid cells within camera range.
+        left: int = int(self.model.player.camera.left // self.model.cell_size)
+        right: int = int(self.model.player.camera.right // self.model.cell_size)
+        bottom: int = int(self.model.player.camera.top // self.model.cell_size)
+        top: int = int(self.model.player.camera.bottom // self.model.cell_size)
+        for row in range(bottom, top + 1):
+            for col in range(left, right + 1):
+                # If the column overflows, wrap around to other side of the map
+                grid_r = row
+                grid_c = (col + self.model.grid_width) % self.model.grid_width
+                # Convert top left of row, col to coords on the world map
+                x = col * self.model.cell_size
+                y = (row + 1) * self.model.cell_size
+                # Adjust world map coords to screen relative coords
+                x = x - self.model.player.camera.left
+                y = self.model.player.camera.bottom - y
+                self.view.draw_surface(self.model.grid_space[grid_r][grid_c].background_surface, (x, y))
 
     def draw_fps_menu(self) -> None:
         self.view.print_info_to_screen(
@@ -131,12 +143,58 @@ class GameController:
         )
 
     def draw_game_entities(self) -> None:
-        for fish in self.model.fish.values():
-            fish_surface = fish.get_surface()
-            self.view.draw_surface(fish_surface, self.convert_model_pos_to_view_pos(fish.position, fish_surface))
-        for jelly in self.model.jellyfish.values():
-            jelly_surface = jelly.get_surface()
-            self.view.draw_surface(jelly_surface, self.convert_model_pos_to_view_pos(jelly.position, jelly_surface))
+        # Loop over grid cells within camera range.
+        left: int = int(self.model.player.camera.left // self.model.cell_size)
+        right: int = int(self.model.player.camera.right // self.model.cell_size)
+        bottom: int = int(self.model.player.camera.top // self.model.cell_size)
+        top: int = int(self.model.player.camera.bottom // self.model.cell_size)
+        for row in range(bottom, top + 1):
+            for col in range(left, right + 1):
+                # Wrap the grid col around the map if it extends over the edge
+                wrapped_col = (col + self.model.grid_width) % self.model.grid_width
+                # Adjust the entities position if it is wrapping
+                entity_adj: Vector2 = Vector2(0, 0)
+                if col < 0:
+                    entity_adj = Vector2(-self.model.world_width, 0)
+                if col >= self.model.grid_width:
+                    entity_adj = Vector2(self.model.world_width, 0)
+                # Get the grid cell that holds the entities we need to draw
+                grid_cell: GridCell = self.model.grid_space[row][wrapped_col]
+                for fish in grid_cell.fish.values():
+                    self.view.draw_surface(
+                        fish.get_surface(),
+                        self.adj_game_entity_pos_to_camera(
+                            fish.position + entity_adj, # Adjust the entities position for wrapping
+                            fish.sprite_width_adj,
+                            fish.sprite_height_adj,
+                            self.model.player.camera.left,
+                            self.model.player.camera.bottom
+                        )
+                    )
+                for jelly in grid_cell.jellyfish.values():
+                    self.view.draw_surface(
+                        jelly.get_surface(),
+                        self.adj_game_entity_pos_to_camera(
+                            jelly.position + entity_adj, # Adjust the entities position for wrapping
+                            jelly.sprite_width_adj,
+                            jelly.sprite_height_adj,
+                            self.model.player.camera.left,
+                            self.model.player.camera.bottom
+                        )
+                    )
+
+    @staticmethod
+    def adj_game_entity_pos_to_camera(
+            entity_pos: Vector2,
+            sprite_w_adj: float,
+            sprite_h_adj: float,
+            camera_left: float,
+            camera_top: float
+    ) -> Tuple[float, float]:
+        return (
+            entity_pos.x - camera_left - sprite_w_adj,
+            camera_top - entity_pos.y - sprite_h_adj
+        )
 
     def draw_player(self) -> None:
         self.view.draw_surface(
@@ -153,20 +211,6 @@ class GameController:
         self.model.player.update_shield_alpha()
         if self.model.player.shield > 0:
             self.view.draw_surface(self.model.player.shield_surface, self.model.player.get_camera_adjusted_shield_pos())
-
-    def convert_model_pos_to_view_pos(
-        self, model_pos: Vector2, blit_surface: Surface
-    ) -> Tuple[float, float]:
-        camera_pos = self.model.player.position
-        camera_w = self.model.player.camera_width
-        camera_h = self.model.player.camera_height
-        # Find the center of my object in pygame view space (inverted y-axis). 0,0 is top left corner
-        view_center_x = model_pos.x - (camera_pos.x - camera_w / 2)
-        view_center_y = (camera_pos.y + camera_h / 2) - model_pos.y
-        # Adjust to the top left corner of the object
-        view_x = view_center_x - blit_surface.get_width() / 2
-        view_y = view_center_y - blit_surface.get_height() / 2
-        return view_x, view_y
 
     def add_school(self, school: School) -> None:
         self.model.add_school(school)

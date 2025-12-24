@@ -74,8 +74,8 @@ for _ in range(num_red_schools):
             1.8,
             1.0,
             get_random_shoal_location(
-                game_controller.model.player.camera_width,
-                game_controller.model.player.camera_height,
+                game_controller.model.player.camera.width,
+                game_controller.model.player.camera.height,
                 world_height,
                 world_width,
             ),
@@ -124,8 +124,8 @@ for _ in range(num_green_schools):
             1.8,
             1.0,
             get_random_shoal_location(
-                game_controller.model.player.camera_width,
-                game_controller.model.player.camera_height,
+                game_controller.model.player.camera.width,
+                game_controller.model.player.camera.height,
                 world_height,
                 world_width,
             ),

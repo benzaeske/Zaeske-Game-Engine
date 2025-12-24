@@ -24,11 +24,8 @@ class GridCell:
         self.size: float = size
         self.fish: dict[UUID, Fish] = {}
         self.jellyfish: dict[UUID, Jellyfish] = {}
-
-
         if background_surface is None:
             self.background_surface: Surface = pygame.Surface((size, size))
-            self.background_surface.fill((0, 0, 0))
         else:
             self.background_surface: Surface = background_surface
         self.center_pos: Vector2 = Vector2(

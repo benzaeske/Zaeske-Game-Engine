@@ -22,19 +22,22 @@ class Player(ABC):
         start_pos: Vector2 = Vector2(0.0, 0.0),
         max_speed: float = 1.0,
     ) -> None:
-        # Positional/physics variables
+        # Positional/physics
+        self.position: Vector2 = start_pos
         self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
-        self.hitbox.center = (int(start_pos.x), int(start_pos.y))
-        self.surface_width: float = surface_width
-        self.surface_height: float = surface_height
-        self.camera_width: float = camera_width
-        self.camera_height: float = camera_height
+        self.hitbox.center = (int(self.position.x), int(self.position.y))
+        self.camera: Rect = Rect(0, 0, camera_width, camera_height)
+        self.camera.center = (int(self.position.x), int(self.position.y))
         self.camera_w_adjust: float = camera_width / 2
         self.camera_h_adjust: float = camera_height / 2
         self.world_boundary: Tuple[float, float] = world_boundary
-        self.position: Vector2 = start_pos
         self.facing_direction: int = 1
         self.max_speed: float = max_speed
+        # Sprite
+        self.surface_rect: Rect = Rect(0, 0, surface_width, surface_height)
+        self.surface_rect.center = (int(self.position.x), int(self.position.y))
+        self.surface_w_adj: float = surface_width / 2
+        self.surface_h_adj: float = surface_height / 2
         # Health
         self.max_health: float = 100.0
         self.health: float = self.max_health
@@ -55,6 +58,8 @@ class Player(ABC):
                            (255, 255, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)),
                            self.shield_surface.get_rect().center,
                            self.shield_radius)
+        self.shield_surface_w_adj: float = self.shield_surface.get_width() / 2
+        self.shield_surface_h_adj: float = self.shield_surface.get_height() / 2
         # Fish coherency
         self.cohere_green: int = 0
         self.cohere_yellow: int = 0
@@ -81,17 +86,23 @@ class Player(ABC):
             velocity += Vector2(0, -self.max_speed)
         limit_magnitude(velocity, self.max_speed)
         self.position += velocity * dt
-        # Don't let the camera go outside the world boundary
-        if self.position.x - self.camera_w_adjust < 0:
-            self.position.x = self.camera_w_adjust
-        if self.position.x + self.camera_w_adjust >= self.world_boundary[0]:
-            self.position.x = self.world_boundary[0] - self.camera_w_adjust - 1
-        if self.position.y - self.camera_h_adjust < 0:
-            self.position.y = self.camera_h_adjust
-        if self.position.y + self.camera_h_adjust >= self.world_boundary[1]:
-            self.position.y = self.world_boundary[1] - self.camera_h_adjust - 1
-        # Update Hitboxes
+        # Wrap on x axis
+        self.position.x = (self.position.x + self.world_boundary[0]) % self.world_boundary[0]
+        # Prevent sprite from leaving world boundary on y-axis
+        if self.position.y < self.surface_h_adj:
+            self.position.y = self.surface_h_adj
+        if self.position.y + self.surface_h_adj >= self.world_boundary[1]:
+            self.position.y = self.world_boundary[1] - self.surface_h_adj
+        # Update Hitbox
         self.hitbox.center = (int(self.position.x), int(self.position.y))
+        # Update sprite
+        self.surface_rect.center = (int(self.position.x), int(self.position.y))
+        # Update camera. Prevent camera from leaving world boundary on y-axis
+        self.camera.center = (int(self.position.x), int(self.position.y))
+        if self.camera.bottom >= self.world_boundary[1] - 1:
+            self.camera.bottom = int(self.world_boundary[1]) - 1
+        if self.camera.top < 0:
+            self.camera.top = 0
         # Update facing direction for drawing
         if velocity.x != 0:
             if velocity.x > 0:
@@ -131,27 +142,21 @@ class Player(ABC):
                            self.shield_radius)
 
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
-        """
-        Returns the coordinates to center the player surface on the screen
-        """
         return (
-            self.camera_w_adjust - self.surface_width / 2,
-            self.camera_h_adjust - self.surface_height / 2,
+            self.surface_rect.left - self.camera.left,
+            self.camera.bottom - self.surface_rect.bottom,
         )
 
     def get_camera_adjusted_hp_pos(self) -> Tuple[float, float]:
-        """
-        Returns the coordinates to center the hp bar on the player's hitbox
-        """
         return (
-            self.camera_w_adjust - self.hitbox.width / 2,
-            self.camera_h_adjust + self.hitbox.height / 2
+            self.hitbox.left - self.camera.left,
+            self.camera.bottom - self.hitbox.top - self.max_hp_surface.get_height(),
         )
 
     def get_camera_adjusted_shield_pos(self) -> Tuple[float, float]:
         return (
-            self.camera_w_adjust - self.shield_surface.get_width() / 2,
-            self.camera_h_adjust - self.shield_surface.get_height() / 2
+            self.position.x - self.camera.left - self.shield_surface_w_adj,
+            self.camera.bottom - self.position.y - self.shield_surface_h_adj
         )
 
     @abstractmethod

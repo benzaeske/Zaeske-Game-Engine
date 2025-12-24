@@ -53,7 +53,12 @@ class SpatialPartitioningModel:
             for col in range(self.grid_width):
                 background: Surface = pygame.Surface((self.cell_size, self.cell_size))
                 noise: int = random.randint(0, 25)
-                background.fill((0, 50 + noise, 115 + noise * 2))
+                if col == 0:
+                    background.fill((0, 0, 0))
+                elif row == 0:
+                    background.fill((99, 85, 52))
+                else:
+                    background.fill((0, 50 + noise, 115 + noise * 2))
                 grid_space[row].append(GridCell(self.cell_size, row, col, background))
         return grid_space
 

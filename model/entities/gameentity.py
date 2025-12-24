@@ -1,4 +1,5 @@
 import uuid
+from typing import Tuple
 
 from pygame import Surface, Vector2, Rect
 
@@ -60,3 +61,5 @@ class GameEntity:
 
     def get_surface(self):
         return self.sprite
+
+
