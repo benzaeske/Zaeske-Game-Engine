@@ -1,9 +1,10 @@
+import copy
 import random
 from typing import Tuple
 from uuid import UUID
 
 import pygame
-from pygame import Surface, Vector2
+from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
 from model.entities.fish.fish import Fish
@@ -111,10 +112,13 @@ class SpatialPartitioningModel:
             for dc in range(-cell_range, cell_range + 1):
                 grid_r: int = r + dr
                 grid_r = (grid_r + self.grid_height) % self.grid_height
-                grid_c: int = c + dc
-                grid_c = (grid_c + self.grid_width) % self.grid_width
+                virtual_grid_c: int = c + dc
+                grid_c: int = (virtual_grid_c + self.grid_width) % self.grid_width
                 for jelly in self.grid_space[grid_r][grid_c].jellyfish.values():
-                    if jelly.hitbox.colliderect(self.player.hitbox):
+                    jelly_hitbox: Rect = jelly.hitbox
+                    if virtual_grid_c < 0 or virtual_grid_c >= self.grid_width:
+                        jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
+                    if jelly_hitbox.colliderect(self.player.hitbox):
                         self.player.health -= (jelly.damage * dt)
 
     ##############################
@@ -191,6 +195,14 @@ class SpatialPartitioningModel:
             self.jelly_spawner_timer = self.jelly_spawner_delay
             self.jellyfish_spawner.amount += 1
 
+    def get_virtual_wrapped_hitbox(self, game_entity: GameEntity, virtual_grid_r: int) -> Rect:
+        virtual_hitbox: Rect = copy.deepcopy(game_entity.hitbox)
+        if virtual_grid_r < 0:
+            virtual_hitbox.center = (int(game_entity.position.x - self.world_width), int(game_entity.position.y))
+        elif virtual_grid_r >= self.grid_width:
+            virtual_hitbox.center = (int(game_entity.position.x + self.world_width), int(game_entity.position.y))
+        return virtual_hitbox
+
     def update_jellyfish(self, dt: float):
         if self.player.shield > 0:
             shield_cell_range: int = 2
@@ -201,21 +213,23 @@ class SpatialPartitioningModel:
                 for dc in range(-shield_cell_range, shield_cell_range + 1):
                     grid_r: int = r + dr
                     grid_r = (grid_r + self.grid_height) % self.grid_height
-                    grid_c: int = c + dc
-                    grid_c = (grid_c + self.grid_width) % self.grid_width
+                    virtual_grid_c: int = c + dc
+                    grid_c: int = (virtual_grid_c + self.grid_width) % self.grid_width
                     for jelly_id in list(self.grid_space[grid_r][grid_c].jellyfish.keys()):
                         jelly = self.grid_space[grid_r][grid_c].jellyfish[jelly_id]
+                        jelly_hitbox: Rect = jelly.hitbox
+                        if virtual_grid_c < 0 or virtual_grid_c >= self.grid_width:
+                            jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
                         # find the closest point on the jelly's hitbox to the player's circular shield
                         closest_point: Vector2 = Vector2(
-                            max(jelly.hitbox.left, min(int(self.player.position.x), jelly.hitbox.right)),
-                            max(jelly.hitbox.top, min(int(self.player.position.y), jelly.hitbox.bottom))
+                            max(jelly_hitbox.left, min(int(self.player.position.x), jelly_hitbox.right)),
+                            max(jelly_hitbox.top, min(int(self.player.position.y), jelly_hitbox.bottom))
                         )
                         if closest_point.distance_squared_to(self.player.position) < self.player.shield_radius_squared:
                             self.player.decrement_shield()
                             del self.jellyfish[jelly_id]
                             del self.grid_space[grid_r][grid_c].jellyfish[jelly_id]
 
-        # Avoid jelly neighbors
         neighbor_range: int = 1
         scared_range: int = 2
         for jellyfish in self.jellyfish.values():
@@ -242,6 +256,7 @@ class SpatialPartitioningModel:
                     for fish in self.grid_space[grid_r][grid_c].fish.values():
                         if self.schools[fish.school_id].fish_settings.fish_type == FishType.RED:
                             afraid_of_fish.append(fish)
+
             jellyfish.update_acceleration(self.player.position, neighbor_jellies, afraid_of_fish, self.world_width)
 
         # Move all the jellyfish: this should only be done after all accelerations have been applied to them for the current frame
@@ -255,61 +270,3 @@ class SpatialPartitioningModel:
             if new_r != old_r or new_c != old_c:
                 del self.grid_space[old_r][old_c].jellyfish[jellyfish.uuid]
                 self.grid_space[new_r][new_c].jellyfish[jellyfish.uuid] = jellyfish
-
-    ########################
-    ### Helper Functions ###
-    ########################
-
-    def get_grid_cells_in_range(
-        self, x_range: Tuple[float, float], y_range: Tuple[float, float]
-    ) -> list[GridCell]:
-        left: int = int(x_range[0] / self.cell_size)
-        right: int = int(x_range[1] / self.cell_size)
-        bottom: int = int(y_range[0] / self.cell_size)
-        top: int = int(y_range[1] / self.cell_size)
-        cells: list[GridCell] = []
-        for r in range(bottom, top + 1):
-            for c in range(left, right + 1):
-                cells.append(self.grid_space[r][c])
-        return cells
-
-    def get_grid_cells_in_camera_range(self) -> list[GridCell]:
-        return self.get_grid_cells_in_range(
-            (
-                self.player.position.x - self.player.camera_w_adjust,
-                self.player.position.x + self.player.camera_w_adjust,
-            ),
-            (
-                self.player.position.y - self.player.camera_h_adjust,
-                self.player.position.y + self.player.camera_h_adjust,
-            ),
-        )
-
-    def get_entities_in_range(
-        self, x_range: Tuple[float, float], y_range: Tuple[float, float]
-    ) -> list[GameEntity]:
-        """
-        Finds the grid cells that are within the x, y range specified and returns all entities in those grid cells
-        """
-        left: int = int(x_range[0] / self.cell_size)
-        right: int = int(x_range[1] / self.cell_size)
-        bottom: int = int(y_range[0] / self.cell_size)
-        top: int = int(y_range[1] / self.cell_size)
-        entities: list[GameEntity] = []
-        for r in range(bottom, top + 1):
-            for c in range(left, right + 1):
-                entities.extend(self.grid_space[r][c].fish_old_impl)
-                entities.extend(self.grid_space[r][c].jellyfish_old_impl.values())
-        return entities
-
-    def get_entities_in_camera_range(self):
-        return self.get_entities_in_range(
-            (
-                self.player.position.x - self.player.camera_w_adjust,
-                self.player.position.x + self.player.camera_w_adjust,
-            ),
-            (
-                self.player.position.y - self.player.camera_h_adjust,
-                self.player.position.y + self.player.camera_h_adjust,
-            ),
-        )
