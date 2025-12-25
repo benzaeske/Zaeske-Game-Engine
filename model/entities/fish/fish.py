@@ -7,6 +7,7 @@ from pygame import Vector2, Surface
 from model.entities.fish.fishsettings import FishSettings
 from model.entities.gameentity import GameEntity
 from model.entities.school.schoolparameters import SchoolParameters
+from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 
 
 class Fish(GameEntity):
@@ -54,14 +55,7 @@ class Fish(GameEntity):
         count_s: int = 0
         for other in others:
             if self.school_id == other.school_id and self.uuid != other.uuid:
-                direct_d: float = self.position.distance_to(other.position)
-                wrap_pos: Vector2 = other.position + Vector2(world_width, 0) if other.position.x < (world_width / 2) else other.position - Vector2(world_width, 0)
-                wrap_d: float = self.position.distance_to(wrap_pos)
-                other_pos = other.position
-                d = direct_d
-                if wrap_d < direct_d:
-                    other_pos = wrap_pos
-                    d = wrap_d
+                d, other_pos = calculate_shortest_distance_and_virtual_position(self.position, other.position, world_width)
                 if 0 < d < school_params.cohere_distance:
                     sum_align += other.velocity
                     sum_cohere += other_pos
@@ -81,15 +75,7 @@ class Fish(GameEntity):
             self.target(sum_cohere, school_params.cohere_k)
 
     def _shoal(self, school_params: SchoolParameters, world_width: float) -> None:
-        direct_d: float = self.position.distance_to(school_params.shoal_location)
-        wrap_shoal_pos: Vector2 = school_params.shoal_location + Vector2(world_width, 0) if school_params.shoal_location.x < (
-                    world_width / 2) else school_params.shoal_location - Vector2(world_width, 0)
-        wrap_d: float = self.position.distance_to(wrap_shoal_pos)
-        d: float = direct_d
-        shoal_pos: Vector2 = school_params.shoal_location
-        if wrap_d < direct_d:
-            d = wrap_d
-            shoal_pos = wrap_shoal_pos
+        d, shoal_pos = calculate_shortest_distance_and_virtual_position(self.position, school_params.shoal_location, world_width)
         diff = shoal_pos - self.position
         if d > school_params.shoal_radius:
             self.target(diff, school_params.shoal_k)

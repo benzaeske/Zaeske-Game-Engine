@@ -3,6 +3,7 @@ from pygame import Vector2, Surface
 from model.entities.fish.fish import Fish
 from model.entities.gameentity import GameEntity
 from model.entities.jellyfish.jellyfishsettings import JellyfishSettings
+from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 
 
 class Jellyfish(GameEntity):
@@ -39,13 +40,9 @@ class Jellyfish(GameEntity):
         sum_avoid_jelly: Vector2 = Vector2(0.0, 0.0)
         count_avoid: int = 0
         for neighbor in neighbors:
-            direct_d: float = self.position.distance_to(neighbor.position)
-            wrap_vec: Vector2 = Vector2(world_width, 0) if neighbor.position.x < (world_width / 2) else Vector2(
-                -world_width, 0)
-            wrap_d: float = self.position.distance_to(neighbor.position + wrap_vec)
-            d = min(direct_d, wrap_d)
+            d, neighbor_pos = calculate_shortest_distance_and_virtual_position(self.position, neighbor.position, world_width)
             if 0 < d < avoid_jelly_dist:
-                diff: Vector2 = self.position - neighbor.position if d == direct_d else self.position - (neighbor.position + wrap_vec)
+                diff: Vector2 = self.position - neighbor_pos
                 diff.normalize_ip()
                 diff /= d
                 sum_avoid_jelly += diff
@@ -60,13 +57,9 @@ class Jellyfish(GameEntity):
         sum_avoid_fish: Vector2 = Vector2(0.0, 0.0)
         count: int = 0
         for neighbor in afraid_neighbors:
-            direct_d: float = self.position.distance_to(neighbor.position)
-            wrap_vec: Vector2 = Vector2(world_width, 0) if neighbor.position.x < (world_width / 2) else Vector2(
-                -world_width, 0)
-            wrap_d: float = self.position.distance_to(neighbor.position + wrap_vec)
-            d = min(direct_d, wrap_d)
+            d, neighbor_pos = calculate_shortest_distance_and_virtual_position(self.position, neighbor.position, world_width)
             if 0 < d < scared_range:
-                diff: Vector2 = self.position - neighbor.position if d == direct_d else self.position - (neighbor.position + wrap_vec)
+                diff: Vector2 = self.position - neighbor_pos
                 diff.normalize_ip()
                 diff /= d
                 sum_avoid_fish += diff
