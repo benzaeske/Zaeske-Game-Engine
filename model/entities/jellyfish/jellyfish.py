@@ -19,38 +19,57 @@ class Jellyfish(GameEntity):
         self.health = settings.health
         self.damage = settings.damage
 
-    def update_acceleration(self, player_position: Vector2, neighbors: list[Jellyfish], afraid_neighbors: list[Fish]):
-        self.target(player_position - self.position, 1.0)
+    def update_acceleration(self, player_position: Vector2, neighbors: list[Jellyfish], afraid_neighbors: list[Fish], world_width: float):
+        self.move_towards_player(player_position, world_width)
+        self.avoid_close_neighbors(neighbors, world_width)
+        self.run_away_from_fish(afraid_neighbors, world_width)
 
-        # Avoid other jellies when too close
+    def move_towards_player(self, player_position: Vector2, world_width: float) -> None:
+        direct_diff_x = player_position.x - self.position.x
+        wrap_diff_x = (direct_diff_x - world_width) if self.position.x < (world_width / 2) else (
+                    direct_diff_x + world_width)
+        if abs(direct_diff_x) < abs(wrap_diff_x):
+            self.target(Vector2(direct_diff_x, player_position.y - self.position.y), 1.0)
+        else:
+            self.target(Vector2(wrap_diff_x, player_position.y - self.position.y), 1.0)
+
+    def avoid_close_neighbors(self, neighbors: list[Jellyfish], world_width: float):
         avoid_jelly_dist: float = 96.0
-        avoid_jelly_k: float = 1.0
+        avoid_jelly_k: float = 2.0
         sum_avoid_jelly: Vector2 = Vector2(0.0, 0.0)
-        count_a_j: int = 0
+        count_avoid: int = 0
         for neighbor in neighbors:
-            d: float = self.position.distance_to(neighbor.position)
-            if (d > 0) and (d < avoid_jelly_dist):
-                diff: Vector2 = self.position - neighbor.position
+            direct_d: float = self.position.distance_to(neighbor.position)
+            wrap_vec: Vector2 = Vector2(world_width, 0) if neighbor.position.x < (world_width / 2) else Vector2(
+                -world_width, 0)
+            wrap_d: float = self.position.distance_to(neighbor.position + wrap_vec)
+            d = min(direct_d, wrap_d)
+            if 0 < d < avoid_jelly_dist:
+                diff: Vector2 = self.position - neighbor.position if d == direct_d else self.position - (neighbor.position + wrap_vec)
                 diff.normalize_ip()
                 diff /= d
                 sum_avoid_jelly += diff
-                count_a_j += 1
-        if count_a_j > 0:
+                count_avoid += 1
+        if count_avoid > 0:
             self.target(sum_avoid_jelly, avoid_jelly_k)
 
+    def run_away_from_fish(self, afraid_neighbors: list[Fish], world_width: float) -> None:
         # Afraid of red fish
-        afraid_fish_range: float = 256.0
-        afraid_fish_k: float = 1.5
+        scared_range: float = 192.0
+        fear_k: float = 3.0
         sum_avoid_fish: Vector2 = Vector2(0.0, 0.0)
-        count_a_f: int = 0
+        count: int = 0
         for neighbor in afraid_neighbors:
-            d: float = self.position.distance_to(neighbor.position)
-            if (d > 0) and (d < afraid_fish_range):
-                diff: Vector2 = self.position - neighbor.position
+            direct_d: float = self.position.distance_to(neighbor.position)
+            wrap_vec: Vector2 = Vector2(world_width, 0) if neighbor.position.x < (world_width / 2) else Vector2(
+                -world_width, 0)
+            wrap_d: float = self.position.distance_to(neighbor.position + wrap_vec)
+            d = min(direct_d, wrap_d)
+            if 0 < d < scared_range:
+                diff: Vector2 = self.position - neighbor.position if d == direct_d else self.position - (neighbor.position + wrap_vec)
                 diff.normalize_ip()
                 diff /= d
                 sum_avoid_fish += diff
-                count_a_f += 1
-        if count_a_f > 0:
-            self.target(sum_avoid_fish, afraid_fish_k)
-
+                count += 1
+        if count > 0:
+            self.target(sum_avoid_fish, fear_k)

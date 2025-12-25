@@ -31,6 +31,7 @@ class SpatialPartitioningModel:
         player: Player,
     ):
         self.world_width: float = world_width
+        self.world_width_adj: float = self.world_width / 2
         self.world_height: float = world_height
         self.cell_size: float = cell_size
         self.grid_width: int = int(self.world_width / self.cell_size)
@@ -216,7 +217,7 @@ class SpatialPartitioningModel:
 
         # Avoid jelly neighbors
         neighbor_range: int = 1
-        scared_range: int = 3
+        scared_range: int = 2
         for jellyfish in self.jellyfish.values():
             neighbor_jellies: list[Jellyfish] = []
             r: int = int(jellyfish.position.y / self.cell_size)
@@ -241,7 +242,7 @@ class SpatialPartitioningModel:
                     for fish in self.grid_space[grid_r][grid_c].fish.values():
                         if self.schools[fish.school_id].fish_settings.fish_type == FishType.RED:
                             afraid_of_fish.append(fish)
-            jellyfish.update_acceleration(self.player.position, neighbor_jellies, afraid_of_fish)
+            jellyfish.update_acceleration(self.player.position, neighbor_jellies, afraid_of_fish, self.world_width)
 
         # Move all the jellyfish: this should only be done after all accelerations have been applied to them for the current frame
         for jellyfish in self.jellyfish.values():
