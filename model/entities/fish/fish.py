@@ -32,13 +32,13 @@ class Fish(GameEntity):
         )
 
     def make_schooling_decisions(
-        self, others: list["Fish"], school_params: SchoolParameters
+        self, others: list["Fish"], school_params: SchoolParameters, world_width: float
     ) -> None:
-        self._school(others, school_params)
+        self._school(others, school_params, world_width)
         if school_params.shoal_location is not None:
-            self._shoal(school_params)
+            self._shoal(school_params, world_width)
 
-    def _school(self, others: list["Fish"], school_params: SchoolParameters) -> None:
+    def _school(self, others: list["Fish"], school_params: SchoolParameters, world_width: float) -> None:
         """
         Applies acceleration to this fish according to three rules for schooling\n
         #. Each fish moves away from other fish that are within its avoidance range.\n
@@ -53,15 +53,21 @@ class Fish(GameEntity):
         count_n: int = 0
         count_s: int = 0
         for other in others:
-            if self.school_id == other.school_id:
-                # TODO add check to make sure not to check this entity against itself
-                d: float = self.position.distance_to(other.position)
-                if (d > 0) and d < school_params.cohere_distance:
+            if self.school_id == other.school_id and self.uuid != other.uuid:
+                direct_d: float = self.position.distance_to(other.position)
+                wrap_pos: Vector2 = other.position + Vector2(world_width, 0) if other.position.x < (world_width / 2) else other.position - Vector2(world_width, 0)
+                wrap_d: float = self.position.distance_to(wrap_pos)
+                other_pos = other.position
+                d = direct_d
+                if wrap_d < direct_d:
+                    other_pos = wrap_pos
+                    d = wrap_d
+                if 0 < d < school_params.cohere_distance:
                     sum_align += other.velocity
-                    sum_cohere += other.position
+                    sum_cohere += other_pos
                     count_n += 1
-                if (d > 0) and (d < school_params.avoid_distance):
-                    diff: Vector2 = self.position - other.position
+                if 0 < d < school_params.avoid_distance:
+                    diff: Vector2 = self.position - other_pos
                     diff.normalize_ip()
                     diff /= d
                     sum_avoid += diff
@@ -74,9 +80,17 @@ class Fish(GameEntity):
             sum_cohere -= self.position
             self.target(sum_cohere, school_params.cohere_k)
 
-    def _shoal(self, school_params: SchoolParameters) -> None:
-        diff = school_params.shoal_location - self.position
-        d = self.position.distance_to(school_params.shoal_location)
+    def _shoal(self, school_params: SchoolParameters, world_width: float) -> None:
+        direct_d: float = self.position.distance_to(school_params.shoal_location)
+        wrap_shoal_pos: Vector2 = school_params.shoal_location + Vector2(world_width, 0) if school_params.shoal_location.x < (
+                    world_width / 2) else school_params.shoal_location - Vector2(world_width, 0)
+        wrap_d: float = self.position.distance_to(wrap_shoal_pos)
+        d: float = direct_d
+        shoal_pos: Vector2 = school_params.shoal_location
+        if wrap_d < direct_d:
+            d = wrap_d
+            shoal_pos = wrap_shoal_pos
+        diff = shoal_pos - self.position
         if d > school_params.shoal_radius:
             self.target(diff, school_params.shoal_k)
         else:

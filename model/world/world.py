@@ -162,7 +162,7 @@ class SpatialPartitioningModel:
                 grid_c: int = c + dc
                 grid_c = (grid_c + self.grid_width) % self.grid_width
                 neighbors.extend(self.grid_space[grid_r][grid_c].fish.values())
-        current_fish.make_schooling_decisions(neighbors, school.school_params)
+        current_fish.make_schooling_decisions(neighbors, school.school_params, self.world_width)
 
     ##############################
     ##### Jellyfish functions ####

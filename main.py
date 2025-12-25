@@ -113,7 +113,13 @@ for _ in range(num_yellow_schools):
     game_controller.add_school(yellow_school)
 
 
-num_green_schools = 4
+num_green_schools = 1
+random_green_shoal = get_random_shoal_location(
+                game_controller.model.player.camera.width,
+                game_controller.model.player.camera.height,
+                world_height,
+                world_width,
+            )
 for _ in range(num_green_schools):
     green_school = School(
         SchoolParameters(
@@ -123,12 +129,7 @@ for _ in range(num_green_schools):
             1.0,
             1.8,
             1.0,
-            get_random_shoal_location(
-                game_controller.model.player.camera.width,
-                game_controller.model.player.camera.height,
-                world_height,
-                world_width,
-            ),
+            Vector2(64.0, world_height / 2),
             128.0,
             1.0,
             get_random_spawn_region(
