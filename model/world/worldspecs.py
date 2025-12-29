@@ -1,10 +1,5 @@
-class WorldSpecifications:
-    def __init__(
-            self,
-            world_width: float,
-            world_height: float,
-            cell_size: float
-    ):
+class WorldSpecs:
+    def __init__(self, world_width: float, world_height: float, cell_size: float):
         self.world_width = world_width
         self.world_width_adj: float = self.world_width / 2
         self.world_height = world_height

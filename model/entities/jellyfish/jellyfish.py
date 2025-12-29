@@ -20,9 +20,6 @@ class Jellyfish(GameEntity):
         self.health = settings.health
         self.damage = settings.damage
 
-    def update(self) -> None:
-        pass
-
     def update_acceleration(
         self,
         player_position: Vector2,

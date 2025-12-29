@@ -4,8 +4,9 @@ from abc import ABC, abstractmethod
 from pygame import Vector2
 
 from model.entities.gameentity import GameEntity
+from model.player.cameraspecs import CameraSpecs
 from model.world.grid_cell import GridCell
-from model.world.worldspecifications import WorldSpecifications
+from model.world.worldspecs import WorldSpecs
 
 
 class EntityGroup[T: GameEntity](ABC):
@@ -16,7 +17,7 @@ class EntityGroup[T: GameEntity](ABC):
     @abstractmethod
     def update_entities(
         self,
-        world_specs: WorldSpecifications,
+        world_specs: WorldSpecs,
         grid_space: list[list[GridCell]],
         player_position: Vector2 | None = None,
     ) -> None:
@@ -27,7 +28,7 @@ class EntityGroup[T: GameEntity](ABC):
 
     def move_entities(
         self,
-        world_specs: WorldSpecifications,
+        world_specs: WorldSpecs,
         grid_space: list[list[GridCell]],
         dt: float,
     ) -> None:
@@ -56,7 +57,12 @@ class EntityGroup[T: GameEntity](ABC):
                 ] = entity
 
     @abstractmethod
-    def create_entity(self, camera_position: Vector2 | None = None) -> T:
+    def create_entity(
+        self,
+        world_specs: WorldSpecs,
+        camera_specs: CameraSpecs | None = None,
+        camera_position: Vector2 | None = None,
+    ) -> T:
         """
         Factory method to create a new entity that belongs to this group.
         """

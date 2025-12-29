@@ -5,6 +5,7 @@ import pygame
 from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
+from model.player.cameraspecs import CameraSpecs
 from model.utils.vectorutils import limit_magnitude
 
 
@@ -16,8 +17,7 @@ class Player(ABC):
         hitbox_height: float,
         surface_width: float,
         surface_height: float,
-        camera_width: float,
-        camera_height: float,
+        camera_specs: CameraSpecs,
         world_boundary: Tuple[float, float],
         start_pos: Vector2 = Vector2(0.0, 0.0),
         max_speed: float = 1.0,
@@ -26,10 +26,11 @@ class Player(ABC):
         self.position: Vector2 = start_pos
         self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
         self.hitbox.center = (int(self.position.x), int(self.position.y))
-        self.camera: Rect = Rect(0, 0, camera_width, camera_height)
+        self.camera_specs: CameraSpecs = camera_specs
+        self.camera: Rect = Rect(
+            0, 0, self.camera_specs.camera_width, self.camera_specs.camera_height
+        )
         self.camera.center = (int(self.position.x), int(self.position.y))
-        self.camera_w_adjust: float = camera_width / 2
-        self.camera_h_adjust: float = camera_height / 2
         self.world_boundary: Tuple[float, float] = world_boundary
         self.facing_direction: int = 1
         self.max_speed: float = max_speed
@@ -53,11 +54,20 @@ class Player(ABC):
         self.shield_charge_delay: float = 1.0
         self.current_shield_charge_cooldown: float = self.shield_charge_delay
         self.shield_alpha_scaling: int = 10
-        self.shield_surface: Surface = Surface((self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(self.shield_surface,
-                           (255, 255, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)),
-                           self.shield_surface.get_rect().center,
-                           self.shield_radius)
+        self.shield_surface: Surface = Surface(
+            (self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA
+        )
+        pygame.draw.circle(
+            self.shield_surface,
+            (
+                255,
+                255,
+                0,
+                self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling),
+            ),
+            self.shield_surface.get_rect().center,
+            self.shield_radius,
+        )
         self.shield_surface_w_adj: float = self.shield_surface.get_width() / 2
         self.shield_surface_h_adj: float = self.shield_surface.get_height() / 2
         # Fish coherency
@@ -87,7 +97,9 @@ class Player(ABC):
         limit_magnitude(velocity, self.max_speed)
         self.position += velocity * dt
         # Wrap on x axis
-        self.position.x = (self.position.x + self.world_boundary[0]) % self.world_boundary[0]
+        self.position.x = (
+            self.position.x + self.world_boundary[0]
+        ) % self.world_boundary[0]
         # Prevent sprite from leaving world boundary on y-axis
         if self.position.y < self.surface_h_adj:
             self.position.y = self.surface_h_adj
@@ -135,11 +147,20 @@ class Player(ABC):
             self.shield = 0
 
     def update_shield_alpha(self) -> None:
-        self.shield_surface: Surface = Surface((self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(self.shield_surface,
-                           (255, 255, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)),
-                           self.shield_surface.get_rect().center,
-                           self.shield_radius)
+        self.shield_surface: Surface = Surface(
+            (self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA
+        )
+        pygame.draw.circle(
+            self.shield_surface,
+            (
+                255,
+                255,
+                0,
+                self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling),
+            ),
+            self.shield_surface.get_rect().center,
+            self.shield_radius,
+        )
 
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
         return (
@@ -156,7 +177,7 @@ class Player(ABC):
     def get_camera_adjusted_shield_pos(self) -> Tuple[float, float]:
         return (
             self.position.x - self.camera.left - self.shield_surface_w_adj,
-            self.camera.bottom - self.position.y - self.shield_surface_h_adj
+            self.camera.bottom - self.position.y - self.shield_surface_h_adj,
         )
 
     @abstractmethod
@@ -167,8 +188,7 @@ class Player(ABC):
 class Turtle(Player):
     def __init__(
         self,
-        camera_width: float,
-        camera_height: float,
+        camera_specs: CameraSpecs,
         world_boundary: Tuple[float, float],
     ) -> None:
         hitbox_width: float = 100.0
@@ -191,8 +211,7 @@ class Turtle(Player):
             hitbox_height,
             surface_width,
             surface_height,
-            camera_width,
-            camera_height,
+            camera_specs,
             world_boundary,
             Vector2(world_boundary[0] / 2, world_boundary[1] / 2),
             turtle_speed,

@@ -5,10 +5,10 @@ from pygame import Vector2, Rect
 from controller.controller import GameController, ControllerOptions
 from model.entities.fish.fishsettings import FishSettings, FishType
 from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyfishType
-from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
+from model.entities.jellyfish.jellyfishswarm import JellyfishSwarm
 from model.entities.school.school import School
 from model.entities.school.schoolparameters import SchoolParameters
-from model.world.worldspecifications import WorldSpecifications
+from model.world.worldspecs import WorldSpecs
 
 
 ##########################################
@@ -57,7 +57,7 @@ world_height = 5120.0
 cell_size = 128.0
 
 game_controller = GameController(
-    ControllerOptions(WorldSpecifications(world_width, world_height, cell_size))
+    ControllerOptions(WorldSpecs(world_width, world_height, cell_size))
 )
 
 # Create schools of fish and add to the world
@@ -92,8 +92,13 @@ for _ in range(num_red_schools):
     game_controller.add_school(red_school)
 
 num_yellow_schools = 1
-center_spawn_region = Rect(0, 0, game_controller.view.screen_width, game_controller.view.screen_height)
-center_spawn_region.center = (int(game_controller.model.player.position.x), int(game_controller.model.player.position.y))
+center_spawn_region = Rect(
+    0, 0, game_controller.view.screen_width, game_controller.view.screen_height
+)
+center_spawn_region.center = (
+    int(game_controller.model.player.position.x),
+    int(game_controller.model.player.position.y),
+)
 global_spawn_region = Rect(0, 0, world_width, world_height)
 for _ in range(num_yellow_schools):
     yellow_school = School(
@@ -117,11 +122,11 @@ for _ in range(num_yellow_schools):
 
 num_green_schools = 1
 random_green_shoal = get_random_shoal_location(
-                game_controller.model.player.camera.width,
-                game_controller.model.player.camera.height,
-                world_height,
-                world_width,
-            )
+    game_controller.model.player.camera.width,
+    game_controller.model.player.camera.height,
+    world_height,
+    world_width,
+)
 for _ in range(num_green_schools):
     green_school = School(
         SchoolParameters(
@@ -143,7 +148,7 @@ for _ in range(num_green_schools):
     )
     game_controller.add_school(green_school)
 
-jellyfish_spawner = JellyfishSpawner(
+jellyfish_spawner = JellyfishSwarm(
     JellyfishSettings(
         JellyfishType.RED,
         96.0,
@@ -153,9 +158,9 @@ jellyfish_spawner = JellyfishSpawner(
         128.0,
         90,
         100,
-        10
+        10,
     ),
-    1
+    1,
 )
 game_controller.set_jellyfish_spawner(jellyfish_spawner)
 

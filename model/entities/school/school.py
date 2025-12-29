@@ -8,9 +8,10 @@ from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType, FishSettings
 from model.entities.gameentity import GameEntity
 from model.entities.school.schoolparameters import SchoolParameters
+from model.player.cameraspecs import CameraSpecs
 from model.utils.vectorutils import limit_magnitude
 from model.world.grid_cell import GridCell
-from model.world.worldspecifications import WorldSpecifications
+from model.world.worldspecs import WorldSpecs
 
 
 class School(EntityGroup[Fish]):
@@ -29,7 +30,7 @@ class School(EntityGroup[Fish]):
 
     def update_entities(
         self,
-        world_specs: WorldSpecifications,
+        world_specs: WorldSpecs,
         grid_space: list[list[GridCell]],
         player_position: Vector2 | None = None,
     ) -> None:
@@ -54,7 +55,12 @@ class School(EntityGroup[Fish]):
                 world_specs.world_height,
             )
 
-    def create_entity(self, camera_position: Vector2 | None = None) -> GameEntity:
+    def create_entity(
+        self,
+        world_specs: WorldSpecs,
+        camera_specs: CameraSpecs | None = None,
+        camera_position: Vector2 | None = None,
+    ) -> GameEntity:
         return self.hatch_fish()
 
     def load_fish_sprite(self) -> Surface:
