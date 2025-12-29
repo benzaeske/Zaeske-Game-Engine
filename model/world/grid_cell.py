@@ -3,6 +3,7 @@ from uuid import UUID
 import pygame
 from pygame import Surface, Vector2
 
+from model.entities.entitygroup import EntityGroup
 from model.entities.fish.fish import Fish
 from model.entities.jellyfish.jellyfish import Jellyfish
 
@@ -24,6 +25,7 @@ class GridCell:
         self.size: float = size
         self.fish: dict[UUID, Fish] = {}
         self.jellyfish: dict[UUID, Jellyfish] = {}
+        self.entity_groups: dict[UUID, EntityGroup] = {}
         if background_surface is None:
             self.background_surface: Surface = pygame.Surface((size, size))
         else:
