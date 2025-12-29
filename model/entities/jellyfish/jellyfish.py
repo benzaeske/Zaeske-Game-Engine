@@ -20,6 +20,9 @@ class Jellyfish(GameEntity):
         self.health = settings.health
         self.damage = settings.damage
 
+    def update(self) -> None:
+        pass
+
     def update_acceleration(self, player_position: Vector2, neighbors: list[Jellyfish], afraid_neighbors: list[Fish], world_width: float):
         self.move_towards_player(player_position, world_width)
         self.avoid_close_neighbors(neighbors, world_width)

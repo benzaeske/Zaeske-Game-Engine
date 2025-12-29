@@ -1,12 +1,12 @@
 import copy
 import random
-from typing import Tuple
 from uuid import UUID
 
 import pygame
 from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
+from model.entities.entitygroup import EntityGroup
 from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType
 from model.entities.gameentity import GameEntity
@@ -15,6 +15,7 @@ from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
 from model.entities.school.school import School
 from model.player.player import Player
 from model.world.grid_cell import GridCell
+from model.world.worldspecifications import WorldSpecifications
 
 
 class SpatialPartitioningModel:
@@ -26,17 +27,10 @@ class SpatialPartitioningModel:
 
     def __init__(
         self,
-        world_width: float,
-        world_height: float,
-        cell_size: float,
+        world_specifications: WorldSpecifications,
         player: Player,
     ):
-        self.world_width: float = world_width
-        self.world_width_adj: float = self.world_width / 2
-        self.world_height: float = world_height
-        self.cell_size: float = cell_size
-        self.grid_width: int = int(self.world_width / self.cell_size)
-        self.grid_height: int = int(self.world_height / self.cell_size)
+        self.world_specifications: WorldSpecifications = world_specifications
         self.player: Player = player
         self.schools: dict[UUID, School] = {}
         self.jellyfish_spawner: JellyfishSpawner | None = None
@@ -44,25 +38,27 @@ class SpatialPartitioningModel:
         self.jelly_spawner_timer: float = 0.0
         self.grid_space: list[list[GridCell]] = self.initialize_grid_space()
 
-        # rework
         self.fish: dict[UUID, Fish] = {}
         self.jellyfish: dict[UUID, Jellyfish] = {}
 
+        self.entity_groups: dict[UUID, EntityGroup] = {}
+
     def initialize_grid_space(self) -> list[list[GridCell]]:
         grid_space: list[list[GridCell]] = []
-        for row in range(self.grid_height):
+        for row in range(self.world_specifications.grid_height):
             grid_space.append([])
-            for col in range(self.grid_width):
-                background: Surface = pygame.Surface((self.cell_size, self.cell_size))
+            for col in range(self.world_specifications.grid_width):
+                background: Surface = pygame.Surface((self.world_specifications.cell_size, self.world_specifications.cell_size))
                 noise: int = random.randint(0, 25)
-                if col == 0:
-                    background.fill((0, 0, 0))
-                elif row == 0:
+                if row == 0:
                     background.fill((99, 85, 52))
                 else:
                     background.fill((0, 50 + noise, 115 + noise * 2))
-                grid_space[row].append(GridCell(self.cell_size, row, col, background))
+                grid_space[row].append(GridCell(self.world_specifications.cell_size, row, col, background))
         return grid_space
+
+    def add_entity_group(self, entity_group: EntityGroup) -> None:
+        self.entity_groups[entity_group.group_id] = entity_group
 
     def hatch_schools(self):
         for school in self.schools.values():
@@ -81,8 +77,8 @@ class SpatialPartitioningModel:
         self.process_player_jelly_collisions(dt)
 
     def process_player_fish_coherency(self, dt: float) -> None:
-        r: int = int(self.player.position.y / self.cell_size)
-        c: int = int(self.player.position.x / self.cell_size)
+        r: int = int(self.player.position.y / self.world_specifications.cell_size)
+        c: int = int(self.player.position.x / self.world_specifications.cell_size)
         cohere_red: int = 0
         cohere_green: int = 0
         cohere_yellow: int = 0
@@ -106,17 +102,17 @@ class SpatialPartitioningModel:
     def process_player_jelly_collisions(self, dt: float) -> None:
         cell_range: int = 1
         # Only process collisions for jellies that are within a cell range that can actually reach the player
-        r: int = int(self.player.position.y / self.cell_size)
-        c: int = int(self.player.position.x / self.cell_size)
+        r: int = int(self.player.position.y / self.world_specifications.cell_size)
+        c: int = int(self.player.position.x / self.world_specifications.cell_size)
         for dr in range(-cell_range, cell_range + 1):
             for dc in range(-cell_range, cell_range + 1):
                 grid_r: int = r + dr
-                grid_r = (grid_r + self.grid_height) % self.grid_height
+                grid_r = (grid_r + self.world_specifications.grid_height) % self.world_specifications.grid_height
                 virtual_grid_c: int = c + dc
-                grid_c: int = (virtual_grid_c + self.grid_width) % self.grid_width
+                grid_c: int = (virtual_grid_c + self.world_specifications.grid_width) % self.world_specifications.grid_width
                 for jelly in self.grid_space[grid_r][grid_c].jellyfish.values():
                     jelly_hitbox: Rect = jelly.hitbox
-                    if virtual_grid_c < 0 or virtual_grid_c >= self.grid_width:
+                    if virtual_grid_c < 0 or virtual_grid_c >= self.world_specifications.grid_width:
                         jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
                     if jelly_hitbox.colliderect(self.player.hitbox):
                         self.player.health -= (jelly.damage * dt)
@@ -130,8 +126,8 @@ class SpatialPartitioningModel:
 
     def spawn_fish_in_grid_space(self, new_fish: Fish) -> None:
         self.fish[new_fish.uuid] = new_fish
-        self.grid_space[int(new_fish.position.y / self.cell_size)][
-            int(new_fish.position.x / self.cell_size)
+        self.grid_space[int(new_fish.position.y / self.world_specifications.cell_size)][
+            int(new_fish.position.x / self.world_specifications.cell_size)
         ].fish[new_fish.uuid] = new_fish
 
     def update_fish(self, dt: float):
@@ -140,12 +136,12 @@ class SpatialPartitioningModel:
             self.find_neighbors_and_make_schooling_decisions(current_fish)
         # Move all the fish: this should only be done after all schooling decisions have been made for the current frame
         for current_fish in self.fish.values():
-            old_r = int(current_fish.position.y / self.cell_size)
-            old_c = int(current_fish.position.x / self.cell_size)
-            current_fish.update_position(self.world_width, self.world_height, dt)
+            old_r = int(current_fish.position.y / self.world_specifications.cell_size)
+            old_c = int(current_fish.position.x / self.world_specifications.cell_size)
+            current_fish.update_position(self.world_specifications.world_width, self.world_specifications.world_height, dt)
             # Check if we are in a new grid cell after moving
-            new_r = int(current_fish.position.y / self.cell_size)
-            new_c = int(current_fish.position.x / self.cell_size)
+            new_r = int(current_fish.position.y / self.world_specifications.cell_size)
+            new_c = int(current_fish.position.x / self.world_specifications.cell_size)
             if new_r != old_r or new_c != old_c:
                 del self.grid_space[old_r][old_c].fish[current_fish.uuid]
                 self.grid_space[new_r][new_c].fish[current_fish.uuid] = current_fish
@@ -157,16 +153,16 @@ class SpatialPartitioningModel:
         school: School = self.schools[current_fish.school_id]
         cell_range: int = school.school_params.interaction_cell_range
         neighbors: list[Fish] = []
-        r: int = int(current_fish.position.y / self.cell_size)
-        c: int = int(current_fish.position.x / self.cell_size)
+        r: int = int(current_fish.position.y / self.world_specifications.cell_size)
+        c: int = int(current_fish.position.x / self.world_specifications.cell_size)
         for dr in range(-cell_range, cell_range + 1):
             for dc in range(-cell_range, cell_range + 1):
                 grid_r: int = r + dr
-                grid_r = (grid_r + self.grid_height) % self.grid_height
+                grid_r = (grid_r + self.world_specifications.grid_height) % self.world_specifications.grid_height
                 grid_c: int = c + dc
-                grid_c = (grid_c + self.grid_width) % self.grid_width
+                grid_c = (grid_c + self.world_specifications.grid_width) % self.world_specifications.grid_width
                 neighbors.extend(self.grid_space[grid_r][grid_c].fish.values())
-        current_fish.make_schooling_decisions(neighbors, school.school_params, self.world_width)
+        current_fish.make_schooling_decisions(neighbors, school.school_params, self.world_specifications.world_width, self.world_specifications.world_height)
 
     ##############################
     ##### Jellyfish functions ####
@@ -184,12 +180,12 @@ class SpatialPartitioningModel:
                     self.player.position,
                     self.player.camera_w_adjust,
                     self.player.camera_h_adjust,
-                    self.world_width,
-                    self.world_height
+                    self.world_specifications.world_width,
+                    self.world_specifications.world_height
                 )
                 self.jellyfish[new_jelly.uuid] = new_jelly
-                self.grid_space[int(new_jelly.position.y / self.cell_size)][
-                    int(new_jelly.position.x / self.cell_size)
+                self.grid_space[int(new_jelly.position.y / self.world_specifications.cell_size)][
+                    int(new_jelly.position.x / self.world_specifications.cell_size)
                 ].jellyfish[new_jelly.uuid] = new_jelly
             # reset jelly spawn timer
             self.jelly_spawner_timer = self.jelly_spawner_delay
@@ -198,27 +194,27 @@ class SpatialPartitioningModel:
     def get_virtual_wrapped_hitbox(self, game_entity: GameEntity, virtual_grid_r: int) -> Rect:
         virtual_hitbox: Rect = copy.deepcopy(game_entity.hitbox)
         if virtual_grid_r < 0:
-            virtual_hitbox.center = (int(game_entity.position.x - self.world_width), int(game_entity.position.y))
-        elif virtual_grid_r >= self.grid_width:
-            virtual_hitbox.center = (int(game_entity.position.x + self.world_width), int(game_entity.position.y))
+            virtual_hitbox.center = (int(game_entity.position.x - self.world_specifications.world_width), int(game_entity.position.y))
+        elif virtual_grid_r >= self.world_specifications.grid_width:
+            virtual_hitbox.center = (int(game_entity.position.x + self.world_specifications.world_width), int(game_entity.position.y))
         return virtual_hitbox
 
     def update_jellyfish(self, dt: float):
         if self.player.shield > 0:
             shield_cell_range: int = 2
             # Only process shield collisions for jellies that are within a cell range that can actually reach the player shield
-            r: int = int(self.player.position.y / self.cell_size)
-            c: int = int(self.player.position.x / self.cell_size)
+            r: int = int(self.player.position.y / self.world_specifications.cell_size)
+            c: int = int(self.player.position.x / self.world_specifications.cell_size)
             for dr in range(-shield_cell_range, shield_cell_range + 1):
                 for dc in range(-shield_cell_range, shield_cell_range + 1):
                     grid_r: int = r + dr
-                    grid_r = (grid_r + self.grid_height) % self.grid_height
+                    grid_r = (grid_r + self.world_specifications.grid_height) % self.world_specifications.grid_height
                     virtual_grid_c: int = c + dc
-                    grid_c: int = (virtual_grid_c + self.grid_width) % self.grid_width
+                    grid_c: int = (virtual_grid_c + self.world_specifications.grid_width) % self.world_specifications.grid_width
                     for jelly_id in list(self.grid_space[grid_r][grid_c].jellyfish.keys()):
                         jelly = self.grid_space[grid_r][grid_c].jellyfish[jelly_id]
                         jelly_hitbox: Rect = jelly.hitbox
-                        if virtual_grid_c < 0 or virtual_grid_c >= self.grid_width:
+                        if virtual_grid_c < 0 or virtual_grid_c >= self.world_specifications.grid_width:
                             jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
                         # find the closest point on the jelly's hitbox to the player's circular shield
                         closest_point: Vector2 = Vector2(
@@ -234,39 +230,39 @@ class SpatialPartitioningModel:
         scared_range: int = 2
         for jellyfish in self.jellyfish.values():
             neighbor_jellies: list[Jellyfish] = []
-            r: int = int(jellyfish.position.y / self.cell_size)
-            c: int = int(jellyfish.position.x / self.cell_size)
+            r: int = int(jellyfish.position.y / self.world_specifications.cell_size)
+            c: int = int(jellyfish.position.x / self.world_specifications.cell_size)
             for dr in range(-neighbor_range, neighbor_range + 1):
                 for dc in range(-neighbor_range, neighbor_range + 1):
                     grid_r: int = r + dr
-                    grid_r = (grid_r + self.grid_height) % self.grid_height
+                    grid_r = (grid_r + self.world_specifications.grid_height) % self.world_specifications.grid_height
                     grid_c: int = c + dc
-                    grid_c = (grid_c + self.grid_width) % self.grid_width
+                    grid_c = (grid_c + self.world_specifications.grid_width) % self.world_specifications.grid_width
                     neighbor_jellies.extend(self.grid_space[grid_r][grid_c].jellyfish.values())
 
             afraid_of_fish: list[Fish] = []
-            r: int = int(jellyfish.position.y / self.cell_size)
-            c: int = int(jellyfish.position.x / self.cell_size)
+            r: int = int(jellyfish.position.y / self.world_specifications.cell_size)
+            c: int = int(jellyfish.position.x / self.world_specifications.cell_size)
             for dr in range(-scared_range, scared_range + 1):
                 for dc in range(-scared_range, scared_range + 1):
                     grid_r: int = r + dr
-                    grid_r = (grid_r + self.grid_height) % self.grid_height
+                    grid_r = (grid_r + self.world_specifications.grid_height) % self.world_specifications.grid_height
                     grid_c: int = c + dc
-                    grid_c = (grid_c + self.grid_width) % self.grid_width
+                    grid_c = (grid_c + self.world_specifications.grid_width) % self.world_specifications.grid_width
                     for fish in self.grid_space[grid_r][grid_c].fish.values():
                         if self.schools[fish.school_id].fish_settings.fish_type == FishType.RED:
                             afraid_of_fish.append(fish)
 
-            jellyfish.update_acceleration(self.player.position, neighbor_jellies, afraid_of_fish, self.world_width)
+            jellyfish.update_acceleration(self.player.position, neighbor_jellies, afraid_of_fish, self.world_specifications.world_width)
 
         # Move all the jellyfish: this should only be done after all accelerations have been applied to them for the current frame
         for jellyfish in self.jellyfish.values():
-            old_r = int(jellyfish.position.y / self.cell_size)
-            old_c = int(jellyfish.position.x / self.cell_size)
-            jellyfish.update_position(self.world_width, self.world_height, dt)
+            old_r = int(jellyfish.position.y / self.world_specifications.cell_size)
+            old_c = int(jellyfish.position.x / self.world_specifications.cell_size)
+            jellyfish.update_position(self.world_specifications.world_width, self.world_specifications.world_height, dt)
             # Check if we are in a new grid cell after moving
-            new_r = int(jellyfish.position.y / self.cell_size)
-            new_c = int(jellyfish.position.x / self.cell_size)
+            new_r = int(jellyfish.position.y / self.world_specifications.cell_size)
+            new_c = int(jellyfish.position.x / self.world_specifications.cell_size)
             if new_r != old_r or new_c != old_c:
                 del self.grid_space[old_r][old_c].jellyfish[jellyfish.uuid]
                 self.grid_space[new_r][new_c].jellyfish[jellyfish.uuid] = jellyfish

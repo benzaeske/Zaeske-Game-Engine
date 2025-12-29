@@ -8,6 +8,7 @@ from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, Jellyf
 from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
 from model.entities.school.school import School
 from model.entities.school.schoolparameters import SchoolParameters
+from model.world.worldspecifications import WorldSpecifications
 
 
 ##########################################
@@ -56,7 +57,7 @@ world_height = 5120.0
 cell_size = 128.0
 
 game_controller = GameController(
-    ControllerOptions(world_width, world_height, cell_size)
+    ControllerOptions(WorldSpecifications(world_width, world_height, cell_size))
 )
 
 # Create schools of fish and add to the world
@@ -86,7 +87,7 @@ for _ in range(num_red_schools):
             ),
             16,
         ),
-        FishSettings(FishType.RED, 32.0, 32.0, 175.0, 0.5),
+        FishSettings(FishType.RED, 32.0, 32.0, 175.0, 30.0),
     )
     game_controller.add_school(red_school)
 
@@ -109,7 +110,7 @@ for _ in range(num_yellow_schools):
             center_spawn_region,
             175,
         ),
-        FishSettings(FishType.YELLOW, 30.0, 30.0, 300.0, 0.8),
+        FishSettings(FishType.YELLOW, 30.0, 30.0, 300.0, 48),
     )
     game_controller.add_school(yellow_school)
 
@@ -130,7 +131,7 @@ for _ in range(num_green_schools):
             1.0,
             1.8,
             1.0,
-            Vector2(2.0, world_height / 2),
+            Vector2(world_width / 2, 256.0),
             128.0,
             1.0,
             get_random_spawn_region(
@@ -138,7 +139,7 @@ for _ in range(num_green_schools):
             ),
             32,
         ),
-        FishSettings(FishType.GREEN, 48.0, 48.0, 125.0, 0.4),
+        FishSettings(FishType.GREEN, 48.0, 48.0, 125.0, 24),
     )
     game_controller.add_school(green_school)
 
@@ -150,7 +151,7 @@ jellyfish_spawner = JellyfishSpawner(
         Vector2(0.0, 0.0),
         Vector2(0.0, 0.0),
         128.0,
-        1.5,
+        90,
         100,
         10
     ),

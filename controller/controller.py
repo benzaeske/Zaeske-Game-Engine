@@ -3,36 +3,26 @@ import time
 from typing import Tuple
 
 import pygame
-from pygame import Vector2, Surface, Rect
+from pygame import Vector2
 from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.gameentity import GameEntity
 from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
 from model.entities.school.school import School
 from model.player.player import Turtle
 from model.world.grid_cell import GridCell
 from model.world.world import SpatialPartitioningModel
+from model.world.worldspecifications import WorldSpecifications
 from view.view import View
 
 
 class ControllerOptions:
-    """
-    :param world_width: The size of the world model. This must be divisible by the grid cell size
-    :param world_height: The size of the world model. This must be divisible by the grid cell size
-    :param grid_cell_size: The map will be divided into grids of this size. In order for schooling to work properly, this must be at least as large as the smallest coherence radius of the fish being
-    """
-
     def __init__(
         self,
-        world_width: float,
-        world_height: float,
-        grid_cell_size: float,
+        world_specifications: WorldSpecifications,
     ) -> None:
-        self.world_width: float = world_width
-        self.world_height: float = world_height
-        self.grid_cell_size: float = grid_cell_size
+        self.world_specifications: WorldSpecifications = world_specifications
 
 
 class GameController:
@@ -51,13 +41,11 @@ class GameController:
         pygame.init()
         self.view: View = View()
         self.model: SpatialPartitioningModel = SpatialPartitioningModel(
-            options.world_width,
-            options.world_height,
-            options.grid_cell_size,
+            options.world_specifications,
             Turtle(
                 self.view.screen_width,
                 self.view.screen_height,
-                (options.world_width, options.world_height),
+                (options.world_specifications.world_width, options.world_specifications.world_height),
             ),
         )
         self.clock: Clock = pygame.time.Clock()
@@ -118,18 +106,18 @@ class GameController:
 
     def draw_background(self) -> None:
         # Loop over grid cells within camera range.
-        left: int = int(self.model.player.camera.left // self.model.cell_size)
-        right: int = int(self.model.player.camera.right // self.model.cell_size)
-        bottom: int = int(self.model.player.camera.top // self.model.cell_size)
-        top: int = int(self.model.player.camera.bottom // self.model.cell_size)
+        left: int = int(self.model.player.camera.left // self.model.world_specifications.cell_size)
+        right: int = int(self.model.player.camera.right // self.model.world_specifications.cell_size)
+        bottom: int = int(self.model.player.camera.top // self.model.world_specifications.cell_size)
+        top: int = int(self.model.player.camera.bottom // self.model.world_specifications.cell_size)
         for row in range(bottom, top + 1):
             for col in range(left, right + 1):
                 # If the column overflows, wrap around to other side of the map
                 grid_r = row
-                grid_c = (col + self.model.grid_width) % self.model.grid_width
+                grid_c = (col + self.model.world_specifications.grid_width) % self.model.world_specifications.grid_width
                 # Convert top left of row, col to coords on the world map
-                x = col * self.model.cell_size
-                y = (row + 1) * self.model.cell_size
+                x = col * self.model.world_specifications.cell_size
+                y = (row + 1) * self.model.world_specifications.cell_size
                 # Adjust world map coords to screen relative coords
                 x = x - self.model.player.camera.left
                 y = self.model.player.camera.bottom - y
@@ -144,20 +132,20 @@ class GameController:
 
     def draw_game_entities(self) -> None:
         # Loop over grid cells within camera range.
-        left: int = int(self.model.player.camera.left // self.model.cell_size)
-        right: int = int(self.model.player.camera.right // self.model.cell_size)
-        bottom: int = int(self.model.player.camera.top // self.model.cell_size)
-        top: int = int(self.model.player.camera.bottom // self.model.cell_size)
+        left: int = int(self.model.player.camera.left // self.model.world_specifications.cell_size)
+        right: int = int(self.model.player.camera.right // self.model.world_specifications.cell_size)
+        bottom: int = int(self.model.player.camera.top // self.model.world_specifications.cell_size)
+        top: int = int(self.model.player.camera.bottom // self.model.world_specifications.cell_size)
         for row in range(bottom, top + 1):
             for col in range(left, right + 1):
                 # Wrap the grid col around the map if it extends over the edge
-                wrapped_col = (col + self.model.grid_width) % self.model.grid_width
+                wrapped_col = (col + self.model.world_specifications.grid_width) % self.model.world_specifications.grid_width
                 # Adjust the entities position if it is wrapping
                 entity_adj: Vector2 = Vector2(0, 0)
                 if col < 0:
-                    entity_adj = Vector2(-self.model.world_width, 0)
-                if col >= self.model.grid_width:
-                    entity_adj = Vector2(self.model.world_width, 0)
+                    entity_adj = Vector2(-self.model.world_specifications.world_width, 0)
+                if col >= self.model.world_specifications.grid_width:
+                    entity_adj = Vector2(self.model.world_specifications.world_width, 0)
                 # Get the grid cell that holds the entities we need to draw
                 grid_cell: GridCell = self.model.grid_space[row][wrapped_col]
                 for fish in grid_cell.fish.values():

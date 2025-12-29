@@ -5,13 +5,15 @@ from uuid import UUID
 import pygame.image
 from pygame import Vector2, Surface
 
+from model.entities.entitygroup import EntityGroup
 from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType, FishSettings
+from model.entities.gameentity import GameEntity
 from model.entities.school.schoolparameters import SchoolParameters
 from model.utils.vectorutils import limit_magnitude
 
 
-class School:
+class School(EntityGroup):
     """
     Represents a school of fish. Responsible for creating Fish entities with the given settings passed to it. \n
     All fish created by a school share its school_id
@@ -44,6 +46,14 @@ class School:
                 return pygame.transform.scale(
                     surface, (self.fish_settings.width, self.fish_settings.height)
                 )
+
+    def update_entities(self, world_width: float | None = None, world_height: float | None = None,
+                        player_position: Vector2 | None = None) -> None:
+        for fish in self.entities.values():
+            pass
+
+    def create_entity(self, camera_position: Vector2 | None = None) -> GameEntity:
+        return self.hatch_fish()
 
     def hatch_fish(self) -> Fish:
         hatch_region = self.school_params.hatch_region

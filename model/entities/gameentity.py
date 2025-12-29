@@ -1,5 +1,4 @@
 import uuid
-from typing import Tuple
 
 from pygame import Surface, Vector2, Rect
 
@@ -36,15 +35,18 @@ class GameEntity:
 
     def update_position(self, world_w: float, world_h: float, dt: float) -> None:
         """
-        Updates entities for a single frame.\n
-        All coordinates are assumed to represent the center of entities and have an inverted y-axis\n
+        Updates this entity's position for a single frame by applying acceleration to the entity's current velocity,
+        then applying the updated velocity scaled to delta time (dt) to the entity's position.\n
         By default, an entity's acceleration is set back to 0 after its position is updated
         """
-        self.velocity += self.acceleration
+        self.velocity += (self.acceleration * dt)
         limit_magnitude(self.velocity, self.max_speed)
         self.position += self.velocity * dt
         self.position.x = (self.position.x + world_w) % world_w
-        self.position.y = (self.position.y + world_h) % world_h
+        if self.position.y < 0:
+            self.position.y = 0
+        if self.position.y >= world_h:
+            self.position.y = world_h - 1
         self.acceleration *= 0.0
         self.hitbox.center = (int(self.position.x), int(self.position.y))
 

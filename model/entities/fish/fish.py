@@ -32,12 +32,20 @@ class Fish(GameEntity):
             fish_settings.max_acceleration,
         )
 
+    def update(self) -> None:
+        pass
+
     def make_schooling_decisions(
-        self, others: list["Fish"], school_params: SchoolParameters, world_width: float
+        self, others: list["Fish"], school_params: SchoolParameters, world_width: float, world_height: float
     ) -> None:
         self._school(others, school_params, world_width)
         if school_params.shoal_location is not None:
             self._shoal(school_params, world_width)
+        avoid_edge_dist: float = 128.0
+        if self.position.y < avoid_edge_dist and self.velocity.y < 0:
+            self.acceleration.y += (self.max_speed / 2)
+        if self.position.y > world_height - avoid_edge_dist and self.velocity.y > 0:
+            self.acceleration.y -= (self.max_speed / 2)
 
     def _school(self, others: list["Fish"], school_params: SchoolParameters, world_width: float) -> None:
         """
