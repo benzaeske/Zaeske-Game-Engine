@@ -62,7 +62,7 @@ class GameController:
 
     def start_game(self):
         self.game_start = time.time()
-        self.model.hatch_schools()
+        self.model.hatch_schools_old()
         while True:
             self.do_game_loop()
 
@@ -102,32 +102,32 @@ class GameController:
                     self.paused = not self.paused
 
     def update_model(self) -> None:
-        self.model.update_model(self.dt, self.key_presses)
+        self.model.update_model_old(self.dt, self.key_presses)
 
     def draw_background(self) -> None:
         # Loop over grid cells within camera range.
         left: int = int(
-            self.model.player.camera.left // self.model.world_specifications.cell_size
+            self.model.player.camera.left // self.model.world_specs.cell_size
         )
         right: int = int(
-            self.model.player.camera.right // self.model.world_specifications.cell_size
+            self.model.player.camera.right // self.model.world_specs.cell_size
         )
         bottom: int = int(
-            self.model.player.camera.top // self.model.world_specifications.cell_size
+            self.model.player.camera.top // self.model.world_specs.cell_size
         )
         top: int = int(
-            self.model.player.camera.bottom // self.model.world_specifications.cell_size
+            self.model.player.camera.bottom // self.model.world_specs.cell_size
         )
         for row in range(bottom, top + 1):
             for col in range(left, right + 1):
                 # If the column overflows, wrap around to other side of the map
                 grid_r = row
                 grid_c = (
-                    col + self.model.world_specifications.grid_width
-                ) % self.model.world_specifications.grid_width
+                    col + self.model.world_specs.grid_width
+                ) % self.model.world_specs.grid_width
                 # Convert top left of row, col to coords on the world map
-                x = col * self.model.world_specifications.cell_size
-                y = (row + 1) * self.model.world_specifications.cell_size
+                x = col * self.model.world_specs.cell_size
+                y = (row + 1) * self.model.world_specs.cell_size
                 # Adjust world map coords to screen relative coords
                 x = x - self.model.player.camera.left
                 y = self.model.player.camera.bottom - y
@@ -145,31 +145,31 @@ class GameController:
     def draw_game_entities(self) -> None:
         # Loop over grid cells within camera range.
         left: int = int(
-            self.model.player.camera.left // self.model.world_specifications.cell_size
+            self.model.player.camera.left // self.model.world_specs.cell_size
         )
         right: int = int(
-            self.model.player.camera.right // self.model.world_specifications.cell_size
+            self.model.player.camera.right // self.model.world_specs.cell_size
         )
         bottom: int = int(
-            self.model.player.camera.top // self.model.world_specifications.cell_size
+            self.model.player.camera.top // self.model.world_specs.cell_size
         )
         top: int = int(
-            self.model.player.camera.bottom // self.model.world_specifications.cell_size
+            self.model.player.camera.bottom // self.model.world_specs.cell_size
         )
         for row in range(bottom, top + 1):
             for col in range(left, right + 1):
                 # Wrap the grid col around the map if it extends over the edge
                 wrapped_col = (
-                    col + self.model.world_specifications.grid_width
-                ) % self.model.world_specifications.grid_width
+                    col + self.model.world_specs.grid_width
+                ) % self.model.world_specs.grid_width
                 # Adjust the entities position if it is wrapping
                 entity_adj: Vector2 = Vector2(0, 0)
                 if col < 0:
                     entity_adj = Vector2(
-                        -self.model.world_specifications.world_width, 0
+                        -self.model.world_specs.world_width, 0
                     )
-                if col >= self.model.world_specifications.grid_width:
-                    entity_adj = Vector2(self.model.world_specifications.world_width, 0)
+                if col >= self.model.world_specs.grid_width:
+                    entity_adj = Vector2(self.model.world_specs.world_width, 0)
                 # Get the grid cell that holds the entities we need to draw
                 grid_cell: GridCell = self.model.grid_space_old[row][wrapped_col]
                 for fish in grid_cell.fish.values():

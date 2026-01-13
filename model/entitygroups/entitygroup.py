@@ -18,6 +18,7 @@ class EntityGroup[T: GameEntity](ABC):
     def update_entities(
         self,
         world_specs: WorldSpecs,
+        #TODO GridSpace class instead of 2d array
         grid_space: list[list[GridCell]],
         entity_groups: dict[uuid.UUID, EntityGroup],
         player_position: Vector2 | None = None,
@@ -30,6 +31,7 @@ class EntityGroup[T: GameEntity](ABC):
     def move_entities(
         self,
         world_specs: WorldSpecs,
+        # TODO GridSpace class instead of 2d array
         grid_space: list[list[GridCell]],
         dt: float,
     ) -> None:

@@ -1,4 +1,6 @@
+import uuid
 from abc import ABC, abstractmethod
+from uuid import UUID
 
 from pygame import Vector2
 
@@ -15,6 +17,7 @@ class Spawner(ABC):
     Amount determines how many entities are spawned per spawn cooldown.
     """
     def __init__(self, entity_group: EntityGroup, cooldown: float, world_specs: WorldSpecs, camera_specs: CameraSpecs, amount: int = 1):
+        self.spawner_id: UUID = uuid.uuid4()
         self.entity_group: EntityGroup = entity_group
         self.cooldown: float = cooldown
         self.spawn_timer: float = 0.0
