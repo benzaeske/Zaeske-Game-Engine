@@ -8,8 +8,8 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.jellyfish.jellyfishswarm import JellyfishSwarm
-from model.entities.school.school import School
+from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
+from model.entitygroups.school.school import School
 from model.player.cameraspecs import CameraSpecs
 from model.player.player import Turtle
 from model.world.grid_cell import GridCell
@@ -132,7 +132,7 @@ class GameController:
                 x = x - self.model.player.camera.left
                 y = self.model.player.camera.bottom - y
                 self.view.draw_surface(
-                    self.model.grid_space[grid_r][grid_c].background_surface, (x, y)
+                    self.model.grid_space_old[grid_r][grid_c].background_surface, (x, y)
                 )
 
     def draw_fps_menu(self) -> None:
@@ -171,7 +171,7 @@ class GameController:
                 if col >= self.model.world_specifications.grid_width:
                     entity_adj = Vector2(self.model.world_specifications.world_width, 0)
                 # Get the grid cell that holds the entities we need to draw
-                grid_cell: GridCell = self.model.grid_space[row][wrapped_col]
+                grid_cell: GridCell = self.model.grid_space_old[row][wrapped_col]
                 for fish in grid_cell.fish.values():
                     self.view.draw_surface(
                         fish.get_surface(),

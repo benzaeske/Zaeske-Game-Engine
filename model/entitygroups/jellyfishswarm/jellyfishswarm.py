@@ -1,14 +1,15 @@
 import random
+from uuid import UUID
 
 import pygame
 from pygame import Surface, Vector2
 
-from model.entities.entitygroup import EntityGroup
+from model.entitygroups.entitygroup import EntityGroup
 from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType
 from model.entities.jellyfish.jellyfish import Jellyfish
 from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyfishType
-from model.entities.school.school import School
+from model.entitygroups.school.school import School
 from model.player.cameraspecs import CameraSpecs
 from model.world.grid_cell import GridCell
 from model.world.worldspecs import WorldSpecs
@@ -29,6 +30,7 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
         self,
         world_specs: WorldSpecs,
         grid_space: list[list[GridCell]],
+        entity_groups: dict[UUID, EntityGroup],
         player_position: Vector2 | None = None,
     ) -> None:
         neighbor_range: int = 1
@@ -45,11 +47,9 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
                     ) % world_specs.grid_height
                     grid_c: int = c + dc
                     grid_c = (grid_c + world_specs.grid_width) % world_specs.grid_width
-                    group: EntityGroup[Jellyfish] = grid_space[grid_r][
-                        grid_c
-                    ].entity_groups.get(self.group_id)
-                    if group is not None:
-                        neighbor_jellies.extend(group.entities.values())
+                    group: EntityGroup[Jellyfish] = entity_groups[self.group_id]
+                    for entity_id in grid_space[grid_r][grid_c].get_contained_entity_ids_by_group(self.group_id):
+                        neighbor_jellies.append(group.entities[entity_id])
 
             afraid_of_fish: list[Fish] = []
             r: int = int(jellyfish.position.y / world_specs.cell_size)
@@ -62,14 +62,15 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
                     ) % world_specs.grid_height
                     grid_c: int = c + dc
                     grid_c = (grid_c + world_specs.grid_width) % world_specs.grid_width
-                    for entity_group in grid_space[grid_r][
+                    for current_group_id in grid_space[grid_r][
                         grid_c
-                    ].entity_groups.values():
+                    ].contained_entities_by_group.keys():
+                        group: EntityGroup = entity_groups[current_group_id]
                         if (
-                            isinstance(entity_group, School)
-                            and entity_group.fish_settings.fish_type is FishType.RED
+                            isinstance(group, School)
+                            and group.fish_settings.fish_type is FishType.RED
                         ):
-                            afraid_of_fish.extend(entity_group.entities.values())
+                            afraid_of_fish.extend(entity_groups[current_group_id].entities.values())
 
             jellyfish.update_acceleration(
                 player_position,
@@ -112,6 +113,8 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
         world_h: float,
     ) -> Jellyfish:
         """Create a new jellyfish at a random position outside camera range but within the world boundary"""
+        # TODO this logic should move to the spawner.
+        #  Create entity on EntityGroup should just return a blank entity that has no meaningful initial position
         # Pick between 2 different ranges: one between 0 and the camera edge, the other between the camera edge and the far world boundary
         x_ranges = [
             [0, camera_pos.x - camera_w_adj],
@@ -130,6 +133,7 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
         y_pos = random.uniform(y_range[0], y_range[1])
 
         return Jellyfish(
+            self.group_id,
             self.sprite,
             JellyfishSettings(
                 self.jellyfish_settings.jelly_type,

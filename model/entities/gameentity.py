@@ -9,6 +9,7 @@ class GameEntity:
 
     def __init__(
         self,
+        group_id: uuid.UUID,
         sprite: Surface,
         hitbox_width: float = 0.0,
         hitbox_height: float = 0.0,
@@ -17,7 +18,8 @@ class GameEntity:
         max_speed: float = 1.0,
         max_acceleration: float = 0.1,
     ):
-        self.uuid: uuid.UUID = uuid.uuid4()
+        self.entity_id: uuid.UUID = uuid.uuid4()
+        self.group_id: uuid.UUID = group_id
         # The sprite is what is drawn on screen.
         # The width and height adjusts are for easy calculations when converting the model coordinates to screen coordinates when drawing
         self.sprite: Surface = sprite

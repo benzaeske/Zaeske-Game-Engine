@@ -6,7 +6,7 @@ from pygame import Vector2, Surface
 
 from model.entities.fish.fishsettings import FishSettings
 from model.entities.gameentity import GameEntity
-from model.entities.school.schoolparameters import SchoolParameters
+from model.entitygroups.school.schoolparameters import SchoolParameters
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 
 
@@ -21,8 +21,8 @@ class Fish(GameEntity):
         school_id: UUID,
         fish_sprite: Surface,
     ) -> None:
-        self.school_id: UUID = school_id
         super().__init__(
+            school_id,
             fish_sprite,
             fish_settings.width,
             fish_settings.height,
@@ -69,7 +69,7 @@ class Fish(GameEntity):
         count_s: int = 0
         for other in others:
             if (
-                self.school_id == other.school_id and self.uuid != other.uuid
+                self.group_id == other.group_id and self.entity_id != other.entity_id
             ):  # TODO can remove school id check after refactor
                 d, other_pos = calculate_shortest_distance_and_virtual_position(
                     self.position, other.position, world_width

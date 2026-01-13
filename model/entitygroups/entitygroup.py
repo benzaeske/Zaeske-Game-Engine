@@ -19,6 +19,7 @@ class EntityGroup[T: GameEntity](ABC):
         self,
         world_specs: WorldSpecs,
         grid_space: list[list[GridCell]],
+        entity_groups: dict[uuid.UUID, EntityGroup],
         player_position: Vector2 | None = None,
     ) -> None:
         """
@@ -47,14 +48,8 @@ class EntityGroup[T: GameEntity](ABC):
             new_r = int(entity.position.y / world_specs.cell_size)
             new_c = int(entity.position.x / world_specs.cell_size)
             if new_r != old_r or new_c != old_c:
-                del (
-                    grid_space[old_r][old_c]
-                    .entity_groups[self.group_id]
-                    .entities[entity.uuid]
-                )
-                grid_space[new_r][new_c].entity_groups[self.group_id].entities[
-                    entity.uuid
-                ] = entity
+                grid_space[old_r][old_c].remove_entity(entity)
+                grid_space[new_r][new_c].add_entity(entity)
 
     @abstractmethod
     def create_entity(
@@ -67,3 +62,9 @@ class EntityGroup[T: GameEntity](ABC):
         Factory method to create a new entity that belongs to this group.
         """
         pass
+
+    def add_entity(self, entity: T) -> None:
+        self.entities[entity.entity_id] = entity
+
+    def remove_entity(self, entity: T) -> None:
+        self.entities.pop(entity.entity_id)

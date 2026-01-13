@@ -1,13 +1,14 @@
 import random
+from uuid import UUID
 
 import pygame.image
 from pygame import Vector2, Surface
 
-from model.entities.entitygroup import EntityGroup
+from model.entitygroups.entitygroup import EntityGroup
 from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType, FishSettings
 from model.entities.gameentity import GameEntity
-from model.entities.school.schoolparameters import SchoolParameters
+from model.entitygroups.school.schoolparameters import SchoolParameters
 from model.player.cameraspecs import CameraSpecs
 from model.utils.vectorutils import limit_magnitude
 from model.world.grid_cell import GridCell
@@ -32,6 +33,7 @@ class School(EntityGroup[Fish]):
         self,
         world_specs: WorldSpecs,
         grid_space: list[list[GridCell]],
+        entity_groups: dict[UUID, EntityGroup],
         player_position: Vector2 | None = None,
     ) -> None:
         for current_fish in self.entities.values():
