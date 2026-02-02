@@ -1,4 +1,5 @@
 import random
+from typing import Callable
 from uuid import UUID
 
 import pygame.image
@@ -11,7 +12,7 @@ from model.entities.gameentity import GameEntity
 from model.entitygroups.school.schoolparameters import SchoolParameters
 from model.player.cameraspecs import CameraSpecs
 from model.utils.vectorutils import limit_magnitude
-from model.world.grid_cell import GridCell
+from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
@@ -31,25 +32,13 @@ class School(EntityGroup[Fish]):
 
     def update_entities(
         self,
-        world_specs: WorldSpecs,
-        grid_space: list[list[GridCell]],
+        grid_space: GridSpace,
         entity_groups: dict[UUID, EntityGroup],
+        world_specs: WorldSpecs,
         player_position: Vector2 | None = None,
     ) -> None:
-        for current_fish in self.entities.values():
-            cell_range: int = self.school_params.interaction_cell_range
-            neighbors: list[Fish] = []
-            r: int = int(current_fish.position.y / world_specs.cell_size)
-            c: int = int(current_fish.position.x / world_specs.cell_size)
-            for dr in range(-cell_range, cell_range + 1):
-                for dc in range(-cell_range, cell_range + 1):
-                    grid_r: int = r + dr
-                    grid_r = (
-                        grid_r + world_specs.grid_height
-                    ) % world_specs.grid_height
-                    grid_c: int = c + dc
-                    grid_c = (grid_c + world_specs.grid_width) % world_specs.grid_width
-                    neighbors.extend(grid_space[grid_r][grid_c].fish.values())
+        for current_fish in self._entities:
+            neighbors: list[GameEntity] = grid_space.get_neighbors(current_fish, self.school_params.interaction_cell_range)
             current_fish.make_schooling_decisions(
                 neighbors,
                 self.school_params,

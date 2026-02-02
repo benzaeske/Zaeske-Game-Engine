@@ -37,7 +37,7 @@ class Fish(GameEntity):
 
     def make_schooling_decisions(
         self,
-        others: list["Fish"],
+        others: list[GameEntity],
         school_params: SchoolParameters,
         world_width: float,
         world_height: float,
@@ -52,7 +52,7 @@ class Fish(GameEntity):
             self.acceleration.y -= self.max_speed / 2
 
     def _school(
-        self, others: list["Fish"], school_params: SchoolParameters, world_width: float
+        self, others: list[GameEntity], school_params: SchoolParameters, world_width: float
     ) -> None:
         """
         Applies acceleration to this fish according to three rules for schooling\n

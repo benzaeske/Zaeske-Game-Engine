@@ -4,14 +4,14 @@ from uuid import UUID
 import pygame
 from pygame import Surface, Vector2
 
+from model.entities.gameentity import GameEntity
 from model.entitygroups.entitygroup import EntityGroup
-from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType
 from model.entities.jellyfish.jellyfish import Jellyfish
 from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyfishType
 from model.entitygroups.school.school import School
 from model.player.cameraspecs import CameraSpecs
-from model.world.grid_cell import GridCell
+from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
@@ -28,56 +28,37 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
 
     def update_entities(
         self,
-        world_specs: WorldSpecs,
-        grid_space: list[list[GridCell]],
+        grid_space: GridSpace,
         entity_groups: dict[UUID, EntityGroup],
+        world_specs: WorldSpecs,
         player_position: Vector2 | None = None,
     ) -> None:
+        # TODO make these properties on jellyfish settings
         neighbor_range: int = 1
         scared_range: int = 2
-        for jellyfish in self.entities.values():
-            neighbor_jellies: list[Jellyfish] = []
-            r: int = int(jellyfish.position.y / world_specs.cell_size)
-            c: int = int(jellyfish.position.x / world_specs.cell_size)
-            for dr in range(-neighbor_range, neighbor_range + 1):
-                for dc in range(-neighbor_range, neighbor_range + 1):
-                    grid_r: int = r + dr
-                    grid_r = (
-                        grid_r + world_specs.grid_height
-                    ) % world_specs.grid_height
-                    grid_c: int = c + dc
-                    grid_c = (grid_c + world_specs.grid_width) % world_specs.grid_width
-                    group: EntityGroup[Jellyfish] = entity_groups[self.group_id]
-                    for entity_id in grid_space[grid_r][grid_c].get_contained_entity_ids_by_group(self.group_id):
-                        neighbor_jellies.append(group.entities[entity_id])
-
-            afraid_of_fish: list[Fish] = []
-            r: int = int(jellyfish.position.y / world_specs.cell_size)
-            c: int = int(jellyfish.position.x / world_specs.cell_size)
-            for dr in range(-scared_range, scared_range + 1):
-                for dc in range(-scared_range, scared_range + 1):
-                    grid_r: int = r + dr
-                    grid_r = (
-                        grid_r + world_specs.grid_height
-                    ) % world_specs.grid_height
-                    grid_c: int = c + dc
-                    grid_c = (grid_c + world_specs.grid_width) % world_specs.grid_width
-                    for current_group_id in grid_space[grid_r][
-                        grid_c
-                    ].contained_entities_by_group.keys():
-                        group: EntityGroup = entity_groups[current_group_id]
-                        if (
-                            isinstance(group, School)
-                            and group.fish_settings.fish_type is FishType.RED
-                        ):
-                            afraid_of_fish.extend(entity_groups[current_group_id].entities.values())
-
+        scared_of_groups: set[UUID] = self.get_scared_group_ids(entity_groups)
+        for jellyfish in self._entities:
+            neighbor_jellies: list[GameEntity] = grid_space.get_neighbors(jellyfish, neighbor_range)
+            afraid_of_fish: list[GameEntity] = grid_space.get_neighbors(jellyfish, scared_range, scared_of_groups)
             jellyfish.update_acceleration(
                 player_position,
                 neighbor_jellies,
                 afraid_of_fish,
                 world_specs.world_width,
             )
+
+    @staticmethod
+    def get_scared_group_ids(entity_groups: dict[UUID, EntityGroup]) -> set[UUID]:
+        """
+        Returns a set of group ids of entities that jellyfish are afraid of
+        :param entity_groups: The current entity groups present in the game world
+        :return: A set of group ids
+        """
+        scared_of_groups: set[UUID] = set()
+        for group in entity_groups.values():
+            if isinstance(group, School) and group.fish_settings.fish_type is FishType.RED:
+                scared_of_groups.add(group.group_id)
+        return scared_of_groups
 
     def create_entity(
         self,

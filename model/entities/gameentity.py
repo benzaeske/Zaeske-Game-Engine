@@ -66,4 +66,10 @@ class GameEntity:
     def get_surface(self):
         return self.sprite
 
+    def __eq__(self, other):
+        return self.entity_id == other.entity_id
+
+    def __hash__(self):
+        return hash(self.entity_id)
+
 

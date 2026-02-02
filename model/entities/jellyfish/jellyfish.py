@@ -2,7 +2,6 @@ from uuid import UUID
 
 from pygame import Vector2, Surface
 
-from model.entities.fish.fish import Fish
 from model.entities.gameentity import GameEntity
 from model.entities.jellyfish.jellyfishsettings import JellyfishSettings
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
@@ -26,8 +25,8 @@ class Jellyfish(GameEntity):
     def update_acceleration(
         self,
         player_position: Vector2,
-        neighbors: list["Jellyfish"],
-        afraid_neighbors: list[Fish],
+        neighbors: list[GameEntity],
+        afraid_neighbors: list[GameEntity],
         world_width: float,
     ):
         self.move_towards_player(player_position, world_width)
@@ -48,7 +47,7 @@ class Jellyfish(GameEntity):
         else:
             self.target(Vector2(wrap_diff_x, player_position.y - self.position.y), 1.0)
 
-    def avoid_close_neighbors(self, neighbors: list["Jellyfish"], world_width: float):
+    def avoid_close_neighbors(self, neighbors: list[GameEntity], world_width: float):
         avoid_jelly_dist: float = 96.0
         avoid_jelly_k: float = 2.0
         sum_avoid_jelly: Vector2 = Vector2(0.0, 0.0)
@@ -67,7 +66,7 @@ class Jellyfish(GameEntity):
             self.target(sum_avoid_jelly, avoid_jelly_k)
 
     def run_away_from_fish(
-        self, afraid_neighbors: list[Fish], world_width: float
+        self, afraid_neighbors: list[GameEntity], world_width: float
     ) -> None:
         # Afraid of red fish
         scared_range: float = 192.0

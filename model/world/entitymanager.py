@@ -27,13 +27,14 @@ class EntityManager:
     def remove_entity(self, entity: GameEntity) -> None:
         self._entity_groups[entity.group_id].remove_entity(entity)
 
-    def update_all_groups(self, world_specs: WorldSpecs, grid_space: GridSpace, player_position: Vector2) -> None:
-        for group in self._entity_groups.values():
-            # TODO update group impls to use GridSpace class
-            group.update_entities(world_specs, grid_space, self._entity_groups, player_position)
+    def get_entity_group(self, group_id: UUID) -> EntityGroup:
+        return self._entity_groups[group_id]
 
-    def move_all_groups(self, world_specs: WorldSpecs, grid_space: GridSpace, dt: float):
+    def update_all_groups(self, grid_space: GridSpace, world_specs: WorldSpecs, player_position: Vector2) -> None:
         for group in self._entity_groups.values():
-            # TODO update group impls to use GridSpace class
-            group.move_entities(world_specs, grid_space, dt)
+            group.update_entities(grid_space, self.get_entity_group, world_specs, player_position)
+
+    def move_all_groups(self, grid_space: GridSpace, world_specs: WorldSpecs, dt: float):
+        for group in self._entity_groups.values():
+            group.move_entities(grid_space, world_specs, dt)
 

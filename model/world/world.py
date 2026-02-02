@@ -98,13 +98,13 @@ class SpatialPartitioningModel:
         self.update_player_items()
 
     def update_entity_groups(self) -> None:
-        self.entity_manager.update_all_groups(self.world_specs, self.grid_space, self.player.position)
+        self.entity_manager.update_all_groups(self.grid_space, self.world_specs, self.player.position)
 
     def update_player_items(self) -> None:
         pass
 
     def move_entity_groups(self, dt: float) -> None:
-        self.entity_manager.move_all_groups(self.world_specs, self.grid_space, dt)
+        self.entity_manager.move_all_groups(self.grid_space, self.world_specs, dt)
 
     def move_player(self, dt: float, key_presses: ScancodeWrapper):
         # TODO make player move using velocity/acceleration
