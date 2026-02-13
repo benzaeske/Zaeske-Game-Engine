@@ -27,7 +27,7 @@ class EntityGroup[T: GameEntity](ABC):
         Updates all entities in their current position for a given frame by calculating forces applied to them. Does not update entity position since all
         forces need to be calculated for all entities before any of them move.
         :param grid_space: The current grid space - Updating entities needs to be able to ask questions about what other entities are around them
-        :param entity_groups: Updating entities needs to be able to ask questions about the parameters of other groups around them
+        :param entity_groups: Updating entities needs to be able to ask questions about the properties and type of other groups
         :param world_specs: Updating entities currently needs information about the size of the world for wrapping logic
         :param player_position: Provided in case entities need to behave based on their position relative to the player
         """

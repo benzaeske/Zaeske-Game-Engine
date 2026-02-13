@@ -32,7 +32,7 @@ class EntityManager:
 
     def update_all_groups(self, grid_space: GridSpace, world_specs: WorldSpecs, player_position: Vector2) -> None:
         for group in self._entity_groups.values():
-            group.update_entities(grid_space, self.get_entity_group, world_specs, player_position)
+            group.update_entities(grid_space, self._entity_groups, world_specs, player_position)
 
     def move_all_groups(self, grid_space: GridSpace, world_specs: WorldSpecs, dt: float):
         for group in self._entity_groups.values():
