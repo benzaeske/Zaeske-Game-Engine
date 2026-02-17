@@ -1,17 +1,14 @@
 import copy
-import random
 from typing import Tuple
 from uuid import UUID
 
-import pygame
-from pygame import Surface, Vector2, Rect
+from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
 
 from model.entitygroups.entitygroup import EntityGroup
 from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType
 from model.entities.gameentity import GameEntity
-from model.entities.jellyfish.jellyfish import Jellyfish
 from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
 from model.entitygroups.school.school import School
 from model.spawners.spawner import Spawner
