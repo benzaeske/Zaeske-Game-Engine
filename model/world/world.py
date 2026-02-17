@@ -20,12 +20,6 @@ from model.world.worldspecs import WorldSpecs
 
 
 class SpatialPartitioningModel:
-    """
-    Implementation of spatial partitioning. The 'world' is divided into a grid of cells. The size of a cell determines how far entities in the simulation can 'see'.\n
-    When applying the schooling algorithm to fish, calculations are only performed on neighbors within the fish's cell and the cells surrounding it as defined by a variable cell detection radius.\n
-    For V1, The world width and height must be evenly divisible by cell_size, or array out of bounds issues will occur\n
-    """
-
     def __init__(
         self,
         world_specs: WorldSpecs,
