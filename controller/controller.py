@@ -12,6 +12,8 @@ from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
 from model.entitygroups.school.school import School
 from model.player.cameraspecs import CameraSpecs
 from model.player.player import Turtle
+from model.spawners.fishspawner import FishSpawner
+from model.spawners.jellyspawner import JellySpawner
 from model.world.grid_cell import GridCell
 from model.world.world import SpatialPartitioningModel
 from model.world.worldspecs import WorldSpecs
@@ -32,11 +34,13 @@ class GameController:
         options: ControllerOptions,
     ) -> None:
         pygame.init()
+        self.options: ControllerOptions = options
         self.view: View = View()
+        self.camera_specs: CameraSpecs = CameraSpecs(self.view.screen_width, self.view.screen_height)
         self.model: SpatialPartitioningModel = SpatialPartitioningModel(
             options.world_specs,
             Turtle(
-                CameraSpecs(self.view.screen_width, self.view.screen_height),
+                self.camera_specs,
                 (options.world_specs.world_width, options.world_specs.world_height),
             ),
         )
@@ -215,10 +219,20 @@ class GameController:
             )
 
     def add_school(self, school: School) -> None:
-        self.model.add_school(school)
+        self.model.add_entity_group(school)
+        self.model.add_spawner(FishSpawner(school, self.options.world_specs, self.camera_specs))
 
-    def set_jellyfish_spawner(self, spawner: JellyfishSwarm) -> None:
-        self.model.set_jellyfish_spawner(spawner)
+    def add_jellyfish_swarm(self, jellyfish_swarm: JellyfishSwarm, spawn_cooldown: float, spawn_amount: int) -> None:
+        self.model.add_entity_group(jellyfish_swarm)
+        self.model.add_spawner(
+            JellySpawner(
+                jellyfish_swarm,
+                spawn_cooldown,
+                self.options.world_specs,
+                self.camera_specs,
+                spawn_amount
+            )
+        )
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self.dt > self.max_dt:
