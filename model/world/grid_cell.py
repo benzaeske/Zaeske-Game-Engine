@@ -35,8 +35,6 @@ class GridCell:
     def remove_entity(self, entity: GameEntity):
         if entity.group_id in self.contained_entities_by_group and entity in self.contained_entities_by_group[entity.group_id]:
             self.contained_entities_by_group[entity.group_id].remove(entity)
-            #if len(self.contained_entities_by_group.get(entity.group_id)) is 0:
-                #self.contained_entities_by_group.pop(entity.group_id)
 
     def get_contained_entities(self, group_id: UUID) -> set[GameEntity]:
         return self.contained_entities_by_group.get(group_id, set())
