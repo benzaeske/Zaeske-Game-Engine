@@ -1,5 +1,6 @@
 import copy
 import random
+from typing import Tuple
 from uuid import UUID
 
 import pygame
@@ -71,8 +72,8 @@ class SpatialPartitioningModel:
         # Process spawners (decrement cooldown, spawn if ready)
         self.process_spawners(dt)
         # Update player (update current state based on entity proximity; check collisions etc.)
-        #   - Update player items (Items can interact with entities in the world space or with the player)
-        self.update_player_new(dt, key_presses)
+        # Update player items (Items can interact with entities in the world space or with the player)
+        self.update_player(dt, key_presses)
         # Update entity groups (Decisions that each entity makes on their own based on their environment)
         self.update_entity_groups()
         # Move entity groups
@@ -89,12 +90,12 @@ class SpatialPartitioningModel:
             if spawner.tick_spawn_timer(dt):
                 spawner.spawn(self.grid_space, Vector2(self.player.camera.center))
 
-    def update_player_new(self, dt: float, key_presses: ScancodeWrapper) -> None:
+    def update_player(self, dt: float, key_presses: ScancodeWrapper) -> None:
         # TODO make player move using velocity/acceleration
         # TODO update the below functions for the refactor
-        self.process_player_fish_coherency_old(dt)
+        self.process_player_fish_coherency(dt)
         self.process_player_jelly_collisions_old(dt)
-        # TODO items impl
+        # TODO items
         self.update_player_items()
 
     def update_entity_groups(self) -> None:
@@ -164,6 +165,34 @@ class SpatialPartitioningModel:
                     cohere_green += 1
                 case FishType.YELLOW:
                     cohere_yellow += 1
+        # Set coherence amounts on player so other functions can reference it quickly
+        self.player.cohere_green = cohere_green
+        self.player.cohere_yellow = cohere_yellow
+        self.player.cohere_green_red = cohere_red
+        # Process immediate coherence effects
+        self.player.update_hp(1 * dt * cohere_green)
+        if cohere_yellow > 0:
+            self.player.charge_shield(dt)
+
+    def process_player_fish_coherency(self, dt: float) -> None:
+        # Track number of fish types in player's grid cell
+        cohere_red: int = 0
+        cohere_green: int = 0
+        cohere_yellow: int = 0
+        # Player's grid space coordinate
+        p_coord: Tuple[int, int] = self.grid_space.get_grid_cell_coord_from_position(self.player.position.x, self.player.position.y)
+        # Player's grid cell
+        p_grid_cell: GridCell = self.grid_space.get_grid_cell(p_coord)
+        for group_id, entities in p_grid_cell.contained_entities_by_group.items():
+            eg: EntityGroup = self.entity_manager.get_entity_group(group_id)
+            if isinstance(eg, School):
+                match eg.fish_settings.fish_type:
+                    case FishType.RED:
+                        cohere_red += len(entities)
+                    case FishType.GREEN:
+                        cohere_green += len(entities)
+                    case FishType.YELLOW:
+                        cohere_yellow += len(entities)
         # Set coherence amounts on player so other functions can reference it quickly
         self.player.cohere_green = cohere_green
         self.player.cohere_yellow = cohere_yellow

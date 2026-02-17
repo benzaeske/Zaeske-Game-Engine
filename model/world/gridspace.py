@@ -88,7 +88,8 @@ class GridSpace:
 
     def get_neighbors(self, entity: GameEntity, cell_range: int, group_ids: set[UUID] = None) -> list[GameEntity]:
         """
-        Gets all neighbor entities relative to the input entity. Neighbors are considered any entity in a grid cell within the square region bounded by the input cell_range.
+        Gets all neighbor entities relative to the input entity.
+        Neighbors are considered any entity in a grid cell within the square region bounded by the input cell_range.
         :param entity: The entity to find neighbors for
         :param cell_range: The square cell range around which to look for neighbors
         :param group_ids: The group ids of entities that are considered neighbors. If no group_ids are passed in the group_id of the input entity is used
