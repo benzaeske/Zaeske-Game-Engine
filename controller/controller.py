@@ -27,14 +27,6 @@ class ControllerOptions:
 
 
 class GameController:
-    """
-    Orchestration class for running the current state of the game. Contains a model which is the simulated world, a view that is responsible for drawing on the screen,
-    and a 'player' that is essentially a camera that can be moved around the world using WASD and has dimensions equal to the screen size used.\n
-    The model tracks coordinates using a standard 2-dimensional x, y plane with (0,0) being the bottom left of the map.
-    The view is currently implemented using pygame which draws to the screen on an inverted y-axis, so coordinates must be converted when coming from the model\n
-    The world model can be any arbitrary size as long as it is bigger than the screen size. The entire world model is updated each frame, but only the grid cells within the player's 'camera' range are drawn each frame
-    """
-
     def __init__(
         self,
         options: ControllerOptions,
@@ -57,19 +49,20 @@ class GameController:
         # Tracking player inputs
         self.mouse_pos: Tuple[int, int] = (0, 0)
         self.key_presses: ScancodeWrapper = ScancodeWrapper(())
-        self.events: list[Event] = []
+        # All input 'events' such as keypresses etc.
+        # Pygame allows us to get the list of events once and then clears the event queue so we need to store them each frame
+        self.current_frame_input_events: list[Event] = []
         self.paused: bool = False
 
     def start_game(self):
         self.game_start = time.time()
-        self.model.hatch_schools_old()
         while True:
             self.do_game_loop()
 
     def do_game_loop(self) -> None:
         self.key_presses = pygame.key.get_pressed()
         self.mouse_pos = pygame.mouse.get_pos()
-        self.events = pygame.event.get()
+        self.current_frame_input_events = pygame.event.get()
         self.check_for_terminate()
         self.check_for_pause()
         if not self.paused:
@@ -87,7 +80,7 @@ class GameController:
         self.dt = self.clock.tick(self.fps) / 1000
 
     def check_for_terminate(self):
-        for event in self.events:
+        for event in self.current_frame_input_events:
             if event.type == pygame.QUIT:
                 sys.exit()
         if self.key_presses[pygame.K_ESCAPE]:
@@ -96,13 +89,13 @@ class GameController:
             sys.exit()
 
     def check_for_pause(self):
-        for event in self.events:
+        for event in self.current_frame_input_events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.paused = not self.paused
 
     def update_model(self) -> None:
-        self.model.update_model_old(self.dt, self.key_presses)
+        self.model.update_model(self.dt, self.key_presses)
 
     def draw_background(self) -> None:
         # Loop over grid cells within camera range.
@@ -132,7 +125,7 @@ class GameController:
                 x = x - self.model.player.camera.left
                 y = self.model.player.camera.bottom - y
                 self.view.draw_surface(
-                    self.model.grid_space_old[grid_r][grid_c].background_surface, (x, y)
+                    self.model.grid_space.get_grid_cell((grid_r, grid_c)).background_surface, (x, y)
                 )
 
     def draw_fps_menu(self) -> None:
@@ -165,37 +158,23 @@ class GameController:
                 # Adjust the entities position if it is wrapping
                 entity_adj: Vector2 = Vector2(0, 0)
                 if col < 0:
-                    entity_adj = Vector2(
-                        -self.model.world_specs.world_width, 0
-                    )
+                    entity_adj = Vector2(-self.model.world_specs.world_width, 0)
                 if col >= self.model.world_specs.grid_width:
                     entity_adj = Vector2(self.model.world_specs.world_width, 0)
                 # Get the grid cell that holds the entities we need to draw
-                grid_cell: GridCell = self.model.grid_space_old[row][wrapped_col]
-                for fish in grid_cell.fish.values():
-                    self.view.draw_surface(
-                        fish.get_surface(),
-                        self.adj_game_entity_pos_to_camera(
-                            fish.position
-                            + entity_adj,  # Adjust the entities position for wrapping
-                            fish.sprite_width_adj,
-                            fish.sprite_height_adj,
-                            self.model.player.camera.left,
-                            self.model.player.camera.bottom,
-                        ),
-                    )
-                for jelly in grid_cell.jellyfish.values():
-                    self.view.draw_surface(
-                        jelly.get_surface(),
-                        self.adj_game_entity_pos_to_camera(
-                            jelly.position
-                            + entity_adj,  # Adjust the entities position for wrapping
-                            jelly.sprite_width_adj,
-                            jelly.sprite_height_adj,
-                            self.model.player.camera.left,
-                            self.model.player.camera.bottom,
-                        ),
-                    )
+                grid_cell: GridCell = self.model.grid_space.get_grid_cell((row, wrapped_col))
+                for group_id, entities in grid_cell.contained_entities_by_group.items():
+                    for entity in entities:
+                        self.view.draw_surface(
+                            entity.get_surface(),
+                            self.adj_game_entity_pos_to_camera(
+                                entity.position + entity_adj,
+                                entity.sprite_width_adj,
+                                entity.sprite_height_adj,
+                                self.model.player.camera.left,
+                                self.model.player.camera.bottom
+                            )
+                        )
 
     @staticmethod
     def adj_game_entity_pos_to_camera(

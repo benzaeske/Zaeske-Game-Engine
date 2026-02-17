@@ -7,6 +7,7 @@ from pygame import Surface, Vector2
 
 from model.entities.gameentity import GameEntity
 from model.world.grid_cell import GridCell
+from model.world.worldspecs import WorldSpecs
 
 
 class GridSpace:
@@ -33,10 +34,10 @@ class GridSpace:
     This means it would take the turtle 16 seconds x 128 chunks = 2048 seconds / 60 seconds in one minute = ~34 minutes to cross the map in a single
     direction.
     """
-    def __init__(self, grid_width: int, grid_height: int, cell_size: float):
-        self.grid_width: int = grid_width
-        self.grid_height: int = grid_height
-        self.cell_size: float = cell_size
+    def __init__(self, world_specs: WorldSpecs) -> None:
+        self.cell_size: float = world_specs.cell_size
+        self.grid_width: int = world_specs.grid_width
+        self.grid_height: int = world_specs.grid_height
         self._grid: dict[Tuple[int, int], GridCell] = self.initialize_grid_space()
 
     def initialize_grid_space(self) -> dict[Tuple[int, int], GridCell]:

@@ -26,11 +26,7 @@ class SpatialPartitioningModel:
         player: Player,
     ):
         self.world_specs: WorldSpecs = world_specs
-        self.grid_space: GridSpace = GridSpace(
-            world_specs.grid_width,
-            world_specs.grid_height,
-            world_specs.cell_size
-        )
+        self.grid_space: GridSpace = GridSpace(world_specs)
         self.entity_manager: EntityManager = EntityManager()
         self.spawners: dict[UUID, Spawner] = {}
         self.player: Player = player
@@ -68,9 +64,12 @@ class SpatialPartitioningModel:
         """
         Tick each spawner's cooldown and perform the spawn function if it returns true
         """
-        for spawner in self.spawners.values():
+        for spawner_id in self.spawners.keys():
+            spawner: Spawner = self.spawners[spawner_id]
             if spawner.tick_spawn_timer(dt):
                 spawner.spawn(self.grid_space, Vector2(self.player.camera.center))
+            if spawner.should_destroy():
+                self.remove_spawner(spawner_id)
 
     def update_player(self, dt: float, key_presses: ScancodeWrapper) -> None:
         # TODO make player move using velocity/acceleration
@@ -202,16 +201,3 @@ class SpatialPartitioningModel:
                 int(game_entity.position.y),
             )
         return virtual_hitbox
-
-    #------- Legacy functions --------
-
-    def hatch_schools_old(self):
-        for school in self.schools.values():
-            for _ in range(school.school_params.egg_count):
-                self.spawn_fish_in_grid_space(school.hatch_fish())
-
-    def spawn_fish_in_grid_space(self, new_fish: Fish) -> None:
-        self.fish[new_fish.entity_id] = new_fish
-        self.grid_space_old[int(new_fish.position.y / self.world_specs.cell_size)][
-            int(new_fish.position.x / self.world_specs.cell_size)
-        ].fish[new_fish.entity_id] = new_fish

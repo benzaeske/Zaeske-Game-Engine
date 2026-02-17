@@ -22,10 +22,6 @@ class GridCell:
         self.coordinates: Tuple[int, int] = coordinates
         self.contained_entities_by_group: dict[UUID, set[GameEntity]] = {}
         self.background_surface: Surface = background_surface
-        # Old
-        self.fish: dict[UUID, Fish] = {}
-        self.jellyfish: dict[UUID, Jellyfish] = {}
-
 
     def add_entity(self, entity: GameEntity):
         if entity.group_id not in self.contained_entities_by_group:

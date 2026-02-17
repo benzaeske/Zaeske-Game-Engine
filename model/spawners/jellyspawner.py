@@ -14,7 +14,8 @@ class JellySpawner(Spawner):
 
     def spawn(self, grid_space: GridSpace, camera_position: Vector2):
         for _ in range(self.amount):
-            # TODO add logic for positioning new jellies here instead of having the entity group do it
+            # TODO Barebones spawn impl
+            #  add logic for positioning new jellies here instead of having the JellyFishSwarm do it
             new_entity: Jellyfish = self.entity_group.create_entity(self.world_specs, self.camera_specs, camera_position)
             self.entity_group.add_entity(new_entity)
             grid_space.add_entity(new_entity)

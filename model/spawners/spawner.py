@@ -24,6 +24,8 @@ class Spawner(ABC):
         self.world_specs: WorldSpecs = world_specs
         self.camera_specs: CameraSpecs = camera_specs
         self.amount: int = amount
+        # Tracks if this spawner should be removed from the world
+        self._destroy_spawner: bool = False
 
     def tick_spawn_timer(self, dt: float) -> bool:
         """
@@ -31,11 +33,10 @@ class Spawner(ABC):
         If the spawning cooldown is reached, returns True and reset the timer, otherwise False.
         """
         self.spawn_timer += dt
-        if self.spawn_timer > self.cooldown:
+        if self.spawn_timer >= self.cooldown:
             self.spawn_timer = 0.0
             return True
         return False
-
 
     @abstractmethod
     def spawn(self, grid_space: GridSpace, camera_position: Vector2) -> EntityGroup:
@@ -45,6 +46,12 @@ class Spawner(ABC):
         Camera position is provided as an input in case future spawning functions want to determine spawn location based on things being in/out of frame.
         """
         pass
+
+    def set_destroy(self):
+        self._destroy_spawner = True
+
+    def should_destroy(self):
+        return self._destroy_spawner
 
 
 

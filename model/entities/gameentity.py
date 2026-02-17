@@ -63,7 +63,7 @@ class GameEntity:
         target_dir *= k
         self.acceleration += target_dir
 
-    def get_surface(self):
+    def get_surface(self) -> Surface:
         return self.sprite
 
     def __eq__(self, other):

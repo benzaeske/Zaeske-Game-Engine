@@ -52,12 +52,12 @@ def get_random_shoal_location(
 # Create the game world:
 ########################
 
-world_width = 5120.0
-world_height = 5120.0
 cell_size = 128.0
+grid_width = 32
+grid_height = 32
 
 game_controller = GameController(
-    ControllerOptions(WorldSpecs(world_width, world_height, cell_size))
+    ControllerOptions(WorldSpecs(cell_size, grid_width, grid_height)),
 )
 
 # Create schools of fish and add to the world

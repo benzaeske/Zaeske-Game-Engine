@@ -73,6 +73,8 @@ class School(EntityGroup[Fish]):
                 )
 
     def hatch_fish(self) -> Fish:
+        # TODO this should only create a new fish with a naive starting position.
+        #  Logic for positioning the fish should live in the spawner impl
         hatch_region = self.school_params.hatch_region
         initial_position = Vector2(
             random.uniform(hatch_region.x, hatch_region.x + hatch_region.width),
