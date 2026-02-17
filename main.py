@@ -52,20 +52,21 @@ def get_random_shoal_location(
 # Create the game world:
 ########################
 
-cell_size = 128.0
-grid_width = 32
-grid_height = 32
+cell_size: float = 128.0
+grid_width: int = 32
+grid_height: int = 32
+world_specs: WorldSpecs = WorldSpecs(cell_size, grid_width, grid_height)
+world_width: float = world_specs.world_width
+world_height: float = world_specs.world_height
 
-game_controller = GameController(
-    ControllerOptions(WorldSpecs(cell_size, grid_width, grid_height)),
-)
+controller_options: ControllerOptions = ControllerOptions(world_specs)
+game_controller: GameController = GameController(controller_options)
 
 # Create schools of fish and add to the world
 spawn_region_size = 512.0
 
 num_red_schools = 4
 for _ in range(num_red_schools):
-
     red_school = School(
         SchoolParameters(
             128.0,
@@ -92,9 +93,7 @@ for _ in range(num_red_schools):
     game_controller.add_school(red_school)
 
 num_yellow_schools = 1
-center_spawn_region = Rect(
-    0, 0, game_controller.view.screen_width, game_controller.view.screen_height
-)
+center_spawn_region = Rect(0, 0, game_controller.view.screen_width, game_controller.view.screen_height)
 center_spawn_region.center = (
     int(game_controller.model.player.position.x),
     int(game_controller.model.player.position.y),
@@ -148,7 +147,9 @@ for _ in range(num_green_schools):
     )
     game_controller.add_school(green_school)
 
-jellyfish_spawner = JellyfishSwarm(
+jelly_spawn_cd = 10.0 # Spawner cooldown in seconds
+num_jellies_per_spawn = 5
+jellyfish_swarm = JellyfishSwarm(
     JellyfishSettings(
         JellyfishType.RED,
         96.0,
@@ -162,7 +163,7 @@ jellyfish_spawner = JellyfishSwarm(
     ),
     1,
 )
-game_controller.set_jellyfish_spawner(jellyfish_spawner)
+game_controller.add_jellyfish_swarm(jellyfish_swarm, jelly_spawn_cd, num_jellies_per_spawn)
 
 # Start the game loop:
 game_controller.start_game()

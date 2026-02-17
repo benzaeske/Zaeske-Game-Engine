@@ -64,7 +64,7 @@ class SpatialPartitioningModel:
         """
         Tick each spawner's cooldown and perform the spawn function if it returns true
         """
-        for spawner_id in self.spawners.keys():
+        for spawner_id in list(self.spawners.keys()):
             spawner: Spawner = self.spawners[spawner_id]
             if spawner.tick_spawn_timer(dt):
                 spawner.spawn(self.grid_space, Vector2(self.player.camera.center))
