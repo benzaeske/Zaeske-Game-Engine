@@ -92,9 +92,8 @@ class SpatialPartitioningModel:
 
     def update_player(self, dt: float, key_presses: ScancodeWrapper) -> None:
         # TODO make player move using velocity/acceleration
-        # TODO update the below functions for the refactor
         self.process_player_fish_coherency(dt)
-        self.process_player_jelly_collisions_old(dt)
+        self.process_player_jelly_collisions(dt)
         # TODO items
         self.update_player_items()
 
@@ -228,6 +227,29 @@ class SpatialPartitioningModel:
                         )
                     if jelly_hitbox.colliderect(self.player.hitbox):
                         self.player.health -= jelly.damage * dt
+
+    def process_player_jelly_collisions(self, dt: float) -> None:
+        cell_range: int = 1
+        # Only process collisions for jellies that are within a cell range that can actually reach the player
+        r: int = int(self.player.position.y / self.world_specs.cell_size)
+        c: int = int(self.player.position.x / self.world_specs.cell_size)
+        for dr in range(-cell_range, cell_range + 1):
+            for dc in range(-cell_range, cell_range + 1):
+                grid_r: int = r + dr
+                grid_r = (grid_r + self.world_specs.grid_height) % self.world_specs.grid_height
+                # Virtual grid column is used for world-wrapping calculations
+                virtual_grid_c: int = c + dc
+                grid_c: int = (virtual_grid_c + self.world_specs.grid_width) % self.world_specs.grid_width
+                gc: GridCell = self.grid_space.get_grid_cell((grid_r, grid_c))
+                for group_id, entities in gc.contained_entities_by_group.items():
+                    eg: EntityGroup = self.entity_manager.get_entity_group(group_id)
+                    if isinstance(eg, JellyfishSwarm):
+                        for jelly in entities:
+                            jelly_hitbox: Rect = jelly.hitbox
+                            if virtual_grid_c < 0 or virtual_grid_c >= self.world_specs.grid_width:
+                                jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
+                            if jelly_hitbox.colliderect(self.player.hitbox):
+                                self.player.health -= jelly.damage * dt
 
     ##############################
     ######## Fish functions ######

@@ -14,6 +14,7 @@ class EntityManager:
     """
     def __init__(self):
         self._entity_groups: dict[UUID, EntityGroup] = {}
+        # Maintain a map of key: 'entity type enum', value: set[group_id] for easy querying of entity groups that are a certain type
 
     def add_entity_group(self, entity_group: EntityGroup) -> None:
         self._entity_groups[entity_group.group_id] = entity_group
