@@ -67,7 +67,7 @@ class SpatialPartitioningModel:
         for spawner_id in list(self.spawners.keys()):
             spawner: Spawner = self.spawners[spawner_id]
             if spawner.tick_spawn_timer(dt):
-                spawner.spawn(self.grid_space, Vector2(self.player.camera.center))
+                spawner.spawn(self.grid_space, self.world_specs, self.player.camera_specs, Vector2(self.player.camera.center))
             if spawner.should_destroy():
                 self.remove_spawner(spawner_id)
 

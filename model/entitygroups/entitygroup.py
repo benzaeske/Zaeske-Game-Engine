@@ -54,14 +54,10 @@ class EntityGroup[T: GameEntity](ABC):
 
 
     @abstractmethod
-    def create_entity(
-        self,
-        world_specs: WorldSpecs,
-        camera_specs: CameraSpecs | None = None,
-        camera_position: Vector2 | None = None,
-    ) -> T:
+    def create_entity(self) -> T:
         """
         Factory method to create a new entity that belongs to this group.
+        Tracks the created entity in this group's list of entities.
         """
         pass
 

@@ -46,13 +46,20 @@ class School(EntityGroup[Fish]):
                 world_specs.world_height,
             )
 
-    def create_entity(
-        self,
-        world_specs: WorldSpecs,
-        camera_specs: CameraSpecs | None = None,
-        camera_position: Vector2 | None = None,
-    ) -> GameEntity:
-        return self.hatch_fish()
+    def create_entity(self) -> Fish:
+        fish: Fish = Fish(
+            FishSettings(
+                self.fish_settings.fish_type,
+                self.fish_settings.width,
+                self.fish_settings.height,
+                self.fish_settings.max_speed,
+                self.fish_settings.max_acceleration
+            ),
+            self.group_id,
+            self.fish_sprite,
+        )
+        self.add_entity(fish)
+        return fish
 
     def load_fish_sprite(self) -> Surface:
         match self.fish_settings.fish_type:
@@ -71,30 +78,3 @@ class School(EntityGroup[Fish]):
                 return pygame.transform.scale(
                     surface, (self.fish_settings.width, self.fish_settings.height)
                 )
-
-    def hatch_fish(self) -> Fish:
-        # TODO this should only create a new fish with a naive starting position.
-        #  Logic for positioning the fish should live in the spawner impl
-        hatch_region = self.school_params.hatch_region
-        initial_position = Vector2(
-            random.uniform(hatch_region.x, hatch_region.x + hatch_region.width),
-            random.uniform(hatch_region.y, hatch_region.y + hatch_region.height),
-        )
-        initial_velocity = Vector2(
-            random.uniform(-self.fish_settings.max_speed, self.fish_settings.max_speed),
-            random.uniform(-self.fish_settings.max_speed, self.fish_settings.max_speed),
-        )
-        limit_magnitude(initial_velocity, self.fish_settings.max_speed)
-        return Fish(
-            FishSettings(
-                self.fish_settings.fish_type,
-                self.fish_settings.width,
-                self.fish_settings.height,
-                self.fish_settings.max_speed,
-                self.fish_settings.max_acceleration,
-                initial_position,
-                initial_velocity,
-            ),
-            self.group_id,
-            self.fish_sprite,
-        )

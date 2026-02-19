@@ -14,10 +14,10 @@ class Jellyfish(GameEntity):
             jellyfish_sprite,
             settings.width * 0.75,
             settings.height * 0.75,
-            settings.start_position,
-            settings.start_velocity,
             settings.max_speed,
             settings.max_acceleration,
+            settings.start_position,
+            settings.start_velocity,
         )
         self.health = settings.health
         self.damage = settings.damage

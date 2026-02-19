@@ -26,10 +26,10 @@ class Fish(GameEntity):
             fish_sprite,
             fish_settings.width,
             fish_settings.height,
-            fish_settings.initial_position,
-            fish_settings.initial_velocity,
             fish_settings.max_speed,
             fish_settings.max_acceleration,
+            fish_settings.initial_position,
+            fish_settings.initial_velocity,
         )
 
     def update(self) -> None:
