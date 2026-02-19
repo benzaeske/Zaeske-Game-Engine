@@ -15,17 +15,19 @@ from model.player.player import Turtle
 from model.spawners.fishspawner import FishSpawner
 from model.spawners.jellyspawner import JellySpawner
 from model.world.grid_cell import GridCell
-from model.world.world import SpatialPartitioningModel
+from model.world.model import SpatialPartitioningModel
 from model.world.worldspecs import WorldSpecs
-from view.view import View
+from view.view import View, WindowOptions
 
 
 class ControllerOptions:
     def __init__(
         self,
         world_specs: WorldSpecs,
+        window_options: WindowOptions,
     ) -> None:
         self.world_specs: WorldSpecs = world_specs
+        self.window_options: WindowOptions = window_options
 
 
 class GameController:
@@ -35,7 +37,7 @@ class GameController:
     ) -> None:
         pygame.init()
         self.options: ControllerOptions = options
-        self.view: View = View()
+        self.view: View = View(self.options.window_options)
         self.camera_specs: CameraSpecs = CameraSpecs(self.view.screen_width, self.view.screen_height)
         self.model: SpatialPartitioningModel = SpatialPartitioningModel(
             options.world_specs,

@@ -1,3 +1,4 @@
+import copy
 import uuid
 from uuid import UUID
 from abc import ABC, abstractmethod
@@ -45,11 +46,12 @@ class EntityGroup[T: GameEntity](ABC):
         Updates the grid space if an entity changes which grid cell it is in after moving.
         """
         for entity in self._entities:
-            old_position: Vector2 = entity.position
+            old_position: Vector2 = copy.deepcopy(entity.position)
             entity.update_position(
                 world_specs.world_width, world_specs.world_height, dt
             )
             grid_space.process_moved_entity(old_position, entity)
+
 
     @abstractmethod
     def create_entity(

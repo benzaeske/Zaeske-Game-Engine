@@ -5,30 +5,33 @@ import pygame
 from pygame import Surface, Rect
 
 
+class WindowOptions:
+    def __init__(self, screen_width: int = None, screen_height: int = None, full_screen: bool = False) -> None:
+        self.screen_width: int = screen_width
+        self.screen_height: int = screen_height
+        self.full_screen: bool = full_screen
+        # If nothing is passed in, default to full screen
+        if self.screen_width is None and self.screen_height is None:
+            self.full_screen: bool = True
+
 class View:
     """
     The View is responsible for drawing everything on the screen using pygame functions, but should know nothing about the size or shape of the model it is drawing.\n
     Pygame uses an inverted y-axis which is why coordinates are being converted when coming from the model.
     """
 
-    def __init__(
-        self,
-        background_color: Tuple[int, int, int] = (0, 0, 0),
-    ):
+    def __init__(self, options: WindowOptions) -> None:
+        self.options: WindowOptions = options
         # Screen sizing
         display_info = pygame.display.Info()
-        # Display width/height currently matches world width/height and setting manually.
-        # This will eventually change to only display part of the world and run at full screen
+        # Width the display being used as detected by pygame's built in display Info class
         self._display_width: int = display_info.current_w
         self._display_height: int = display_info.current_h
+        # The screen that will be used to blit each frame
         self.screen: Surface = self._get_screen()
         # Get dimensions from created screen
         self.screen_width: int = self.screen.get_width()
         self.screen_height: int = self.screen.get_height()
-
-        # Background variables
-        self.background_color: Tuple[int, int, int] = background_color
-        self.background: Surface = self._get_background()
 
         # Font
         #self.font: Font = pygame.font.SysFont("Arial", 48)
@@ -38,27 +41,18 @@ class View:
             self.screen_width,
             self.screen_height,
         )
-        print(
-            "The actual display size used in the request was: ",
-            self._display_width,
-            self._display_height,
-        )
 
     def _get_screen(self) -> Surface:
         """
-        Get a full screen matching display width and height
+        Get the screen that will be used for displaying the game
         """
-        return pygame.display.set_mode(
-            (self._display_width, self._display_height), pygame.FULLSCREEN
-        )
-
-    def _get_background(self) -> Surface:
-        background = pygame.Surface((self.screen_width, self.screen_height))
-        background.fill(self.background_color)
-        return background
-
-    def draw_background(self, destination: Tuple[int, int] = (0, 0)) -> None:
-        self.screen.blit(self.background, destination)
+        if self.options.full_screen:
+            return pygame.display.set_mode((self._display_width, self._display_height), pygame.FULLSCREEN)
+        else:
+            # Don't let the width/height exceed the maximum dimensions of the current display
+            width: int = self.options.screen_width if self.options.screen_width is not None and self.options.screen_width < self._display_width else self._display_width
+            height: int = self.options.screen_height if self.options.screen_height is not None and self.options.screen_height < self._display_height else self._display_height
+            return pygame.display.set_mode((width, height))
 
     def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
         self.screen.blit(surface, dest, area)

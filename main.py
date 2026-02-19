@@ -9,6 +9,7 @@ from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
 from model.entitygroups.school.school import School
 from model.entitygroups.school.schoolparameters import SchoolParameters
 from model.world.worldspecs import WorldSpecs
+from view.view import WindowOptions
 
 
 ##########################################
@@ -55,11 +56,17 @@ def get_random_shoal_location(
 cell_size: float = 128.0
 grid_width: int = 32
 grid_height: int = 32
+# Defines the size of the game world
 world_specs: WorldSpecs = WorldSpecs(cell_size, grid_width, grid_height)
 world_width: float = world_specs.world_width
 world_height: float = world_specs.world_height
 
-controller_options: ControllerOptions = ControllerOptions(world_specs)
+# Defines the size of the display window and if fullscreen will be used
+window_options: WindowOptions = WindowOptions()
+
+# Inputs for the main game controller
+controller_options: ControllerOptions = ControllerOptions(world_specs, window_options)
+
 game_controller: GameController = GameController(controller_options)
 
 # Create schools of fish and add to the world
@@ -148,7 +155,7 @@ for _ in range(num_green_schools):
     game_controller.add_school(green_school)
 
 jelly_spawn_cd = 10.0 # Spawner cooldown in seconds
-num_jellies_per_spawn = 5
+num_jellies_per_spawn = 10
 jellyfish_swarm = JellyfishSwarm(
     JellyfishSettings(
         JellyfishType.RED,
