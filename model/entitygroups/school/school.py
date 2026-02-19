@@ -1,5 +1,3 @@
-import random
-from typing import Callable
 from uuid import UUID
 
 import pygame.image
@@ -10,8 +8,6 @@ from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType, FishSettings
 from model.entities.gameentity import GameEntity
 from model.entitygroups.school.schoolparameters import SchoolParameters
-from model.player.cameraspecs import CameraSpecs
-from model.utils.vectorutils import limit_magnitude
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 

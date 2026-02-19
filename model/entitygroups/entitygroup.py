@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 from pygame import Vector2
 
 from model.entities.gameentity import GameEntity
-from model.player.cameraspecs import CameraSpecs
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 

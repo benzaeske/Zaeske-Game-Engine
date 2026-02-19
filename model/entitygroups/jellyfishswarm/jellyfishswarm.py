@@ -1,4 +1,3 @@
-import random
 from uuid import UUID
 
 import pygame
@@ -10,7 +9,6 @@ from model.entities.fish.fishsettings import FishType
 from model.entities.jellyfish.jellyfish import Jellyfish
 from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyfishType
 from model.entitygroups.school.school import School
-from model.player.cameraspecs import CameraSpecs
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
