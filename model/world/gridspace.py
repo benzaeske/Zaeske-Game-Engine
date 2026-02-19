@@ -109,7 +109,7 @@ class GridSpace:
                 grid_c: int = c + dc
                 grid_c = (grid_c + self.grid_width) % self.grid_width
                 for group_id in group_ids:
-                    neighbors.extend(self._grid[(grid_r, grid_c)].get_contained_entities(group_id))
+                    neighbors.extend(self._grid[(grid_r, grid_c)].get_entities_by_group_id(group_id))
         return neighbors
 
     def process_moved_entity(self, old_position: Vector2, entity: GameEntity) -> None:

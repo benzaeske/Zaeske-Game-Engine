@@ -1,11 +1,13 @@
 import copy
 import uuid
+from typing import Callable
 from uuid import UUID
 from abc import ABC, abstractmethod
 
 from pygame import Vector2
 
 from model.entities.gameentity import GameEntity
+from model.world.entitygroupindex import EntityGroupIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
@@ -19,17 +21,17 @@ class EntityGroup[T: GameEntity](ABC):
     def update_entities(
         self,
         grid_space: GridSpace,
-        entity_groups: dict[UUID, EntityGroup],
+        get_group_ids_by_type: Callable[[EntityGroupIndex], set[UUID]],
         world_specs: WorldSpecs,
         player_position: Vector2 | None = None,
     ) -> None:
         """
         Updates all entities in their current position for a given frame by calculating forces applied to them. Does not update entity position since all
         forces need to be calculated for all entities before any of them move.
-        :param grid_space: The current grid space - Updating entities needs to be able to ask questions about what other entities are around them
-        :param entity_groups: Updating entities needs to be able to ask questions about the properties and type of other groups
-        :param world_specs: Updating entities currently needs information about the size of the world for wrapping logic
-        :param player_position: Provided in case entities need to behave based on their position relative to the player
+        :param grid_space: The current grid space
+        :param get_group_ids_by_type: A function that takes an entity group type and returns a set of group ids for that type
+        :param world_specs: Information about the world space
+        :param player_position: The current position of the player
         """
         pass
 

@@ -71,9 +71,9 @@ class Player(ABC):
         self.shield_surface_w_adj: float = self.shield_surface.get_width() / 2
         self.shield_surface_h_adj: float = self.shield_surface.get_height() / 2
         # Fish coherency
-        self.cohere_green: int = 0
-        self.cohere_yellow: int = 0
         self.cohere_red: int = 0
+        self.cohere_yellow: int = 0
+        self.cohere_green: int = 0
 
     def move_player(
         self,

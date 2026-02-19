@@ -169,7 +169,7 @@ class GameController:
                     entity_adj = Vector2(self.model.world_specs.world_width, 0)
                 # Get the grid cell that holds the entities we need to draw
                 grid_cell: GridCell = self.model.grid_space.get_grid_cell((row, wrapped_col))
-                for group_id, entities in grid_cell.contained_entities_by_group.items():
+                for group_id, entities in grid_cell.contained_entities_by_group_id.items():
                     for entity in entities:
                         self.view.draw_surface(
                             entity.get_surface(),

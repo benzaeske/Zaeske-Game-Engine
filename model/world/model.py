@@ -6,12 +6,9 @@ from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
 
 from model.entitygroups.entitygroup import EntityGroup
-from model.entities.fish.fish import Fish
-from model.entities.fish.fishsettings import FishType
 from model.entities.gameentity import GameEntity
-from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
-from model.entitygroups.school.school import School
 from model.spawners.spawner import Spawner
+from model.world.entitygroupindex import EntityGroupIndex
 from model.world.entitymanager import EntityManager
 from model.world.gridspace import GridSpace
 from model.player.player import Player
@@ -78,31 +75,29 @@ class SpatialPartitioningModel:
         self.update_player_items()
 
     def process_player_fish_coherency(self, dt: float) -> None:
-        # Track number of fish types in player's grid cell
-        cohere_red: int = 0
-        cohere_green: int = 0
-        cohere_yellow: int = 0
         # Player's grid space coordinate
         p_coord: Tuple[int, int] = self.grid_space.get_grid_cell_coord_from_position(self.player.position.x, self.player.position.y)
         # Player's grid cell
         p_grid_cell: GridCell = self.grid_space.get_grid_cell(p_coord)
-        for group_id, entities in p_grid_cell.contained_entities_by_group.items():
-            eg: EntityGroup = self.entity_manager.get_entity_group(group_id)
-            if isinstance(eg, School):
-                match eg.fish_settings.fish_type:
-                    case FishType.RED:
-                        cohere_red += len(entities)
-                    case FishType.GREEN:
-                        cohere_green += len(entities)
-                    case FishType.YELLOW:
-                        cohere_yellow += len(entities)
         # Set coherence amounts on player so other functions can reference it quickly
-        self.player.cohere_green = cohere_green
-        self.player.cohere_yellow = cohere_yellow
-        self.player.cohere_green_red = cohere_red
+        self.player.cohere_red = len(
+            p_grid_cell.get_entities_by_group_ids(
+                self.entity_manager.get_group_ids_by_type(EntityGroupIndex.RED_FISH)
+            )
+        )
+        self.player.cohere_yellow = len(
+            p_grid_cell.get_entities_by_group_ids(
+                self.entity_manager.get_group_ids_by_type(EntityGroupIndex.YELLOW_FISH)
+            )
+        )
+        self.player.cohere_green = len(
+            p_grid_cell.get_entities_by_group_ids(
+                self.entity_manager.get_group_ids_by_type(EntityGroupIndex.GREEN_FISH)
+            )
+        )
         # Process immediate coherence effects
-        self.player.update_hp(1 * dt * cohere_green)
-        if cohere_yellow > 0:
+        self.player.update_hp(1 * dt * self.player.cohere_green)
+        if self.player.cohere_yellow > 0:
             self.player.charge_shield(dt)
 
     def process_player_jelly_collisions(self, dt: float) -> None:
@@ -110,23 +105,25 @@ class SpatialPartitioningModel:
         # Only process collisions for jellies that are within a cell range that can actually reach the player
         r: int = int(self.player.position.y / self.world_specs.cell_size)
         c: int = int(self.player.position.x / self.world_specs.cell_size)
+        # Get all jelly group ids to use for easy querying later
+        jelly_group_ids: set[UUID] = self.entity_manager.get_group_ids_by_type(EntityGroupIndex.JELLY)
         for dr in range(-cell_range, cell_range + 1):
             for dc in range(-cell_range, cell_range + 1):
                 grid_r: int = r + dr
                 grid_r = (grid_r + self.world_specs.grid_height) % self.world_specs.grid_height
-                # Virtual grid column is used for world-wrapping calculations
+                # Virtual grid column is the column before wrapping
                 virtual_grid_c: int = c + dc
+                # Grid column wrapped to fit in grid boundary
                 grid_c: int = (virtual_grid_c + self.world_specs.grid_width) % self.world_specs.grid_width
+                # The current grid cell
                 gc: GridCell = self.grid_space.get_grid_cell((grid_r, grid_c))
-                for group_id, entities in gc.contained_entities_by_group.items():
-                    eg: EntityGroup = self.entity_manager.get_entity_group(group_id)
-                    if isinstance(eg, JellyfishSwarm):
-                        for jelly in entities:
-                            jelly_hitbox: Rect = jelly.hitbox
-                            if virtual_grid_c < 0 or virtual_grid_c >= self.world_specs.grid_width:
-                                jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
-                            if jelly_hitbox.colliderect(self.player.hitbox):
-                                self.player.health -= jelly.damage * dt
+                for jelly in gc.get_entities_by_group_ids(jelly_group_ids):
+                    jelly_hitbox: Rect = jelly.hitbox
+                    if virtual_grid_c < 0 or virtual_grid_c >= self.world_specs.grid_width:
+                        jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
+                    if jelly_hitbox.colliderect(self.player.hitbox):
+                        self.player.health -= jelly.damage * dt
+
 
     def update_player_items(self) -> None:
         # TODO create an abstract Item class with an update method. Track items globally
@@ -135,44 +132,42 @@ class SpatialPartitioningModel:
     def shield_update(self):
         # TODO Move to the 'Shield' Item impl once Item is an abstract class
         if self.player.shield > 0:
-            shield_cell_range: int = 2
             # Only process shield collisions for jellies that are within a cell range that can actually reach the player shield
+            shield_cell_range: int = 2
+            # Get the grid cell row/column of the player's current position
             r: int = int(self.player.position.y / self.world_specs.cell_size)
             c: int = int(self.player.position.x / self.world_specs.cell_size)
+            # Get all jelly group ids to use for easy querying later
+            jelly_group_ids: set[UUID] = self.entity_manager.get_group_ids_by_type(EntityGroupIndex.JELLY)
             for dr in range(-shield_cell_range, shield_cell_range + 1):
                 for dc in range(-shield_cell_range, shield_cell_range + 1):
                     grid_r: int = r + dr
                     grid_r = (grid_r + self.world_specs.grid_height) % self.world_specs.grid_height
-                    # Track virtual grid column needed for wrapping calculations.
+                    # Virtual grid column is the column before wrapping
                     virtual_grid_c: int = c + dc
+                    # Grid column wrapped to fit in grid boundary
                     grid_c: int = (virtual_grid_c + self.world_specs.grid_width) % self.world_specs.grid_width
+                    # The current grid cell
                     gc: GridCell = self.grid_space.get_grid_cell((grid_r, grid_c))
-                    for group_id, entities in gc.contained_entities_by_group.items():
-                        eg: EntityGroup = self.entity_manager.get_entity_group(group_id)
-                        if isinstance(eg, JellyfishSwarm):
-                            # Track entities that need to be deleted because they touched the shield
-                            remove_entities: list[GameEntity] = []
-                            for jelly in entities:
-                                jelly_hitbox: Rect = jelly.hitbox
-                                if virtual_grid_c < 0 or virtual_grid_c >= self.world_specs.grid_width:
-                                    jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
-                                # find the closest point on the jelly's hitbox to the player's circular shield
-                                closest_point: Vector2 = Vector2(
-                                    max(
-                                        jelly_hitbox.left,
-                                        min(int(self.player.position.x), jelly_hitbox.right),
-                                    ),
-                                    max(
-                                        jelly_hitbox.top,
-                                        min(int(self.player.position.y), jelly_hitbox.bottom),
-                                    ),
-                                )
-                                if closest_point.distance_squared_to(self.player.position) < self.player.shield_radius_squared:
-                                    self.player.decrement_shield()
-                                    remove_entities.append(jelly)
-                            for entity in remove_entities:
-                                self.entity_manager.remove_entity(entity)
-                                self.grid_space.remove_entity(entity)
+                    for jelly in gc.get_entities_by_group_ids(jelly_group_ids):
+                        jelly_hitbox: Rect = jelly.hitbox
+                        if virtual_grid_c < 0 or virtual_grid_c >= self.world_specs.grid_width:
+                            jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
+                        # find the closest point on the jelly's hitbox to the player's circular shield
+                        closest_point: Vector2 = Vector2(
+                            max(
+                                jelly_hitbox.left,
+                                min(int(self.player.position.x), jelly_hitbox.right),
+                            ),
+                            max(
+                                jelly_hitbox.top,
+                                min(int(self.player.position.y), jelly_hitbox.bottom),
+                            ),
+                        )
+                        if closest_point.distance_squared_to(self.player.position) < self.player.shield_radius_squared:
+                            self.player.decrement_shield()
+                            self.entity_manager.remove_entity(jelly)
+                            self.grid_space.remove_entity(jelly)
 
     def update_entity_groups(self) -> None:
         self.entity_manager.update_all_groups(self.grid_space, self.world_specs, self.player.position)

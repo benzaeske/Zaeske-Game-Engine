@@ -66,9 +66,7 @@ class Fish(GameEntity):
         count_n: int = 0
         count_s: int = 0
         for other in others:
-            if (
-                self.group_id == other.group_id and self.entity_id != other.entity_id
-            ):  # TODO can remove school id check after refactor
+            if self.entity_id != other.entity_id: # Make sure we don't check an entity against itself
                 d, other_pos = calculate_shortest_distance_and_virtual_position(
                     self.position, other.position, world_width
                 )

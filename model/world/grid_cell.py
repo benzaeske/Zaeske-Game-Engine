@@ -4,9 +4,7 @@ from uuid import UUID
 from pygame import Surface
 
 
-from model.entities.fish.fish import Fish
 from model.entities.gameentity import GameEntity
-from model.entities.jellyfish.jellyfish import Jellyfish
 
 
 class GridCell:
@@ -20,17 +18,23 @@ class GridCell:
         background_surface: Surface,
     ):
         self.coordinates: Tuple[int, int] = coordinates
-        self.contained_entities_by_group: dict[UUID, set[GameEntity]] = {}
+        self.contained_entities_by_group_id: dict[UUID, set[GameEntity]] = {}
         self.background_surface: Surface = background_surface
 
     def add_entity(self, entity: GameEntity):
-        if entity.group_id not in self.contained_entities_by_group:
-            self.contained_entities_by_group[entity.group_id] = set()
-        self.contained_entities_by_group[entity.group_id].add(entity)
+        if entity.group_id not in self.contained_entities_by_group_id:
+            self.contained_entities_by_group_id[entity.group_id] = set()
+        self.contained_entities_by_group_id[entity.group_id].add(entity)
 
     def remove_entity(self, entity: GameEntity):
-        if entity.group_id in self.contained_entities_by_group and entity in self.contained_entities_by_group[entity.group_id]:
-            self.contained_entities_by_group[entity.group_id].remove(entity)
+        if entity.group_id in self.contained_entities_by_group_id and entity in self.contained_entities_by_group_id[entity.group_id]:
+            self.contained_entities_by_group_id[entity.group_id].remove(entity)
 
-    def get_contained_entities(self, group_id: UUID) -> set[GameEntity]:
-        return self.contained_entities_by_group.get(group_id, set())
+    def get_entities_by_group_id(self, group_id: UUID) -> set[GameEntity]:
+        return self.contained_entities_by_group_id.get(group_id, set())
+
+    def get_entities_by_group_ids(self, group_ids: set[UUID]) -> set[GameEntity]:
+        entities: set[GameEntity] = set()
+        for group_id in group_ids:
+            entities.update(self.contained_entities_by_group_id.get(group_id, set()))
+        return entities

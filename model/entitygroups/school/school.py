@@ -1,4 +1,5 @@
 import copy
+from typing import Callable
 from uuid import UUID
 
 import pygame.image
@@ -9,6 +10,7 @@ from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType, FishSettings
 from model.entities.gameentity import GameEntity
 from model.entitygroups.school.schoolparameters import SchoolParameters
+from model.world.entitygroupindex import EntityGroupIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
@@ -30,7 +32,7 @@ class School(EntityGroup[Fish]):
     def update_entities(
         self,
         grid_space: GridSpace,
-        entity_groups: dict[UUID, EntityGroup],
+        get_group_ids_by_type: Callable[[EntityGroupIndex], set[UUID]],
         world_specs: WorldSpecs,
         player_position: Vector2 | None = None,
     ) -> None:
