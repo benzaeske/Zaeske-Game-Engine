@@ -1,7 +1,5 @@
 from enum import Enum
 
-from pygame import Vector2
-
 
 class JellyfishType(Enum):
     RED = 0
@@ -17,8 +15,8 @@ class JellyfishSettings:
         max_acceleration: float,
         health: float,
         damage: float,
-        start_position: Vector2 = Vector2(0.0, 0.0),
-        start_velocity: Vector2 = Vector2(0.0, 0.0),
+        neighbor_range: int,
+        scared_range: int,
     ):
         self.jelly_type: JellyfishType = jelly_type
         self.width: float = width
@@ -27,5 +25,5 @@ class JellyfishSettings:
         self.max_acceleration: float = max_acceleration
         self.health: float = health
         self.damage: float = damage
-        self.start_position: Vector2 = start_position
-        self.start_velocity: Vector2 = start_velocity
+        self.neighbor_range: int = neighbor_range
+        self.scared_range: int = scared_range

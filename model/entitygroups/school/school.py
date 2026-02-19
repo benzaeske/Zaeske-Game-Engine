@@ -1,3 +1,4 @@
+import copy
 from uuid import UUID
 
 import pygame.image
@@ -44,13 +45,7 @@ class School(EntityGroup[Fish]):
 
     def create_entity(self) -> Fish:
         fish: Fish = Fish(
-            FishSettings(
-                self.fish_settings.fish_type,
-                self.fish_settings.width,
-                self.fish_settings.height,
-                self.fish_settings.max_speed,
-                self.fish_settings.max_acceleration
-            ),
+            copy.deepcopy(self.fish_settings),
             self.group_id,
             self.fish_sprite,
         )

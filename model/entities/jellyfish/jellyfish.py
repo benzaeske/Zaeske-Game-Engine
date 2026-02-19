@@ -16,8 +16,6 @@ class Jellyfish(GameEntity):
             settings.height * 0.75,
             settings.max_speed,
             settings.max_acceleration,
-            settings.start_position,
-            settings.start_velocity,
         )
         self.health = settings.health
         self.damage = settings.damage

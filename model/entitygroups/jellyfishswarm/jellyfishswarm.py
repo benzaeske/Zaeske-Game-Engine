@@ -1,3 +1,4 @@
+import copy
 from uuid import UUID
 
 import pygame
@@ -31,13 +32,10 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
         world_specs: WorldSpecs,
         player_position: Vector2 | None = None,
     ) -> None:
-        # TODO make these properties on jellyfish settings
-        neighbor_range: int = 1
-        scared_range: int = 2
         scared_of_groups: set[UUID] = self.get_scared_group_ids(entity_groups)
         for jellyfish in self._entities:
-            neighbor_jellies: list[GameEntity] = grid_space.get_neighbors(jellyfish, neighbor_range)
-            afraid_of_fish: list[GameEntity] = grid_space.get_neighbors(jellyfish, scared_range, scared_of_groups)
+            neighbor_jellies: list[GameEntity] = grid_space.get_neighbors(jellyfish, self.jellyfish_settings.neighbor_range)
+            afraid_of_fish: list[GameEntity] = grid_space.get_neighbors(jellyfish, self.jellyfish_settings.scared_range, scared_of_groups)
             jellyfish.update_acceleration(
                 player_position,
                 neighbor_jellies,
@@ -52,6 +50,7 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
         :param entity_groups: The current entity groups present in the game world
         :return: A set of group ids
         """
+        # TODO create and utilize an entity group type map in entity manager
         scared_of_groups: set[UUID] = set()
         for group in entity_groups.values():
             if isinstance(group, School) and group.fish_settings.fish_type is FishType.RED:
@@ -62,15 +61,7 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
         jelly: Jellyfish = Jellyfish(
             self.group_id,
             self.sprite,
-            JellyfishSettings(
-                self.jellyfish_settings.jelly_type,
-                self.jellyfish_settings.width,
-                self.jellyfish_settings.height,
-                self.jellyfish_settings.max_speed,
-                self.jellyfish_settings.max_acceleration,
-                self.jellyfish_settings.health,
-                self.jellyfish_settings.damage,
-            )
+            copy.deepcopy(self.jellyfish_settings)
         )
         self.add_entity(jelly)
         return jelly

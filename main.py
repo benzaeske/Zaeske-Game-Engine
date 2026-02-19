@@ -165,6 +165,8 @@ jellyfish_swarm = JellyfishSwarm(
         90,
         100,
         10,
+        1,
+        2
     ),
     1,
 )

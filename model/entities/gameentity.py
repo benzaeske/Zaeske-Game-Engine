@@ -16,8 +16,6 @@ class GameEntity:
         hitbox_height: float,
         max_speed: float,
         max_acceleration: float,
-        start_pos: Vector2 = Vector2(0.0, 0.0),
-        start_v: Vector2 = Vector2(0.0, 0.0)
     ):
         self.entity_id: uuid.UUID = uuid.uuid4()
         self.group_id: uuid.UUID = group_id
@@ -26,12 +24,12 @@ class GameEntity:
         self.sprite: Surface = sprite
         self.sprite_width_adj: float = sprite.get_width() / 2
         self.sprite_height_adj: float = sprite.get_height() / 2
-        self.position: Vector2 = copy.deepcopy(start_pos)
+        self.position: Vector2 = Vector2(0.0, 0.0)
         # The hitbox is how big the entity actually is when performing hit detection.
         # The sprite and the hitbox are on top of each other's centers
         self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
         self.hitbox.center = (int(self.position.x), int(self.position.y))
-        self.velocity: Vector2 = copy.deepcopy(start_v)
+        self.velocity: Vector2 = Vector2(0.0, 0.0)
         self.acceleration: Vector2 = Vector2(0.0, 0.0)
         self.max_speed: float = max_speed
         self.max_acceleration: float = max_acceleration
