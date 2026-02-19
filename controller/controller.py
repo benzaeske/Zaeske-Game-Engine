@@ -66,6 +66,10 @@ class GameController:
             self.do_game_loop()
 
     def do_game_loop(self) -> None:
+        # TODO State machine for different display loops
+        #  Pause menu. Display high score and current score. Options to resume or quit
+        #  Display a score, save high score locally
+        #  You died screen. Shows score, high score. Options to quit, play again
         self.key_presses = pygame.key.get_pressed()
         self.mouse_pos = pygame.mouse.get_pos()
         self.current_frame_input_events = pygame.event.get()
@@ -104,6 +108,7 @@ class GameController:
         self.model.update_model(self.dt, self.key_presses)
 
     def draw_background(self) -> None:
+        # TODO Grid cell background matrix using perlin noise instead of storing background tiles in grid cell class
         # Loop over grid cells within camera range.
         left: int = int(
             self.model.player.camera.left // self.model.world_specs.cell_size
@@ -171,6 +176,7 @@ class GameController:
                 grid_cell: GridCell = self.model.grid_space.get_grid_cell((row, wrapped_col))
                 for group_id, entities in grid_cell.contained_entities_by_group_id.items():
                     for entity in entities:
+                        # TODO Move drawing into GameEntity implementations. Drawable interface?
                         self.view.draw_surface(
                             entity.get_surface(),
                             self.adj_game_entity_pos_to_camera(

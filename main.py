@@ -155,7 +155,7 @@ for _ in range(num_green_schools):
     game_controller.add_school(green_school)
 
 jelly_spawn_cd = 10.0 # Spawner cooldown in seconds
-num_jellies_per_spawn = 5
+num_jellies_per_spawn = 10
 jellyfish_swarm = JellyfishSwarm(
     JellyfishSettings(
         JellyfishType.RED,

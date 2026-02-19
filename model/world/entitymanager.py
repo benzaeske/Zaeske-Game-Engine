@@ -13,7 +13,8 @@ from model.world.worldspecs import WorldSpecs
 
 class EntityManager:
     """
-    A global entity manager. Stores all entities that are currently loaded into the game
+    A global entity manager. Stores all entities that are currently loaded into the game.
+    Contains functions to easily query existing EntityGroups and GameEntities.
     """
     def __init__(self):
         self._entity_groups: dict[UUID, EntityGroup] = {}

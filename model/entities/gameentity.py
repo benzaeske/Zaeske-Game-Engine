@@ -1,4 +1,3 @@
-import copy
 import uuid
 
 from pygame import Surface, Vector2, Rect
@@ -7,11 +6,10 @@ from model.utils.vectorutils import limit_magnitude, safe_normalize
 
 
 class GameEntity:
-
     def __init__(
         self,
         group_id: uuid.UUID,
-        sprite: Surface,
+        sprite: Surface, # TODO Make sure sprites are loaded once on the entity group
         hitbox_width: float,
         hitbox_height: float,
         max_speed: float,
