@@ -2,7 +2,7 @@ import math
 from typing import Tuple
 
 import pygame
-from pygame import Surface, Rect
+from pygame import Surface, Rect, Font
 
 
 class WindowOptions:
@@ -34,7 +34,7 @@ class View:
         self.screen_height: int = self.screen.get_height()
 
         # Font
-        #self.font: Font = pygame.font.SysFont("Arial", 48)
+        self.font: Font = pygame.font.SysFont("Arial", 48)
 
         print(
             "Initialized view with pygame screen Surface dimensions: ",
@@ -57,11 +57,13 @@ class View:
     def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
         self.screen.blit(surface, dest, area)
 
-    def print_info_to_screen(self, fps: float, player_x: int, player_y: int) -> None:
+    def print_fps_to_screen(self, fps: float, player_x: int, player_y: int) -> None:
         fps_surface: Surface = self.font.render(
             str(math.floor(fps)), True, (255, 255, 255)
         )
         self.screen.blit(fps_surface, fps_surface.get_rect(x=0, y=0))
+
+    def print_location_to_screen(self, player_x: int, player_y: int) -> None:
         x_surface: Surface = self.font.render(
             "x: " + str(player_x), True, (255, 255, 255)
         )
@@ -75,6 +77,13 @@ class View:
                 x=0, y=fps_surface.get_height() + x_surface.get_height()
             ),
         )
+
+    def print_score_to_screen(self, score: int | None) -> None:
+        if score is None:
+            score = 0
+        score_surface: Surface = self.font.render("Score: " + str(score), True, (255, 255, 255))
+        self.screen.blit(score_surface, score_surface.get_rect(x=0, y=0))
+
 
     @staticmethod
     def update_screen() -> None:

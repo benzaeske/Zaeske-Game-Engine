@@ -1,5 +1,5 @@
 import copy
-from typing import Tuple
+from typing import Tuple, Callable
 from uuid import UUID
 
 from pygame import Vector2, Rect
@@ -43,12 +43,13 @@ class SpatialPartitioningModel:
 
     # --------- Refactor Update Functions -----------
 
-    def update_model(self, dt: float, key_presses: ScancodeWrapper) -> None:
+    def update_model(self, dt: float, key_presses: ScancodeWrapper, score_callback: Callable[[int], None]) -> None:
         # Process spawners (decrement cooldown, spawn if ready)
         self.process_spawners(dt)
         # Update player (update current state based on entity proximity; check collisions etc.)
         # Update player items (Items can interact with entities in the world space or with the player)
-        self.update_player(dt, key_presses)
+        # TODO Process deleted entities when updating them instead of in the item
+        self.update_player(dt, key_presses, score_callback)
         # Update entity groups (Decisions that each entity makes on their own based on their environment)
         self.update_entity_groups()
         # Move entity groups
@@ -68,11 +69,11 @@ class SpatialPartitioningModel:
             if spawner.should_destroy():
                 self.remove_spawner(spawner_id)
 
-    def update_player(self, dt: float, key_presses: ScancodeWrapper) -> None:
+    def update_player(self, dt: float, key_presses: ScancodeWrapper, score_callback: Callable[[int], None]) -> None:
         # TODO make player move using velocity/acceleration
         self.process_player_fish_coherency(dt)
         self.process_player_jelly_collisions(dt)
-        self.update_player_items()
+        self.update_player_items(score_callback)
 
     def process_player_fish_coherency(self, dt: float) -> None:
         # Player's grid space coordinate
@@ -125,11 +126,11 @@ class SpatialPartitioningModel:
                         self.player.health -= jelly.damage * dt
 
 
-    def update_player_items(self) -> None:
+    def update_player_items(self, score_callback: Callable[[int], None]) -> None:
         # TODO create an abstract Item class with an update method. Track items globally
-        self.shield_update()
+        self.shield_update(score_callback)
 
-    def shield_update(self):
+    def shield_update(self, score_callback: Callable[[int], None]):
         # TODO Move to the 'Shield' Item impl once Item is an abstract class
         if self.player.shield > 0:
             # Only process shield collisions for jellies that are within a cell range that can actually reach the player shield
@@ -165,9 +166,13 @@ class SpatialPartitioningModel:
                             ),
                         )
                         if closest_point.distance_squared_to(self.player.position) < self.player.shield_radius_squared:
+                            # TODO delete jellies when health reaches 0 instead of shield killing them instantly
                             self.player.decrement_shield()
                             self.entity_manager.remove_entity(jelly)
                             self.grid_space.remove_entity(jelly)
+                            # Note: This is in the item's update method right now since the item is erasing the enemies directly from the game. Eventually this should
+                            # be moved to wherever entity 'death' handling is done
+                            score_callback(1)
 
     def update_entity_groups(self) -> None:
         self.entity_manager.update_all_groups(self.grid_space, self.world_specs, self.player.position)

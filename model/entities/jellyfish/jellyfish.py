@@ -8,6 +8,7 @@ from model.utils.entityutils import calculate_shortest_distance_and_virtual_posi
 
 
 class Jellyfish(GameEntity):
+    # TODO: Base class: Enemy
     def __init__(self, group_id: UUID, jellyfish_sprite: Surface, settings: JellyfishSettings):
         super().__init__(
             group_id,

@@ -59,6 +59,7 @@ class GameController:
         # Pygame allows us to get the list of events once and then clears the event queue so we need to store them each frame
         self.current_frame_input_events: list[Event] = []
         self.paused: bool = False
+        self.score: int = 0
 
     def start_game(self):
         self.game_start = time.time()
@@ -81,9 +82,10 @@ class GameController:
             model_update_time = time.time() - model_update_time
             view_update_time = time.time()
             self.draw_background()
-            # self.draw_fps_menu()
             self.draw_game_entities()
             self.draw_player()
+            # self.draw_fps_menu()
+            self.draw_score()
             self.view.update_screen()
             view_update_time = time.time() - view_update_time
             self.fps_logging(model_update_time, view_update_time)
@@ -105,7 +107,7 @@ class GameController:
                     self.paused = not self.paused
 
     def update_model(self) -> None:
-        self.model.update_model(self.dt, self.key_presses)
+        self.model.update_model(self.dt, self.key_presses, self.increment_score)
 
     def draw_background(self) -> None:
         # TODO Grid cell background matrix using perlin noise instead of storing background tiles in grid cell class
@@ -145,6 +147,9 @@ class GameController:
             int(self.model.player.position.x),
             int(self.model.player.position.y),
         )
+
+    def draw_score(self) -> None:
+        self.view.print_score_to_screen(self.score)
 
     def draw_game_entities(self) -> None:
         # Loop over grid cells within camera range.
@@ -255,3 +260,6 @@ class GameController:
                 view_t,
                 "\n",
             )
+
+    def increment_score(self, n: int | None) -> None:
+        self.score += n
