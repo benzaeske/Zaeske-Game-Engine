@@ -196,12 +196,12 @@ class Turtle(Player):
         surface_width: float = 128.0
         surface_height: float = 128.0
         turtle_speed: float = 256.0
-        self.surface_left: Surface = pygame.image.load("images/turtle-side-left.png")
+        self.surface_left: Surface = pygame.image.load("images/baby_turtle_left.png")
         self.surface_left = self.surface_left.convert_alpha()
         self.surface_left = pygame.transform.scale(
             self.surface_left, (surface_width, surface_height)
         )
-        self.surface_right: Surface = pygame.image.load("images/turtle-side-right.png")
+        self.surface_right: Surface = pygame.image.load("images/baby_turtle_right.png")
         self.surface_right = self.surface_right.convert_alpha()
         self.surface_right = pygame.transform.scale(
             self.surface_right, (surface_width, surface_height)
