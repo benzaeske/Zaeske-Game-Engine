@@ -3,7 +3,7 @@ from uuid import UUID
 from pygame import Vector2
 
 from model.entities.fish.fishsettings import FishType
-from model.entitygroups.entitygroup import EntityGroup
+from model.entitygroups.gameentitygroup import GameEntityGroup
 from model.entities.gameentity import GameEntity
 from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
 from model.entitygroups.school.school import School
@@ -17,7 +17,7 @@ class EntityManager:
     Contains functions to easily query existing EntityGroups and GameEntities.
     """
     def __init__(self):
-        self._entity_groups: dict[UUID, EntityGroup] = {}
+        self._entity_groups: dict[UUID, GameEntityGroup] = {}
         # Maintain sets of EntityGroup ids keyed by the various types defined in the EntityGroupIndex Enum.
         self._indexed_group_ids: dict[EntityGroupIndex, set[UUID]] = {index: set() for index in EntityGroupIndex}
 
@@ -29,7 +29,7 @@ class EntityManager:
         for group in self._entity_groups.values():
             group.move_entities(grid_space, world_specs, dt)
 
-    def add_entity_group(self, entity_group: EntityGroup) -> None:
+    def add_entity_group(self, entity_group: GameEntityGroup) -> None:
         self._entity_groups[entity_group.group_id] = entity_group
         self._index_entity_group(entity_group)
 
@@ -40,7 +40,7 @@ class EntityManager:
             if group_id in ids:
                 ids.remove(group_id)
 
-    def _index_entity_group(self, entity_group: EntityGroup) -> None:
+    def _index_entity_group(self, entity_group: GameEntityGroup) -> None:
         if isinstance(entity_group, JellyfishSwarm):
             self._indexed_group_ids[EntityGroupIndex.JELLY].add(entity_group.group_id)
         elif isinstance(entity_group, School):
@@ -52,7 +52,7 @@ class EntityManager:
                 case FishType.GREEN:
                     self._indexed_group_ids[EntityGroupIndex.GREEN_FISH].add(entity_group.group_id)
 
-    def get_entity_group(self, group_id: UUID) -> EntityGroup:
+    def get_entity_group(self, group_id: UUID) -> GameEntityGroup:
         return self._entity_groups[group_id]
 
     def get_group_ids_by_type(self, entity_type: EntityGroupIndex) -> set[UUID]:

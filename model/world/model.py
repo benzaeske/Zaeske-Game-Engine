@@ -5,7 +5,7 @@ from uuid import UUID
 from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
 
-from model.entitygroups.entitygroup import EntityGroup
+from model.entitygroups.gameentitygroup import GameEntityGroup
 from model.entities.gameentity import GameEntity
 from model.spawners.spawner import Spawner
 from model.world.entitygroupindex import EntityGroupIndex
@@ -29,7 +29,7 @@ class SpatialPartitioningModel:
         self.player: Player = player
 
     # ------- Refactor access functions --------
-    def add_entity_group(self, entity_group: EntityGroup) -> None:
+    def add_entity_group(self, entity_group: GameEntityGroup) -> None:
         self.entity_manager.add_entity_group(entity_group)
 
     def remove_entity_group(self, group_id: UUID) -> None:
@@ -44,19 +44,11 @@ class SpatialPartitioningModel:
     # --------- Refactor Update Functions -----------
 
     def update_model(self, dt: float, key_presses: ScancodeWrapper, score_callback: Callable[[int], None]) -> None:
-        # Process spawners (decrement cooldown, spawn if ready)
         self.process_spawners(dt)
-        # Update player (update current state based on entity proximity; check collisions etc.)
-        # Update player items (Items can interact with entities in the world space or with the player)
-        # TODO Process deleted entities when updating them instead of in the item
-        self.update_player(dt, key_presses, score_callback)
-        # Update entity groups (Decisions that each entity makes on their own based on their environment)
         self.update_entity_groups()
-        # Move entity groups
+        self.update_player(dt, key_presses, score_callback)
         self.move_entity_groups(dt)
-        # Move player
         self.move_player(dt, key_presses)
-        pass
 
     def process_spawners(self, dt: float) -> None:
         """
@@ -70,9 +62,14 @@ class SpatialPartitioningModel:
                 self.remove_spawner(spawner_id)
 
     def update_player(self, dt: float, key_presses: ScancodeWrapper, score_callback: Callable[[int], None]) -> None:
+        """
+        - Calculate acceleration based on key presses and input events
+        - update current state based on neighbor entities
+        """
         # TODO make player move using velocity/acceleration
         self.process_player_fish_coherency(dt)
         self.process_player_jelly_collisions(dt)
+        # TODO Process deleted entities when updating them instead of in the item
         self.update_player_items(score_callback)
 
     def process_player_fish_coherency(self, dt: float) -> None:
@@ -175,9 +172,20 @@ class SpatialPartitioningModel:
                             score_callback(1)
 
     def update_entity_groups(self) -> None:
+        """
+        - individual entities may decide how to move themselves
+        - entities may act on other entities
+        - checking entity hp to determine if they should be removed because they 'died' should be done here
+        """
         self.entity_manager.update_all_groups(self.grid_space, self.world_specs, self.player.position)
 
     def move_entity_groups(self, dt: float) -> None:
+        """
+        Before calling this each frame:\n
+        - All updates to each entity's self-imposed acceleration have been made
+        - All relevant external forces have been applied to each entity
+        - Entities that were killed this frame have been removed
+        """
         self.entity_manager.move_all_groups(self.grid_space, self.world_specs, dt)
 
     def move_player(self, dt: float, key_presses: ScancodeWrapper):

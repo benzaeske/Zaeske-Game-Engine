@@ -5,13 +5,13 @@ from uuid import UUID
 from pygame import Vector2
 
 from model.entities.gameentity import GameEntity
-from model.entitygroups.entitygroup import EntityGroup
+from model.entitygroups.gameentitygroup import GameEntityGroup
 from model.player.cameraspecs import CameraSpecs
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
-class Spawner[T: EntityGroup](ABC):
+class Spawner[T: GameEntityGroup](ABC):
     """
     Basic abstract class for spawners.
     Amount determines how many entities are spawned each time the spawn cooldown (seconds) is reached

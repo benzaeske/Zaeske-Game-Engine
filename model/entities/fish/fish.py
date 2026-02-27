@@ -30,9 +30,6 @@ class Fish(GameEntity):
             fish_settings.max_acceleration,
         )
 
-    def update(self) -> None:
-        pass
-
     def make_schooling_decisions(
         self,
         others: list[GameEntity],

@@ -12,7 +12,10 @@ from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
-class EntityGroup[T: GameEntity](ABC):
+class GameEntityGroup[T: GameEntity](ABC):
+    """
+    A group of entities of the same type that are controlled by the game.
+    """
     def __init__(self):
         self.group_id: UUID = uuid.uuid4()
         self._entities: set[T] = set()

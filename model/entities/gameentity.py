@@ -15,6 +15,9 @@ class GameEntity:
         max_speed: float,
         max_acceleration: float,
     ):
+        """
+        An entity that is controlled by the game and is external to the player.
+        """
         self.entity_id: uuid.UUID = uuid.uuid4()
         self.group_id: uuid.UUID = group_id
         # The sprite is what is drawn on screen.

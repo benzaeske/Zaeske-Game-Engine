@@ -6,7 +6,7 @@ import pygame
 from pygame import Surface, Vector2
 
 from model.entities.gameentity import GameEntity
-from model.entitygroups.entitygroup import EntityGroup
+from model.entitygroups.gameentitygroup import GameEntityGroup
 from model.entities.jellyfish.jellyfish import Jellyfish
 from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyfishType
 from model.world.entitygroupindex import EntityGroupIndex
@@ -14,7 +14,7 @@ from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
-class JellyfishSwarm(EntityGroup[Jellyfish]):
+class JellyfishSwarm(GameEntityGroup[Jellyfish]):
     def __init__(self, jellyfish_settings: JellyfishSettings, amount: int):
         super().__init__()
         self.jellyfish_settings: JellyfishSettings = jellyfish_settings
@@ -34,8 +34,8 @@ class JellyfishSwarm(EntityGroup[Jellyfish]):
     ) -> None:
         scared_of_groups: set[UUID] = get_group_ids_by_type(EntityGroupIndex.RED_FISH)
         for jellyfish in self._entities:
-            neighbor_jellies: list[GameEntity] = grid_space.get_neighbors(jellyfish, self.jellyfish_settings.neighbor_range)
-            afraid_of_fish: list[GameEntity] = grid_space.get_neighbors(jellyfish, self.jellyfish_settings.scared_range, scared_of_groups)
+            neighbor_jellies: list[GameEntity] = grid_space.get_entity_neighbors(jellyfish, self.jellyfish_settings.neighbor_range)
+            afraid_of_fish: list[GameEntity] = grid_space.get_entity_neighbors(jellyfish, self.jellyfish_settings.scared_range, scared_of_groups)
             jellyfish.update_acceleration(
                 player_position,
                 neighbor_jellies,

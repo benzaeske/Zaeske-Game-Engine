@@ -5,7 +5,7 @@ from uuid import UUID
 import pygame.image
 from pygame import Vector2, Surface
 
-from model.entitygroups.entitygroup import EntityGroup
+from model.entitygroups.gameentitygroup import GameEntityGroup
 from model.entities.fish.fish import Fish
 from model.entities.fish.fishsettings import FishType, FishSettings
 from model.entities.gameentity import GameEntity
@@ -15,7 +15,7 @@ from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
-class School(EntityGroup[Fish]):
+class School(GameEntityGroup[Fish]):
     """
     Represents a school of fish. Responsible for creating Fish entities with the given settings passed to it. \n
     All fish created by a school share its school_id
@@ -37,7 +37,7 @@ class School(EntityGroup[Fish]):
         player_position: Vector2 | None = None,
     ) -> None:
         for current_fish in self._entities:
-            neighbors: list[GameEntity] = grid_space.get_neighbors(current_fish, self.school_params.interaction_cell_range)
+            neighbors: list[GameEntity] = grid_space.get_entity_neighbors(current_fish, self.school_params.interaction_cell_range)
             current_fish.make_schooling_decisions(
                 neighbors,
                 self.school_params,
