@@ -3,10 +3,10 @@ import random
 from pygame import Vector2, Rect
 
 from controller.controller import GameController, ControllerOptions
-from model.entities.fish.fishsettings import FishSettings, FishType
-from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyfishType
-from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
-from model.entitygroups.school.school import School
+from model.entities.fish.fishsettingsv1 import FishSettingsV1, FishTypeV1
+from model.entities.jellyfishfolder.jellyfishsettingsv1 import JellyfishSettingsV1, JellyfishType
+from model.entitygroups.jellyfishswarm.jellyfishswarmv1 import JellyfishSwarmV1
+from model.entitygroups.school.schoolv1 import SchoolV1
 from model.entitygroups.school.schoolparameters import SchoolParameters
 from model.world.worldspecs import WorldSpecs
 from view.view import WindowOptions
@@ -74,7 +74,7 @@ spawn_region_size = 512.0
 
 num_red_schools = 4
 for _ in range(num_red_schools):
-    red_school = School(
+    red_school = SchoolV1(
         SchoolParameters(
             128.0,
             48.0,
@@ -95,7 +95,7 @@ for _ in range(num_red_schools):
             ),
             16,
         ),
-        FishSettings(FishType.RED, 32.0, 32.0, 175.0, 30.0),
+        FishSettingsV1(FishTypeV1.RED, 32.0, 32.0, 175.0, 30.0),
     )
     game_controller.add_school(red_school)
 
@@ -107,7 +107,7 @@ center_spawn_region.center = (
 )
 global_spawn_region = Rect(0, 0, world_width, world_height)
 for _ in range(num_yellow_schools):
-    yellow_school = School(
+    yellow_school = SchoolV1(
         SchoolParameters(
             128.0,
             48.0,
@@ -121,7 +121,7 @@ for _ in range(num_yellow_schools):
             center_spawn_region,
             175,
         ),
-        FishSettings(FishType.YELLOW, 30.0, 30.0, 300.0, 48),
+        FishSettingsV1(FishTypeV1.YELLOW, 30.0, 30.0, 300.0, 48),
     )
     game_controller.add_school(yellow_school)
 
@@ -134,7 +134,7 @@ random_green_shoal = get_random_shoal_location(
     world_width,
 )
 for _ in range(num_green_schools):
-    green_school = School(
+    green_school = SchoolV1(
         SchoolParameters(
             256.0,
             96.0,
@@ -150,14 +150,14 @@ for _ in range(num_green_schools):
             ),
             32,
         ),
-        FishSettings(FishType.GREEN, 48.0, 48.0, 125.0, 24),
+        FishSettingsV1(FishTypeV1.GREEN, 48.0, 48.0, 125.0, 24),
     )
     game_controller.add_school(green_school)
 
 jelly_spawn_cd = 10.0 # Spawner cooldown in seconds
 num_jellies_per_spawn = 10
-jellyfish_swarm = JellyfishSwarm(
-    JellyfishSettings(
+jellyfish_swarm = JellyfishSwarmV1(
+    JellyfishSettingsV1(
         JellyfishType.RED,
         96.0,
         96.0,

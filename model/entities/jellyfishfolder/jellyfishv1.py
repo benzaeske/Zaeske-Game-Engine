@@ -3,13 +3,13 @@ from uuid import UUID
 from pygame import Vector2, Surface
 
 from model.entities.gameentity import GameEntity
-from model.entities.jellyfish.jellyfishsettings import JellyfishSettings
+from model.entities.jellyfishfolder.jellyfishsettingsv1 import JellyfishSettingsV1
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 
 
-class Jellyfish(GameEntity):
+class JellyfishV1(GameEntity):
     # TODO: Base class: Enemy
-    def __init__(self, group_id: UUID, jellyfish_sprite: Surface, settings: JellyfishSettings):
+    def __init__(self, group_id: UUID, jellyfish_sprite: Surface, settings: JellyfishSettingsV1):
         super().__init__(
             group_id,
             jellyfish_sprite,

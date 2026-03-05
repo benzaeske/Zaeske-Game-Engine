@@ -5,7 +5,7 @@ from uuid import UUID
 from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
 
-from model.entitygroups.gameentitygroup import GameEntityGroup
+from model.entitygroups.entitygroupv1 import EntityGroupV1
 from model.entities.gameentity import GameEntity
 from model.spawners.spawner import Spawner
 from model.world.entitygroupindex import EntityGroupIndex
@@ -29,7 +29,7 @@ class SpatialPartitioningModel:
         self.player: Player = player
 
     # ------- Refactor access functions --------
-    def add_entity_group(self, entity_group: GameEntityGroup) -> None:
+    def add_entity_group(self, entity_group: EntityGroupV1) -> None:
         self.entity_manager.add_entity_group(entity_group)
 
     def remove_entity_group(self, group_id: UUID) -> None:
@@ -79,17 +79,17 @@ class SpatialPartitioningModel:
         p_grid_cell: GridCell = self.grid_space.get_grid_cell(p_coord)
         # Set coherence amounts on player so other functions can reference it quickly
         self.player.cohere_red = len(
-            p_grid_cell.get_entities_by_group_ids(
+            p_grid_cell.get_entities_by_group_ids_v1(
                 self.entity_manager.get_group_ids_by_type(EntityGroupIndex.RED_FISH)
             )
         )
         self.player.cohere_yellow = len(
-            p_grid_cell.get_entities_by_group_ids(
+            p_grid_cell.get_entities_by_group_ids_v1(
                 self.entity_manager.get_group_ids_by_type(EntityGroupIndex.YELLOW_FISH)
             )
         )
         self.player.cohere_green = len(
-            p_grid_cell.get_entities_by_group_ids(
+            p_grid_cell.get_entities_by_group_ids_v1(
                 self.entity_manager.get_group_ids_by_type(EntityGroupIndex.GREEN_FISH)
             )
         )
@@ -115,7 +115,7 @@ class SpatialPartitioningModel:
                 grid_c: int = (virtual_grid_c + self.world_specs.grid_width) % self.world_specs.grid_width
                 # The current grid cell
                 gc: GridCell = self.grid_space.get_grid_cell((grid_r, grid_c))
-                for jelly in gc.get_entities_by_group_ids(jelly_group_ids):
+                for jelly in gc.get_entities_by_group_ids_v1(jelly_group_ids):
                     jelly_hitbox: Rect = jelly.hitbox
                     if virtual_grid_c < 0 or virtual_grid_c >= self.world_specs.grid_width:
                         jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
@@ -147,7 +147,7 @@ class SpatialPartitioningModel:
                     grid_c: int = (virtual_grid_c + self.world_specs.grid_width) % self.world_specs.grid_width
                     # The current grid cell
                     gc: GridCell = self.grid_space.get_grid_cell((grid_r, grid_c))
-                    for jelly in gc.get_entities_by_group_ids(jelly_group_ids):
+                    for jelly in gc.get_entities_by_group_ids_v1(jelly_group_ids):
                         jelly_hitbox: Rect = jelly.hitbox
                         if virtual_grid_c < 0 or virtual_grid_c >= self.world_specs.grid_width:
                             jelly_hitbox = self.get_virtual_wrapped_hitbox(jelly, virtual_grid_c)
@@ -166,7 +166,7 @@ class SpatialPartitioningModel:
                             # TODO delete jellies when health reaches 0 instead of shield killing them instantly
                             self.player.decrement_shield()
                             self.entity_manager.remove_entity(jelly)
-                            self.grid_space.remove_entity(jelly)
+                            self.grid_space.remove_entity_v1(jelly)
                             # Note: This is in the item's update method right now since the item is erasing the enemies directly from the game. Eventually this should
                             # be moved to wherever entity 'death' handling is done
                             score_callback(1)

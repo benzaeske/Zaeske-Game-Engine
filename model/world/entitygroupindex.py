@@ -9,4 +9,5 @@ class EntityGroupIndex(Enum):
     RED_FISH = 0,
     YELLOW_FISH = 1,
     GREEN_FISH = 2,
-    JELLY = 3
+    JELLY = 3,
+    ENEMY = 4

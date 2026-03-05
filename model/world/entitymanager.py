@@ -2,11 +2,12 @@ from uuid import UUID
 
 from pygame import Vector2
 
-from model.entities.fish.fishsettings import FishType
-from model.entitygroups.gameentitygroup import GameEntityGroup
+from model.entities.enemy import Enemy
+from model.entities.fish.fishsettingsv1 import FishTypeV1
+from model.entitygroups.entitygroupv1 import EntityGroupV1
 from model.entities.gameentity import GameEntity
-from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
-from model.entitygroups.school.school import School
+from model.entitygroups.jellyfishswarm.jellyfishswarmv1 import JellyfishSwarmV1
+from model.entitygroups.school.schoolv1 import SchoolV1
 from model.world.entitygroupindex import EntityGroupIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
@@ -17,7 +18,7 @@ class EntityManager:
     Contains functions to easily query existing EntityGroups and GameEntities.
     """
     def __init__(self):
-        self._entity_groups: dict[UUID, GameEntityGroup] = {}
+        self._entity_groups: dict[UUID, EntityGroupV1] = {}
         # Maintain sets of EntityGroup ids keyed by the various types defined in the EntityGroupIndex Enum.
         self._indexed_group_ids: dict[EntityGroupIndex, set[UUID]] = {index: set() for index in EntityGroupIndex}
 
@@ -29,7 +30,7 @@ class EntityManager:
         for group in self._entity_groups.values():
             group.move_entities(grid_space, world_specs, dt)
 
-    def add_entity_group(self, entity_group: GameEntityGroup) -> None:
+    def add_entity_group(self, entity_group: EntityGroupV1) -> None:
         self._entity_groups[entity_group.group_id] = entity_group
         self._index_entity_group(entity_group)
 
@@ -40,19 +41,21 @@ class EntityManager:
             if group_id in ids:
                 ids.remove(group_id)
 
-    def _index_entity_group(self, entity_group: GameEntityGroup) -> None:
-        if isinstance(entity_group, JellyfishSwarm):
+    def _index_entity_group(self, entity_group: EntityGroupV1) -> None:
+        if isinstance(entity_group, JellyfishSwarmV1):
             self._indexed_group_ids[EntityGroupIndex.JELLY].add(entity_group.group_id)
-        elif isinstance(entity_group, School):
+        elif isinstance(entity_group, Enemy):
+            self._indexed_group_ids[EntityGroupIndex.ENEMY].add(entity_group.group_id)
+        elif isinstance(entity_group, SchoolV1):
             match entity_group.fish_settings.fish_type:
-                case FishType.RED:
+                case FishTypeV1.RED:
                     self._indexed_group_ids[EntityGroupIndex.RED_FISH].add(entity_group.group_id)
-                case FishType.YELLOW:
+                case FishTypeV1.YELLOW:
                     self._indexed_group_ids[EntityGroupIndex.YELLOW_FISH].add(entity_group.group_id)
-                case FishType.GREEN:
+                case FishTypeV1.GREEN:
                     self._indexed_group_ids[EntityGroupIndex.GREEN_FISH].add(entity_group.group_id)
 
-    def get_entity_group(self, group_id: UUID) -> GameEntityGroup:
+    def get_entity_group(self, group_id: UUID) -> EntityGroupV1:
         return self._entity_groups[group_id]
 
     def get_group_ids_by_type(self, entity_type: EntityGroupIndex) -> set[UUID]:

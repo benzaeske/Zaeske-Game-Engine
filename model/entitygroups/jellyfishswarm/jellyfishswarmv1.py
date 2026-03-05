@@ -6,18 +6,18 @@ import pygame
 from pygame import Surface, Vector2
 
 from model.entities.gameentity import GameEntity
-from model.entitygroups.gameentitygroup import GameEntityGroup
-from model.entities.jellyfish.jellyfish import Jellyfish
-from model.entities.jellyfish.jellyfishsettings import JellyfishSettings, JellyfishType
+from model.entitygroups.entitygroupv1 import EntityGroupV1
+from model.entities.jellyfishfolder.jellyfishv1 import JellyfishV1
+from model.entities.jellyfishfolder.jellyfishsettingsv1 import JellyfishSettingsV1, JellyfishType
 from model.world.entitygroupindex import EntityGroupIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
-class JellyfishSwarm(GameEntityGroup[Jellyfish]):
-    def __init__(self, jellyfish_settings: JellyfishSettings, amount: int):
+class JellyfishSwarmV1(EntityGroupV1[JellyfishV1]):
+    def __init__(self, jellyfish_settings: JellyfishSettingsV1, amount: int):
         super().__init__()
-        self.jellyfish_settings: JellyfishSettings = jellyfish_settings
+        self.jellyfish_settings: JellyfishSettingsV1 = jellyfish_settings
         self.sprite = self.get_jelly_sprite(
             jellyfish_settings.jelly_type,
             jellyfish_settings.width,
@@ -34,8 +34,8 @@ class JellyfishSwarm(GameEntityGroup[Jellyfish]):
     ) -> None:
         scared_of_groups: set[UUID] = get_group_ids_by_type(EntityGroupIndex.RED_FISH)
         for jellyfish in self._entities:
-            neighbor_jellies: list[GameEntity] = grid_space.get_entity_neighbors(jellyfish, self.jellyfish_settings.neighbor_range)
-            afraid_of_fish: list[GameEntity] = grid_space.get_entity_neighbors(jellyfish, self.jellyfish_settings.scared_range, scared_of_groups)
+            neighbor_jellies: list[GameEntity] = grid_space.get_entity_neighbors_v1(jellyfish, self.jellyfish_settings.neighbor_range)
+            afraid_of_fish: list[GameEntity] = grid_space.get_entity_neighbors_v1(jellyfish, self.jellyfish_settings.scared_range, scared_of_groups)
             jellyfish.update_acceleration(
                 player_position,
                 neighbor_jellies,
@@ -43,8 +43,8 @@ class JellyfishSwarm(GameEntityGroup[Jellyfish]):
                 world_specs.world_width,
             )
 
-    def create_entity(self) -> Jellyfish:
-        jelly: Jellyfish = Jellyfish(
+    def create_entity(self) -> JellyfishV1:
+        jelly: JellyfishV1 = JellyfishV1(
             self.group_id,
             self.sprite,
             copy.deepcopy(self.jellyfish_settings)

@@ -4,20 +4,20 @@ from uuid import UUID
 import pygame
 from pygame import Vector2, Surface
 
-from model.entities.fish.fishsettings import FishSettings
+from model.entities.fish.fishsettingsv1 import FishSettingsV1
 from model.entities.gameentity import GameEntity
 from model.entitygroups.school.schoolparameters import SchoolParameters
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 
 
-class Fish(GameEntity):
+class FishV1(GameEntity):
     """
     A fish entity with functions for applying boid's algorithm each frame to mimic schooling behavior
     """
 
     def __init__(
         self,
-        fish_settings: FishSettings,
+        fish_settings: FishSettingsV1,
         school_id: UUID,
         fish_sprite: Surface,
     ) -> None:
@@ -96,10 +96,6 @@ class Fish(GameEntity):
             self.target(diff, -school_params.shoal_k)
 
     def get_surface(self):
-        """
-        Gets the surface of this entity rotated according to its velocity.\n
-        This function is currently the most expensive thing being done when drawing the screen and will tank FPS if there are too many fish to display at once
-        """
         return pygame.transform.rotate(
             self.sprite, math.degrees(math.atan2(self.velocity.y, self.velocity.x))
         )

@@ -8,8 +8,8 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
-from model.entitygroups.school.school import School
+from model.entitygroups.jellyfishswarm.jellyfishswarmv1 import JellyfishSwarmV1
+from model.entitygroups.school.schoolv1 import SchoolV1
 from model.player.cameraspecs import CameraSpecs
 from model.player.player import Turtle
 from model.spawners.fishspawner import FishSpawner
@@ -231,11 +231,11 @@ class GameController:
                 self.model.player.get_camera_adjusted_shield_pos(),
             )
 
-    def add_school(self, school: School) -> None:
+    def add_school(self, school: SchoolV1) -> None:
         self.model.add_entity_group(school)
         self.model.add_spawner(FishSpawner(school, self.options.world_specs, self.camera_specs))
 
-    def add_jellyfish_swarm(self, jellyfish_swarm: JellyfishSwarm, spawn_cooldown: float, spawn_amount: int) -> None:
+    def add_jellyfish_swarm(self, jellyfish_swarm: JellyfishSwarmV1, spawn_cooldown: float, spawn_amount: int) -> None:
         self.model.add_entity_group(jellyfish_swarm)
         self.model.add_spawner(
             JellySpawner(

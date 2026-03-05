@@ -2,15 +2,15 @@ import random
 
 from pygame import Vector2
 
-from model.entities.jellyfish.jellyfish import Jellyfish
-from model.entitygroups.jellyfishswarm.jellyfishswarm import JellyfishSwarm
+from model.entities.jellyfishfolder.jellyfishv1 import JellyfishV1
+from model.entitygroups.jellyfishswarm.jellyfishswarmv1 import JellyfishSwarmV1
 from model.player.cameraspecs import CameraSpecs
 from model.spawners.spawner import Spawner
 from model.world.worldspecs import WorldSpecs
 
 
-class JellySpawner(Spawner[JellyfishSwarm]):
-    def __init__(self, jelly_swarm: JellyfishSwarm, cooldown: float, world_specs: WorldSpecs, camera_specs: CameraSpecs, amount: int):
+class JellySpawner(Spawner[JellyfishSwarmV1]):
+    def __init__(self, jelly_swarm: JellyfishSwarmV1, cooldown: float, world_specs: WorldSpecs, camera_specs: CameraSpecs, amount: int):
         super().__init__(jelly_swarm, amount, cooldown, world_specs, camera_specs)
 
     def spawn_single(
@@ -18,8 +18,8 @@ class JellySpawner(Spawner[JellyfishSwarm]):
             world_specs: WorldSpecs,
             camera_specs: CameraSpecs,
             camera_position: Vector2
-    ) -> Jellyfish:
-        new_jelly: Jellyfish = self.entity_group.create_entity()
+    ) -> JellyfishV1:
+        new_jelly: JellyfishV1 = self.entity_group.create_entity()
         new_jelly.position = self._get_initial_position(world_specs, camera_specs, camera_position)
         return new_jelly
 

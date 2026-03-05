@@ -5,9 +5,9 @@ from uuid import UUID
 import pygame.image
 from pygame import Vector2, Surface
 
-from model.entitygroups.gameentitygroup import GameEntityGroup
-from model.entities.fish.fish import Fish
-from model.entities.fish.fishsettings import FishType, FishSettings
+from model.entitygroups.entitygroupv1 import EntityGroupV1
+from model.entities.fish.fishv1 import FishV1
+from model.entities.fish.fishsettingsv1 import FishTypeV1, FishSettingsV1
 from model.entities.gameentity import GameEntity
 from model.entitygroups.school.schoolparameters import SchoolParameters
 from model.world.entitygroupindex import EntityGroupIndex
@@ -15,18 +15,18 @@ from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
-class School(GameEntityGroup[Fish]):
+class SchoolV1(EntityGroupV1[FishV1]):
     """
     Represents a school of fish. Responsible for creating Fish entities with the given settings passed to it. \n
     All fish created by a school share its school_id
     """
 
     def __init__(
-        self, school_params: SchoolParameters, fish_settings: FishSettings
+        self, school_params: SchoolParameters, fish_settings: FishSettingsV1
     ) -> None:
         super().__init__()
         self.school_params: SchoolParameters = school_params
-        self.fish_settings: FishSettings = fish_settings
+        self.fish_settings: FishSettingsV1 = fish_settings
         self.fish_sprite: Surface = self.load_fish_sprite()
 
     def update_entities(
@@ -37,7 +37,7 @@ class School(GameEntityGroup[Fish]):
         player_position: Vector2 | None = None,
     ) -> None:
         for current_fish in self._entities:
-            neighbors: list[GameEntity] = grid_space.get_entity_neighbors(current_fish, self.school_params.interaction_cell_range)
+            neighbors: list[GameEntity] = grid_space.get_entity_neighbors_v1(current_fish, self.school_params.interaction_cell_range)
             current_fish.make_schooling_decisions(
                 neighbors,
                 self.school_params,
@@ -45,8 +45,8 @@ class School(GameEntityGroup[Fish]):
                 world_specs.world_height,
             )
 
-    def create_entity(self) -> Fish:
-        fish: Fish = Fish(
+    def create_entity(self) -> FishV1:
+        fish: FishV1 = FishV1(
             copy.deepcopy(self.fish_settings),
             self.group_id,
             self.fish_sprite,
@@ -56,17 +56,17 @@ class School(GameEntityGroup[Fish]):
 
     def load_fish_sprite(self) -> Surface:
         match self.fish_settings.fish_type:
-            case FishType.RED:
+            case FishTypeV1.RED:
                 surface = pygame.image.load("images/red_fish.png").convert_alpha()
                 return pygame.transform.scale(
                     surface, (self.fish_settings.width, self.fish_settings.height)
                 )
-            case FishType.GREEN:
+            case FishTypeV1.GREEN:
                 surface = pygame.image.load("images/green_fish.png").convert_alpha()
                 return pygame.transform.scale(
                     surface, (self.fish_settings.width, self.fish_settings.height)
                 )
-            case FishType.YELLOW:
+            case FishTypeV1.YELLOW:
                 surface = pygame.image.load("images/yellow_fish.png").convert_alpha()
                 return pygame.transform.scale(
                     surface, (self.fish_settings.width, self.fish_settings.height)

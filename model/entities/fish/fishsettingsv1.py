@@ -1,13 +1,13 @@
 from enum import Enum
 
 
-class FishType(Enum):
+class FishTypeV1(Enum):
     RED = 0
     GREEN = 1
     YELLOW = 2
 
 
-class FishSettings:
+class FishSettingsV1:
     """
     Defines properties for an individual Fish entity
     :param fish_type: The type of fish to use. This determines which fish sprite gets loaded from the images directory
@@ -19,13 +19,13 @@ class FishSettings:
 
     def __init__(
         self,
-        fish_type: FishType,
+        fish_type: FishTypeV1,
         width: float,
         height: float,
         max_speed: float,
         max_acceleration: float,
     ) -> None:
-        self.fish_type: FishType = fish_type
+        self.fish_type: FishTypeV1 = fish_type
         self.width: float = width
         self.height: float = height
         self.max_speed: float = max_speed

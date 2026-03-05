@@ -12,7 +12,7 @@ from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
-class GameEntityGroup[T: GameEntity](ABC):
+class EntityGroupV1[T: GameEntity](ABC):
     """
     A group of entities of the same type that are controlled by the game.
     """
@@ -54,7 +54,7 @@ class GameEntityGroup[T: GameEntity](ABC):
             entity.update_position(
                 world_specs.world_width, world_specs.world_height, dt
             )
-            grid_space.process_moved_entity(old_position, entity)
+            grid_space.process_moved_entity_v1(old_position, entity)
 
 
     @abstractmethod

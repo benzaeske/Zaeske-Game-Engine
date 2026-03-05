@@ -5,7 +5,7 @@ class JellyfishType(Enum):
     RED = 0
 
 
-class JellyfishSettings:
+class JellyfishSettingsV1:
     def __init__(
         self,
         jelly_type: JellyfishType,
