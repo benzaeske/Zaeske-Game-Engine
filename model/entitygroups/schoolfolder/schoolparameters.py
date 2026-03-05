@@ -3,18 +3,18 @@ from pygame import Vector2, Rect
 
 class SchoolParameters:
     """
-    Defines schooling behavior for a school of fish
-    :param cohere_distance: The distance at which fish in the school will attempt to come together. Needs to be less than or equal to interaction_cell_range * grid cell size for the algorithm to work properly
-    :param avoid_distance: The distance at which fish in the school will avoid each other. Should be smaller than cohere_distance
+    Defines schooling behavior for a schoolfolder of fish
+    :param cohere_distance: The distance at which fish in the schoolfolder will attempt to come together. Needs to be less than or equal to interaction_cell_range * grid cell size for the algorithm to work properly
+    :param avoid_distance: The distance at which fish in the schoolfolder will avoid each other. Should be smaller than cohere_distance
     :param interaction_cell_range: The range of grid cells around which to check for neighbors when performing boids algorithm
-    :param cohere_k: How strongly fish in the school will attempt to cohere with neighbors in their coherence radius
-    :param avoid_k: How strongly fish in the school will avoid neighbors in their avoid radius
-    :param align_k: How strongly fish in the school will attempt to align their velocities
+    :param cohere_k: How strongly fish in the schoolfolder will attempt to cohere with neighbors in their coherence radius
+    :param avoid_k: How strongly fish in the schoolfolder will avoid neighbors in their avoid radius
+    :param align_k: How strongly fish in the schoolfolder will attempt to align their velocities
     :param shoal_location: A location that fish will 'shoal' to. They will target the shoal location when far from it, and swim 'around' it when near
-    :param shoal_radius: The radius of the shoal - determines when fish in the school will go towards the shoal vs swim 'around' it
-    :param shoal_k: How strongly fish in the school will prioritize movement about the shoal location
-    :param hatch_region: A rectangle that defines the region in which this school of fish can spawn
-    :param egg_count: The number of fish this school can support
+    :param shoal_radius: The radius of the shoal - determines when fish in the schoolfolder will go towards the shoal vs swim 'around' it
+    :param shoal_k: How strongly fish in the schoolfolder will prioritize movement about the shoal location
+    :param hatch_region: A rectangle that defines the region in which this schoolfolder of fish can spawn
+    :param egg_count: The number of fish this schoolfolder can support
     """
 
     def __init__(

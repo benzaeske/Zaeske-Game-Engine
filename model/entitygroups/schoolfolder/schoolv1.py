@@ -9,16 +9,16 @@ from model.entitygroups.entitygroupv1 import EntityGroupV1
 from model.entities.fish.fishv1 import FishV1
 from model.entities.fish.fishsettingsv1 import FishTypeV1, FishSettingsV1
 from model.entities.gameentity import GameEntity
-from model.entitygroups.school.schoolparameters import SchoolParameters
-from model.world.entitygroupindex import EntityGroupIndex
+from model.entitygroups.schoolfolder.schoolparameters import SchoolParameters
+from model.world.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
 
 class SchoolV1(EntityGroupV1[FishV1]):
     """
-    Represents a school of fish. Responsible for creating Fish entities with the given settings passed to it. \n
-    All fish created by a school share its school_id
+    Represents a schoolfolder of fish. Responsible for creating Fish entities with the given settings passed to it. \n
+    All fish created by a schoolfolder share its school_id
     """
 
     def __init__(
@@ -32,7 +32,7 @@ class SchoolV1(EntityGroupV1[FishV1]):
     def update_entities(
         self,
         grid_space: GridSpace,
-        get_group_ids_by_type: Callable[[EntityGroupIndex], set[UUID]],
+        get_group_ids_by_type: Callable[[EntityManagerIndex], set[UUID]],
         world_specs: WorldSpecs,
         player_position: Vector2 | None = None,
     ) -> None:

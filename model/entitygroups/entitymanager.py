@@ -6,7 +6,7 @@ from pygame import Vector2
 
 from model.player.cameraspecs import CameraSpecs
 from model.player.player import Player
-from model.world.entitygroupindex import EntityGroupIndex
+from model.world.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
@@ -43,16 +43,16 @@ class FrameActionContext:
     def __init__(
             self,
             grid_space: GridSpace,
-            entity_manager_indexes: dict[EntityGroupIndex, set[UUID]],
+            entity_manager_indexes: dict[EntityManagerIndex, set[UUID]],
             player: Player,
             world_specs: WorldSpecs,
     ) -> None:
         self.grid_space: GridSpace = grid_space
-        self.entity_manager_indexes: dict[EntityGroupIndex, set[UUID]] = entity_manager_indexes
+        self.entity_manager_indexes: dict[EntityManagerIndex, set[UUID]] = entity_manager_indexes
         self.player: Player = player
         self.world_specs: WorldSpecs = world_specs
 
-    def get_manager_ids_by_type(self, index: EntityGroupIndex) -> set[UUID]:
+    def get_manager_ids_by_type(self, index: EntityManagerIndex) -> set[UUID]:
         return self.entity_manager_indexes.get(index, set())
 
     def get_world_width(self) -> float:

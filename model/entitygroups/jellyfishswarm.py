@@ -6,10 +6,10 @@ from model.entities.jellyfish import Jellyfish
 from model.entities.jellyfishconfig import JellyfishConfig
 from model.entitygroups.enemymanager import EnemyManager
 from model.entitygroups.entitymanager import FrameActionContext
-from model.world.entitygroupindex import EntityGroupIndex
+from model.world.entitymanagerindex import EntityManagerIndex
 
 
-class JellyFishSwarm(EnemyManager[Jellyfish]):
+class JellyfishSwarm(EnemyManager[Jellyfish]):
     """
     Implementation of EnemyManager for Jellyfish
     """
@@ -26,7 +26,7 @@ class JellyFishSwarm(EnemyManager[Jellyfish]):
                 context.grid_space.get_entity_neighbors(
                     jellyfish,
                     self._jellyfish_config.scared_cell_range,
-                    context.get_manager_ids_by_type(EntityGroupIndex.RED_FISH)
+                    context.get_manager_ids_by_type(EntityManagerIndex.RED_FISH)
                 ),
                 context.get_world_width()
             )

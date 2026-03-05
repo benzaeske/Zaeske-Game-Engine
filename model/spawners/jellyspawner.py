@@ -3,7 +3,7 @@ import random
 from pygame import Vector2
 
 from model.entities.jellyfishfolder.jellyfishv1 import JellyfishV1
-from model.entitygroups.jellyfishswarm.jellyfishswarmv1 import JellyfishSwarmV1
+from model.entitygroups.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
 from model.player.cameraspecs import CameraSpecs
 from model.spawners.spawner import Spawner
 from model.world.worldspecs import WorldSpecs

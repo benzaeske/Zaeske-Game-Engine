@@ -8,7 +8,7 @@ from pygame.key import ScancodeWrapper
 from model.entitygroups.entitygroupv1 import EntityGroupV1
 from model.entities.gameentity import GameEntity
 from model.spawners.spawner import Spawner
-from model.world.entitygroupindex import EntityGroupIndex
+from model.world.entitymanagerindex import EntityManagerIndex
 from model.world.entitymanagerv1 import EntityManagerV1
 from model.world.gridspace import GridSpace
 from model.player.player import Player
@@ -80,17 +80,17 @@ class SpatialPartitioningModel:
         # Set coherence amounts on player so other functions can reference it quickly
         self.player.cohere_red = len(
             p_grid_cell.get_entities_by_group_ids_v1(
-                self.entity_manager.get_group_ids_by_type(EntityGroupIndex.RED_FISH)
+                self.entity_manager.get_group_ids_by_type(EntityManagerIndex.RED_FISH)
             )
         )
         self.player.cohere_yellow = len(
             p_grid_cell.get_entities_by_group_ids_v1(
-                self.entity_manager.get_group_ids_by_type(EntityGroupIndex.YELLOW_FISH)
+                self.entity_manager.get_group_ids_by_type(EntityManagerIndex.YELLOW_FISH)
             )
         )
         self.player.cohere_green = len(
             p_grid_cell.get_entities_by_group_ids_v1(
-                self.entity_manager.get_group_ids_by_type(EntityGroupIndex.GREEN_FISH)
+                self.entity_manager.get_group_ids_by_type(EntityManagerIndex.GREEN_FISH)
             )
         )
         # Process immediate coherence effects
@@ -104,7 +104,7 @@ class SpatialPartitioningModel:
         r: int = int(self.player.position.y / self.world_specs.cell_size)
         c: int = int(self.player.position.x / self.world_specs.cell_size)
         # Get all jelly group ids to use for easy querying later
-        jelly_group_ids: set[UUID] = self.entity_manager.get_group_ids_by_type(EntityGroupIndex.JELLY)
+        jelly_group_ids: set[UUID] = self.entity_manager.get_group_ids_by_type(EntityManagerIndex.JELLY)
         for dr in range(-cell_range, cell_range + 1):
             for dc in range(-cell_range, cell_range + 1):
                 grid_r: int = r + dr
@@ -136,7 +136,7 @@ class SpatialPartitioningModel:
             r: int = int(self.player.position.y / self.world_specs.cell_size)
             c: int = int(self.player.position.x / self.world_specs.cell_size)
             # Get all jelly group ids to use for easy querying later
-            jelly_group_ids: set[UUID] = self.entity_manager.get_group_ids_by_type(EntityGroupIndex.JELLY)
+            jelly_group_ids: set[UUID] = self.entity_manager.get_group_ids_by_type(EntityManagerIndex.JELLY)
             for dr in range(-shield_cell_range, shield_cell_range + 1):
                 for dc in range(-shield_cell_range, shield_cell_range + 1):
                     grid_r: int = r + dr

@@ -3,7 +3,7 @@ import random
 from pygame import Vector2, Surface, Rect
 
 from model.entities.boid import Boid
-from model.entities.fishconfig import FishConfig
+from model.entities.fishconfig import FishConfig, FishType
 from model.entitygroups.entitymanager import EntityManager, FrameActionContext, MovementContext
 from model.utils.vectorutils import limit_magnitude
 
@@ -73,3 +73,5 @@ class School(EntityManager):
         limit_magnitude(initial_velocity, max_speed)
         return initial_velocity
 
+    def get_fish_type(self) -> FishType:
+        return self._fish_config.type

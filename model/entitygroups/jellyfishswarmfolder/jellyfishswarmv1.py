@@ -9,7 +9,7 @@ from model.entities.gameentity import GameEntity
 from model.entitygroups.entitygroupv1 import EntityGroupV1
 from model.entities.jellyfishfolder.jellyfishv1 import JellyfishV1
 from model.entities.jellyfishfolder.jellyfishsettingsv1 import JellyfishSettingsV1, JellyfishType
-from model.world.entitygroupindex import EntityGroupIndex
+from model.world.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
@@ -28,11 +28,11 @@ class JellyfishSwarmV1(EntityGroupV1[JellyfishV1]):
     def update_entities(
         self,
         grid_space: GridSpace,
-        get_group_ids_by_type: Callable[[EntityGroupIndex], set[UUID]],
+        get_group_ids_by_type: Callable[[EntityManagerIndex], set[UUID]],
         world_specs: WorldSpecs,
         player_position: Vector2 | None = None,
     ) -> None:
-        scared_of_groups: set[UUID] = get_group_ids_by_type(EntityGroupIndex.RED_FISH)
+        scared_of_groups: set[UUID] = get_group_ids_by_type(EntityManagerIndex.RED_FISH)
         for jellyfish in self._entities:
             neighbor_jellies: list[GameEntity] = grid_space.get_entity_neighbors_v1(jellyfish, self.jellyfish_settings.neighbor_range)
             afraid_of_fish: list[GameEntity] = grid_space.get_entity_neighbors_v1(jellyfish, self.jellyfish_settings.scared_range, scared_of_groups)

@@ -6,7 +6,7 @@ from pygame import Vector2, Surface
 
 from model.entities.fish.fishsettingsv1 import FishSettingsV1
 from model.entities.gameentity import GameEntity
-from model.entitygroups.school.schoolparameters import SchoolParameters
+from model.entitygroups.schoolfolder.schoolparameters import SchoolParameters
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 
 

@@ -1,5 +1,5 @@
 import random
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from pygame import Vector2
 
@@ -7,10 +7,10 @@ from model.entities.enemy import Enemy
 from model.entities.enemyconfig import EnemyConfig
 from model.entities.entity import Entity
 from model.entitygroups.entitymanager import EntityManager, FrameActionContext, MovementContext
-from model.world.entitygroupindex import EntityGroupIndex
+from model.world.entitymanagerindex import EntityManagerIndex
 
 
-class EnemyManager[T: Enemy](EntityManager):
+class EnemyManager[T: Enemy](EntityManager, ABC):
     """
     Base class for a group of enemies that continue to spawn on a given cooldown interval.
     """
@@ -22,6 +22,7 @@ class EnemyManager[T: Enemy](EntityManager):
         self._amount: int = initial_amount
 
     def frame_actions(self, context: FrameActionContext, dt: float) -> None:
+        # TODO remove enemies with hp = 0
         # Spawn new enemies
         if self.tick_spawn_timer(dt):
             self.spawn(context)
@@ -30,7 +31,7 @@ class EnemyManager[T: Enemy](EntityManager):
             neighbors: list[Entity] = context.grid_space.get_entity_neighbors(
                 enemy,
                 self.get_enemy_config().neighbor_cell_range,
-                context.get_manager_ids_by_type(EntityGroupIndex.ENEMY)
+                context.get_manager_ids_by_type(EntityManagerIndex.ENEMY)
             )
             enemy.swarm_to_player(
                 self.get_enemy_config(),

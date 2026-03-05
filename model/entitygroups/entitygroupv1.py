@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from pygame import Vector2
 
 from model.entities.gameentity import GameEntity
-from model.world.entitygroupindex import EntityGroupIndex
+from model.world.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
@@ -24,7 +24,7 @@ class EntityGroupV1[T: GameEntity](ABC):
     def update_entities(
         self,
         grid_space: GridSpace,
-        get_group_ids_by_type: Callable[[EntityGroupIndex], set[UUID]],
+        get_group_ids_by_type: Callable[[EntityManagerIndex], set[UUID]],
         world_specs: WorldSpecs,
         player_position: Vector2 | None = None,
     ) -> None:

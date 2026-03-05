@@ -4,7 +4,7 @@ from pygame import Vector2
 
 from model.entities.fish.fishv1 import FishV1
 from model.entities.fish.fishsettingsv1 import FishSettingsV1
-from model.entitygroups.school.schoolv1 import SchoolV1
+from model.entitygroups.schoolfolder.schoolv1 import SchoolV1
 from model.player.cameraspecs import CameraSpecs
 from model.spawners.spawner import Spawner
 from model.utils.vectorutils import limit_magnitude
