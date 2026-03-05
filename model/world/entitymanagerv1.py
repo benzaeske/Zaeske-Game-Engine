@@ -12,7 +12,7 @@ from model.world.entitygroupindex import EntityGroupIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
-class EntityManager:
+class EntityManagerV1:
     """
     A global entity manager. Stores all entities that are currently loaded into the game.
     Contains functions to easily query existing EntityGroups and GameEntities.
@@ -45,7 +45,7 @@ class EntityManager:
         if isinstance(entity_group, JellyfishSwarmV1):
             self._indexed_group_ids[EntityGroupIndex.JELLY].add(entity_group.group_id)
         elif isinstance(entity_group, Enemy):
-            self._indexed_group_ids[EntityGroupIndex.ENEMY].add(entity_group.group_id)
+            self._indexed_group_ids[EntityGroupIndex.ENEMY].add(entity_group.manager_id)
         elif isinstance(entity_group, SchoolV1):
             match entity_group.fish_settings.fish_type:
                 case FishTypeV1.RED:

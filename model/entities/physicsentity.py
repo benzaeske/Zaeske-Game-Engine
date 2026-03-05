@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pygame import Surface, Vector2
 
-from model.entities.entity import Entity, EntityMovementContext
+from model.entities.entity import Entity
 from model.utils.vectorutils import limit_magnitude, safe_normalize
 
 
@@ -14,19 +14,17 @@ class PhysicsEntity(Entity, ABC):
     def __init__(
             self,
             sprite: Surface,
-            group_id: UUID,
+            manager_id: UUID,
             max_speed: float,
             max_acceleration: float
     ) -> None:
-        super().__init__(sprite, group_id)
+        super().__init__(sprite, manager_id)
         self._velocity: Vector2 = Vector2(0.0, 0.0)
         self._acceleration: Vector2 = Vector2(0.0, 0.0)
         self._max_speed: float = max_speed
         self._max_acceleration: float = max_acceleration
 
-    def move(self, context: EntityMovementContext, dt: float) -> None:
-        world_w: float = context.world_specs.world_width
-        world_h: float = context.world_specs.world_height
+    def move(self, world_w: float, world_h: float, dt: float) -> None:
         self._velocity += (self._acceleration * dt)
         limit_magnitude(self._velocity, self._max_speed)
         self._position += self._velocity * dt
@@ -59,6 +57,9 @@ class PhysicsEntity(Entity, ABC):
         return self._acceleration
 
     def apply_acceleration(self, a: Vector2) -> None:
+        """
+        Adds the provided acceleration vector to this entity's acceleration for the current frame.
+        """
         self._acceleration += a
 
     def get_max_speed(self) -> float:

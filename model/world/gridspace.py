@@ -65,7 +65,7 @@ class GridSpace:
                 surrounding_cells.append(self._grid[(grid_r, grid_c)])
         return surrounding_cells
 
-    def get_entity_neighbors(self, entity: Entity, cell_range: int, group_ids: set[UUID] = None) -> list[Entity]:
+    def get_entity_neighbors(self, entity: Entity, cell_range: int, group_ids: set[UUID] | None = None) -> list[Entity]:
         """
         Gets all neighbor entities relative to the input entity.
         Neighbors are considered any entity in a grid cell within the square region bounded by the input cell_range.
@@ -76,7 +76,7 @@ class GridSpace:
         """
         if group_ids is None:
             group_ids = set()
-            group_ids.add(entity.get_group_id())
+            group_ids.add(entity.get_manager_id())
         return self.get_neighbors(entity.get_x(), entity.get_y(), cell_range, group_ids)
 
     def get_neighbors(self, x: float, y: float, cell_range: int, group_ids: set[UUID]) -> list[Entity]:

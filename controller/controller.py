@@ -15,7 +15,7 @@ from model.player.player import Turtle
 from model.spawners.fishspawner import FishSpawner
 from model.spawners.jellyspawner import JellySpawner
 from model.world.grid_cell import GridCell
-from model.world.model import SpatialPartitioningModel
+from model.world.modelv1 import SpatialPartitioningModel
 from model.world.worldspecs import WorldSpecs
 from view.view import View, WindowOptions
 

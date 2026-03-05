@@ -9,7 +9,7 @@ from model.entitygroups.entitygroupv1 import EntityGroupV1
 from model.entities.gameentity import GameEntity
 from model.spawners.spawner import Spawner
 from model.world.entitygroupindex import EntityGroupIndex
-from model.world.entitymanager import EntityManager
+from model.world.entitymanagerv1 import EntityManagerV1
 from model.world.gridspace import GridSpace
 from model.player.player import Player
 from model.world.grid_cell import GridCell
@@ -24,7 +24,7 @@ class SpatialPartitioningModel:
     ):
         self.world_specs: WorldSpecs = world_specs
         self.grid_space: GridSpace = GridSpace(world_specs)
-        self.entity_manager: EntityManager = EntityManager()
+        self.entity_manager: EntityManagerV1 = EntityManagerV1()
         self.spawners: dict[UUID, Spawner] = {}
         self.player: Player = player
 
