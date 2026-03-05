@@ -79,6 +79,9 @@ class Enemy(PhysicsEntity):
     def get_hitbox(self) -> Rect:
         return self._hitbox
 
+    def get_hp(self) -> float:
+        return self._hp
+
     def get_damage(self) -> float:
         return self._damage
 

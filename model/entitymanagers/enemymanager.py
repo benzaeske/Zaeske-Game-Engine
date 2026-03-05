@@ -22,7 +22,11 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         self._amount: int = initial_amount
 
     def frame_actions(self, context: FrameActionContext, dt: float) -> None:
-        # TODO remove enemies with hp = 0
+        # Destroy enemies that have no hp
+        for enemy in self._enemies.copy():
+            if enemy.get_hp() <= 0:
+                self._enemies.remove(enemy)
+                context.grid_space.remove_entity(enemy)
         # Spawn new enemies
         if self.tick_spawn_timer(dt):
             self.spawn(context)
