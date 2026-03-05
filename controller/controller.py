@@ -15,6 +15,7 @@ from model.player.player import Turtle
 from model.spawners.fishspawner import FishSpawner
 from model.spawners.jellyspawner import JellySpawner
 from model.world.grid_cell import GridCell
+from model.world.model import Model
 from model.world.modelv1 import SpatialPartitioningModel
 from model.world.worldspecs import WorldSpecs
 from view.view import View, WindowOptions
@@ -39,7 +40,14 @@ class GameController:
         self.options: ControllerOptions = options
         self.view: View = View(self.options.window_options)
         self.camera_specs: CameraSpecs = CameraSpecs(self.view.screen_width, self.view.screen_height)
-        self.model: SpatialPartitioningModel = SpatialPartitioningModel(
+        self.model: Model = Model(
+            options.world_specs,
+            Turtle(
+                self.camera_specs,
+                options.world_specs
+            )
+        )
+        self.model_v1: SpatialPartitioningModel = SpatialPartitioningModel(
             options.world_specs,
             Turtle(
                 self.camera_specs,
@@ -97,7 +105,7 @@ class GameController:
                 sys.exit()
         if self.key_presses[pygame.K_ESCAPE]:
             sys.exit()
-        if self.model.player.health <= 0:
+        if self.model_v1.player.health <= 0:
             sys.exit()
 
     def check_for_pause(self):
@@ -107,45 +115,45 @@ class GameController:
                     self.paused = not self.paused
 
     def update_model(self) -> None:
-        self.model.update_model(self.dt, self.key_presses, self.increment_score)
+        self.model_v1.update_model(self.dt, self.key_presses, self.increment_score)
 
     def draw_background(self) -> None:
         # TODO Grid cell background matrix using perlin noise instead of storing background tiles in grid cell class
         # Loop over grid cells within camera range.
         left: int = int(
-            self.model.player.camera.left // self.model.world_specs.cell_size
+            self.model_v1.player.camera.left // self.model_v1.world_specs.cell_size
         )
         right: int = int(
-            self.model.player.camera.right // self.model.world_specs.cell_size
+            self.model_v1.player.camera.right // self.model_v1.world_specs.cell_size
         )
         bottom: int = int(
-            self.model.player.camera.top // self.model.world_specs.cell_size
+            self.model_v1.player.camera.top // self.model_v1.world_specs.cell_size
         )
         top: int = int(
-            self.model.player.camera.bottom // self.model.world_specs.cell_size
+            self.model_v1.player.camera.bottom // self.model_v1.world_specs.cell_size
         )
         for row in range(bottom, top + 1):
             for col in range(left, right + 1):
                 # If the column overflows, wrap around to other side of the map
                 grid_r = row
                 grid_c = (
-                    col + self.model.world_specs.grid_width
-                ) % self.model.world_specs.grid_width
+                    col + self.model_v1.world_specs.grid_width
+                ) % self.model_v1.world_specs.grid_width
                 # Convert top left of row, col to coords on the world map
-                x = col * self.model.world_specs.cell_size
-                y = (row + 1) * self.model.world_specs.cell_size
+                x = col * self.model_v1.world_specs.cell_size
+                y = (row + 1) * self.model_v1.world_specs.cell_size
                 # Adjust world map coords to screen relative coords
-                x = x - self.model.player.camera.left
-                y = self.model.player.camera.bottom - y
+                x = x - self.model_v1.player.camera.left
+                y = self.model_v1.player.camera.bottom - y
                 self.view.draw_surface(
-                    self.model.grid_space.get_grid_cell((grid_r, grid_c)).background_surface, (x, y)
+                    self.model_v1.grid_space.get_grid_cell((grid_r, grid_c)).background_surface, (x, y)
                 )
 
     def draw_fps_menu(self) -> None:
         self.view.print_info_to_screen(
             self.clock.get_fps(),
-            int(self.model.player.position.x),
-            int(self.model.player.position.y),
+            int(self.model_v1.player.position.x),
+            int(self.model_v1.player.position.y),
         )
 
     def draw_score(self) -> None:
@@ -154,31 +162,31 @@ class GameController:
     def draw_game_entities(self) -> None:
         # Loop over grid cells within camera range.
         left: int = int(
-            self.model.player.camera.left // self.model.world_specs.cell_size
+            self.model_v1.player.camera.left // self.model_v1.world_specs.cell_size
         )
         right: int = int(
-            self.model.player.camera.right // self.model.world_specs.cell_size
+            self.model_v1.player.camera.right // self.model_v1.world_specs.cell_size
         )
         bottom: int = int(
-            self.model.player.camera.top // self.model.world_specs.cell_size
+            self.model_v1.player.camera.top // self.model_v1.world_specs.cell_size
         )
         top: int = int(
-            self.model.player.camera.bottom // self.model.world_specs.cell_size
+            self.model_v1.player.camera.bottom // self.model_v1.world_specs.cell_size
         )
         for row in range(bottom, top + 1):
             for col in range(left, right + 1):
                 # Wrap the grid col around the map if it extends over the edge
                 wrapped_col = (
-                    col + self.model.world_specs.grid_width
-                ) % self.model.world_specs.grid_width
+                    col + self.model_v1.world_specs.grid_width
+                ) % self.model_v1.world_specs.grid_width
                 # Adjust the entities position if it is wrapping
                 entity_adj: Vector2 = Vector2(0, 0)
                 if col < 0:
-                    entity_adj = Vector2(-self.model.world_specs.world_width, 0)
-                if col >= self.model.world_specs.grid_width:
-                    entity_adj = Vector2(self.model.world_specs.world_width, 0)
+                    entity_adj = Vector2(-self.model_v1.world_specs.world_width, 0)
+                if col >= self.model_v1.world_specs.grid_width:
+                    entity_adj = Vector2(self.model_v1.world_specs.world_width, 0)
                 # Get the grid cell that holds the entities we need to draw
-                grid_cell: GridCell = self.model.grid_space.get_grid_cell((row, wrapped_col))
+                grid_cell: GridCell = self.model_v1.grid_space.get_grid_cell((row, wrapped_col))
                 for group_id, entities in grid_cell.contained_entities_by_group_id.items():
                     for entity in entities:
                         # TODO Move drawing into GameEntity implementations. Drawable interface?
@@ -188,8 +196,8 @@ class GameController:
                                 entity.position + entity_adj,
                                 entity.sprite_width_adj,
                                 entity.sprite_height_adj,
-                                self.model.player.camera.left,
-                                self.model.player.camera.bottom
+                                self.model_v1.player.camera.left,
+                                self.model_v1.player.camera.bottom
                             )
                         )
 
@@ -208,36 +216,36 @@ class GameController:
 
     def draw_player(self) -> None:
         self.view.draw_surface(
-            self.model.player.get_surface(),
-            self.model.player.get_camera_adjusted_position(),
+            self.model_v1.player.get_surface(),
+            self.model_v1.player.get_camera_adjusted_position(),
         )
-        hp_bar_location = self.model.player.get_camera_adjusted_hp_pos()
-        self.view.draw_surface(self.model.player.max_hp_surface, hp_bar_location)
-        ratio: float = self.model.player.health / self.model.player.max_health
+        hp_bar_location = self.model_v1.player.get_camera_adjusted_hp_pos()
+        self.view.draw_surface(self.model_v1.player.max_hp_surface, hp_bar_location)
+        ratio: float = self.model_v1.player.health / self.model_v1.player.max_health
         self.view.draw_surface(
-            self.model.player.current_hp_surface,
+            self.model_v1.player.current_hp_surface,
             hp_bar_location,
             (
                 0,
                 0,
-                ratio * self.model.player.current_hp_surface.get_width(),
-                self.model.player.current_hp_surface.get_height(),
+                ratio * self.model_v1.player.current_hp_surface.get_width(),
+                self.model_v1.player.current_hp_surface.get_height(),
             ),
         )
-        self.model.player.update_shield_alpha()
-        if self.model.player.shield > 0:
+        self.model_v1.player.update_shield_alpha()
+        if self.model_v1.player.shield > 0:
             self.view.draw_surface(
-                self.model.player.shield_surface,
-                self.model.player.get_camera_adjusted_shield_pos(),
+                self.model_v1.player.shield_surface,
+                self.model_v1.player.get_camera_adjusted_shield_pos(),
             )
 
     def add_school(self, school: SchoolV1) -> None:
-        self.model.add_entity_group(school)
-        self.model.add_spawner(FishSpawner(school, self.options.world_specs, self.camera_specs))
+        self.model_v1.add_entity_group(school)
+        self.model_v1.add_spawner(FishSpawner(school, self.options.world_specs, self.camera_specs))
 
     def add_jellyfish_swarm(self, jellyfish_swarm: JellyfishSwarmV1, spawn_cooldown: float, spawn_amount: int) -> None:
-        self.model.add_entity_group(jellyfish_swarm)
-        self.model.add_spawner(
+        self.model_v1.add_entity_group(jellyfish_swarm)
+        self.model_v1.add_spawner(
             JellySpawner(
                 jellyfish_swarm,
                 spawn_cooldown,

@@ -83,8 +83,8 @@ for _ in range(num_red_schools):
             1.8,
             1.0,
             get_random_shoal_location(
-                game_controller.model.player.camera.width,
-                game_controller.model.player.camera.height,
+                game_controller.model_v1.player.camera.width,
+                game_controller.model_v1.player.camera.height,
                 world_height,
                 world_width,
             ),
@@ -102,8 +102,8 @@ for _ in range(num_red_schools):
 num_yellow_schools = 1
 center_spawn_region = Rect(0, 0, game_controller.view.screen_width, game_controller.view.screen_height)
 center_spawn_region.center = (
-    int(game_controller.model.player.position.x),
-    int(game_controller.model.player.position.y),
+    int(game_controller.model_v1.player.position.x),
+    int(game_controller.model_v1.player.position.y),
 )
 global_spawn_region = Rect(0, 0, world_width, world_height)
 for _ in range(num_yellow_schools):
@@ -128,8 +128,8 @@ for _ in range(num_yellow_schools):
 
 num_green_schools = 1
 random_green_shoal = get_random_shoal_location(
-    game_controller.model.player.camera.width,
-    game_controller.model.player.camera.height,
+    game_controller.model_v1.player.camera.width,
+    game_controller.model_v1.player.camera.height,
     world_height,
     world_width,
 )

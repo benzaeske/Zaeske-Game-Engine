@@ -142,7 +142,23 @@ class Player(ABC):
                 self.facing_direction = -1
 
     def draw(self, screen: Surface) -> None:
-        pass
+        # Blit the player sprite
+        screen.blit(self.get_surface(), self.get_camera_adjusted_position())
+        # Blit the black max hp indicator
+        hp_bar_location = self.get_camera_adjusted_hp_pos()
+        screen.blit(self.max_hp_surface, hp_bar_location)
+        # Blit the hp bar with width scaled down to the percentage of max hp the player currently has
+        ratio: float = self.health / self.max_health
+        screen.blit(
+            self.current_hp_surface,
+            hp_bar_location,
+            (
+                0,
+                0,
+                ratio * self.current_hp_surface.get_width(),
+                self.current_hp_surface.get_height(),
+            ),
+        )
 
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
         return (
