@@ -5,7 +5,7 @@ from uuid import UUID
 from pygame import Vector2
 
 from model.entities.gameentity import GameEntity
-from model.entitygroups.entitygroupv1 import EntityGroupV1
+from model.entitymanagers.entitygroupv1 import EntityGroupV1
 from model.player.cameraspecs import CameraSpecs
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs

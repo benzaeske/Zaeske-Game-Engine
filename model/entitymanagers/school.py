@@ -4,7 +4,7 @@ from pygame import Vector2, Surface, Rect
 
 from model.entities.boid import Boid
 from model.entities.fishconfig import FishConfig, FishType
-from model.entitygroups.entitymanager import EntityManager, FrameActionContext, MovementContext
+from model.entitymanagers.entitymanager import EntityManager, FrameActionContext, MovementContext
 from model.utils.vectorutils import limit_magnitude
 
 

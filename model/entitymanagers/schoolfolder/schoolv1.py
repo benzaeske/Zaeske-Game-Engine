@@ -5,11 +5,11 @@ from uuid import UUID
 import pygame.image
 from pygame import Vector2, Surface
 
-from model.entitygroups.entitygroupv1 import EntityGroupV1
+from model.entitymanagers.entitygroupv1 import EntityGroupV1
 from model.entities.fish.fishv1 import FishV1
 from model.entities.fish.fishsettingsv1 import FishTypeV1, FishSettingsV1
 from model.entities.gameentity import GameEntity
-from model.entitygroups.schoolfolder.schoolparameters import SchoolParameters
+from model.entitymanagers.schoolfolder.schoolparameters import SchoolParameters
 from model.world.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs

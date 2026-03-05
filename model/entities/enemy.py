@@ -24,8 +24,8 @@ class Enemy(PhysicsEntity):
         # The sprite and the hitbox are on top of each other's centers
         self._hitbox: Rect = Rect(0, 0, config.hitbox_width, config.hitbox_height)
         self._hitbox.center = (int(self.get_x()), int(self.get_y()))
-        self._hp: int = config.hp
-        self._damage: int = config.damage
+        self._hp: float = config.hp
+        self._damage: float = config.damage
 
     def swarm_to_player(
             self,
@@ -75,4 +75,24 @@ class Enemy(PhysicsEntity):
     def move(self, world_w: float, world_h: float, dt: float) -> None:
         super().move(world_w, world_h, dt)
         self._hitbox.center = (int(self.get_x()), int(self.get_y()))
+
+    def get_hitbox(self) -> Rect:
+        return self._hitbox
+
+    def get_damage(self) -> float:
+        return self._damage
+
+    def take_damage(self, n: float) -> None:
+        """
+        Subtracts the provided value from the enemy's hp
+        """
+        self._hp -= n
+
+    def heal(self, n: float) -> None:
+        """
+        Adds the provided value to the enemy's hp
+        """
+        self._hp += n
+
+
 

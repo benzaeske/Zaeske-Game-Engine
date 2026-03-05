@@ -1,16 +1,22 @@
+import copy
 from abc import ABC, abstractmethod
 from typing import Tuple
+from uuid import UUID
 
 import pygame
 from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
 from model.player.cameraspecs import CameraSpecs
+from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 from model.utils.vectorutils import limit_magnitude
+from model.world.entitymanagerindex import EntityManagerIndex
+from model.world.grid_cell import GridCell
+from model.world.gridspace import GridSpace
+from model.world.worldspecs import WorldSpecs
 
 
 class Player(ABC):
-
     def __init__(
         self,
         hitbox_width: float,
@@ -18,11 +24,10 @@ class Player(ABC):
         surface_width: float,
         surface_height: float,
         camera_specs: CameraSpecs,
-        world_boundary: Tuple[float, float],
+        world_specs: WorldSpecs,
         start_pos: Vector2 = Vector2(0.0, 0.0),
         max_speed: float = 1.0,
     ) -> None:
-        # Positional/physics
         self.position: Vector2 = start_pos
         self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
         self.hitbox.center = (int(self.position.x), int(self.position.y))
@@ -31,7 +36,7 @@ class Player(ABC):
             0, 0, self.camera_specs.camera_width, self.camera_specs.camera_height
         )
         self.camera.center = (int(self.position.x), int(self.position.y))
-        self.world_boundary: Tuple[float, float] = world_boundary
+        self.world_specs: WorldSpecs = world_specs
         self.facing_direction: int = 1
         self.max_speed: float = max_speed
         # Sprite
@@ -46,34 +51,48 @@ class Player(ABC):
         self.max_hp_surface.fill((0, 0, 0))
         self.current_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
         self.current_hp_surface.fill((222, 0, 0))
-        # Shield
-        self.max_shield: int = 10
-        self.shield: int = 0
-        self.shield_radius: float = self.hitbox.width
-        self.shield_radius_squared: float = self.shield_radius * self.shield_radius
-        self.shield_charge_delay: float = 1.0
-        self.current_shield_charge_cooldown: float = self.shield_charge_delay
-        self.shield_alpha_scaling: int = 10
-        self.shield_surface: Surface = Surface(
-            (self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA
-        )
-        pygame.draw.circle(
-            self.shield_surface,
-            (
-                255,
-                255,
-                0,
-                self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling),
-            ),
-            self.shield_surface.get_rect().center,
-            self.shield_radius,
-        )
-        self.shield_surface_w_adj: float = self.shield_surface.get_width() / 2
-        self.shield_surface_h_adj: float = self.shield_surface.get_height() / 2
         # Fish coherency
         self.cohere_red: int = 0
         self.cohere_yellow: int = 0
         self.cohere_green: int = 0
+
+    def update(self, grid_space: GridSpace, entity_manager_indexes: dict[EntityManagerIndex, set[UUID]], dt: float) -> None:
+        self.process_fish_coherency(grid_space, entity_manager_indexes)
+        self.process_enemy_collisions(grid_space, entity_manager_indexes, dt)
+
+    def process_fish_coherency(self, grid_space: GridSpace, entity_manager_indexes: dict[EntityManagerIndex, set[UUID]]) -> None:
+        # Player's grid space coordinate
+        p_coord: Tuple[int, int] = grid_space.get_grid_cell_coord_from_position(self.position.x, self.position.y)
+        # Player's grid cell
+        p_grid_cell: GridCell = grid_space.get_grid_cell(p_coord)
+        # Set coherence amounts on player so other functions can reference it quickly
+        self.cohere_red = len(
+            p_grid_cell.get_entities_by_group_ids(
+                entity_manager_indexes.get(EntityManagerIndex.RED_FISH, set())
+            )
+        )
+        self.cohere_yellow = len(
+            p_grid_cell.get_entities_by_group_ids(
+                entity_manager_indexes.get(EntityManagerIndex.YELLOW_FISH, set())
+            )
+        )
+        self.cohere_green = len(
+            p_grid_cell.get_entities_by_group_ids(
+                entity_manager_indexes.get(EntityManagerIndex.GREEN_FISH, set())
+            )
+        )
+
+    def process_enemy_collisions(self, grid_space: GridSpace, entity_manager_indexes: dict[EntityManagerIndex, set[UUID]], dt: float) -> None:
+        cell_range: int = 1
+        for enemy in grid_space.get_neighbors(self.position.x, self.position.y, cell_range,
+                                              entity_manager_indexes.get(EntityManagerIndex.ENEMY, set())):
+            enemy_hitbox: Rect = copy.deepcopy(enemy.get_hitbox())
+            d, other_pos = calculate_shortest_distance_and_virtual_position(
+                self.position, enemy.get_position(), self.world_specs.world_width
+            )
+            enemy_hitbox.center = other_pos
+            if enemy_hitbox.colliderect(self.hitbox):
+                self.health -= (enemy.get_damage() * dt)
 
     def move_player(
         self,
@@ -98,21 +117,21 @@ class Player(ABC):
         self.position += velocity * dt
         # Wrap on x axis
         self.position.x = (
-            self.position.x + self.world_boundary[0]
-        ) % self.world_boundary[0]
+            self.position.x + self.world_specs.world_width
+        ) % self.world_specs.world_width
         # Prevent sprite from leaving world boundary on y-axis
         if self.position.y < self.surface_h_adj:
             self.position.y = self.surface_h_adj
-        if self.position.y + self.surface_h_adj >= self.world_boundary[1]:
-            self.position.y = self.world_boundary[1] - self.surface_h_adj
+        if self.position.y + self.surface_h_adj >= self.world_specs.world_height:
+            self.position.y = self.world_specs.world_height - self.surface_h_adj
         # Update Hitbox
         self.hitbox.center = (int(self.position.x), int(self.position.y))
         # Update sprite
         self.surface_rect.center = (int(self.position.x), int(self.position.y))
         # Update camera. Prevent camera from leaving world boundary on y-axis
         self.camera.center = (int(self.position.x), int(self.position.y))
-        if self.camera.bottom >= self.world_boundary[1] - 1:
-            self.camera.bottom = int(self.world_boundary[1]) - 1
+        if self.camera.bottom >= self.world_specs.world_height - 1:
+            self.camera.bottom = int(self.world_specs.world_height) - 1
         if self.camera.top < 0:
             self.camera.top = 0
         # Update facing direction for drawing
@@ -122,45 +141,8 @@ class Player(ABC):
             else:
                 self.facing_direction = -1
 
-    def update_hp(self, change: float) -> None:
-        self.health += change
-        if self.health > self.max_health:
-            self.health = self.max_health
-        elif self.health < 0:
-            self.health = 0
-
-    def charge_shield(self, dt) -> None:
-        if self.shield < self.max_shield:
-            self.current_shield_charge_cooldown -= dt
-            if self.current_shield_charge_cooldown <= 0:
-                self.current_shield_charge_cooldown = self.shield_charge_delay
-                self.increment_shield()
-
-    def increment_shield(self) -> None:
-        self.shield += 1
-        if self.shield > self.max_shield:
-            self.shield = self.max_shield
-
-    def decrement_shield(self) -> None:
-        self.shield -= 1
-        if self.shield < 0:
-            self.shield = 0
-
-    def update_shield_alpha(self) -> None:
-        self.shield_surface: Surface = Surface(
-            (self.shield_radius * 2, self.shield_radius * 2), pygame.SRCALPHA
-        )
-        pygame.draw.circle(
-            self.shield_surface,
-            (
-                255,
-                255,
-                0,
-                self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling),
-            ),
-            self.shield_surface.get_rect().center,
-            self.shield_radius,
-        )
+    def draw(self, screen: Surface) -> None:
+        pass
 
     def get_camera_adjusted_position(self) -> Tuple[float, float]:
         return (
@@ -174,22 +156,24 @@ class Player(ABC):
             self.camera.bottom - self.hitbox.top - self.max_hp_surface.get_height(),
         )
 
-    def get_camera_adjusted_shield_pos(self) -> Tuple[float, float]:
-        return (
-            self.position.x - self.camera.left - self.shield_surface_w_adj,
-            self.camera.bottom - self.position.y - self.shield_surface_h_adj,
-        )
-
     @abstractmethod
     def get_surface(self):
         pass
 
+    def get_cohere_red(self):
+        return self.cohere_red
+
+    def get_cohere_green(self):
+        return self.cohere_green
+
+    def get_cohere_yellow(self):
+        return self.cohere_yellow
 
 class Turtle(Player):
     def __init__(
         self,
         camera_specs: CameraSpecs,
-        world_boundary: Tuple[float, float],
+        world_specs: WorldSpecs,
     ) -> None:
         hitbox_width: float = 100.0
         hitbox_height: float = 100.0
@@ -212,8 +196,8 @@ class Turtle(Player):
             surface_width,
             surface_height,
             camera_specs,
-            world_boundary,
-            Vector2(world_boundary[0] / 2, world_boundary[1] / 2),
+            world_specs,
+            Vector2(world_specs.world_width / 2, world_specs.world_height / 2),
             turtle_speed,
         )
 

@@ -4,10 +4,10 @@ from pygame import Vector2
 
 from model.entities.enemy import Enemy
 from model.entities.fish.fishsettingsv1 import FishTypeV1
-from model.entitygroups.entitygroupv1 import EntityGroupV1
+from model.entitymanagers.entitygroupv1 import EntityGroupV1
 from model.entities.gameentity import GameEntity
-from model.entitygroups.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
-from model.entitygroups.schoolfolder.schoolv1 import SchoolV1
+from model.entitymanagers.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
+from model.entitymanagers.schoolfolder.schoolv1 import SchoolV1
 from model.world.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs

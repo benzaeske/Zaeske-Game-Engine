@@ -8,8 +8,8 @@ class EnemyConfig:
             max_acceleration: float,
             hitbox_width: float,
             hitbox_height: float,
-            hp: int,
-            damage: int,
+            hp: float,
+            damage: float,
             neighbor_cell_range: int,
             avoid_neighbor_dist: float,
             avoid_neighbor_k: float

@@ -6,7 +6,7 @@ import pygame
 from pygame import Surface, Vector2
 
 from model.entities.gameentity import GameEntity
-from model.entitygroups.entitygroupv1 import EntityGroupV1
+from model.entitymanagers.entitygroupv1 import EntityGroupV1
 from model.entities.jellyfishfolder.jellyfishv1 import JellyfishV1
 from model.entities.jellyfishfolder.jellyfishsettingsv1 import JellyfishSettingsV1, JellyfishType
 from model.world.entitymanagerindex import EntityManagerIndex

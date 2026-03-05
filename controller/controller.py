@@ -8,8 +8,8 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entitygroups.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
-from model.entitygroups.schoolfolder.schoolv1 import SchoolV1
+from model.entitymanagers.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
+from model.entitymanagers.schoolfolder.schoolv1 import SchoolV1
 from model.player.cameraspecs import CameraSpecs
 from model.player.player import Turtle
 from model.spawners.fishspawner import FishSpawner

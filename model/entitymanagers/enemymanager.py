@@ -6,7 +6,7 @@ from pygame import Vector2
 from model.entities.enemy import Enemy
 from model.entities.enemyconfig import EnemyConfig
 from model.entities.entity import Entity
-from model.entitygroups.entitymanager import EntityManager, FrameActionContext, MovementContext
+from model.entitymanagers.entitymanager import EntityManager, FrameActionContext, MovementContext
 from model.world.entitymanagerindex import EntityManagerIndex
 
 

@@ -5,9 +5,9 @@ from pygame import Vector2, Rect
 from controller.controller import GameController, ControllerOptions
 from model.entities.fish.fishsettingsv1 import FishSettingsV1, FishTypeV1
 from model.entities.jellyfishfolder.jellyfishsettingsv1 import JellyfishSettingsV1, JellyfishType
-from model.entitygroups.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
-from model.entitygroups.schoolfolder.schoolv1 import SchoolV1
-from model.entitygroups.schoolfolder.schoolparameters import SchoolParameters
+from model.entitymanagers.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
+from model.entitymanagers.schoolfolder.schoolv1 import SchoolV1
+from model.entitymanagers.schoolfolder.schoolparameters import SchoolParameters
 from model.world.worldspecs import WorldSpecs
 from view.view import WindowOptions
 

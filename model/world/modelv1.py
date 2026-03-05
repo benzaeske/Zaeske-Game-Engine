@@ -5,7 +5,7 @@ from uuid import UUID
 from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
 
-from model.entitygroups.entitygroupv1 import EntityGroupV1
+from model.entitymanagers.entitygroupv1 import EntityGroupV1
 from model.entities.gameentity import GameEntity
 from model.spawners.spawner import Spawner
 from model.world.entitymanagerindex import EntityManagerIndex

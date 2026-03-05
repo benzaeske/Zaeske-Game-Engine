@@ -74,12 +74,16 @@ class MovementContext:
     """
     All information needed for performing movement.
     """
-    def __init__(self, world_specs: WorldSpecs) -> None:
+    def __init__(self, world_specs: WorldSpecs, player: Player) -> None:
         self.world_specs: WorldSpecs = world_specs
+        self.player: Player = player
 
     def get_world_width(self) -> float:
         return self.world_specs.world_width
 
     def get_world_height(self) -> float:
         return self.world_specs.world_height
+
+    def get_player_position(self) -> Vector2:
+        return self.player.position
 

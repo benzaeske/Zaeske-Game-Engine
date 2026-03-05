@@ -1,10 +1,12 @@
 from uuid import UUID
 
+from pygame.key import ScancodeWrapper
+
 from model.entities.fishconfig import FishType
-from model.entitygroups.enemymanager import EnemyManager
-from model.entitygroups.entitymanager import EntityManager, FrameActionContext, MovementContext
-from model.entitygroups.jellyfishswarm import JellyfishSwarm
-from model.entitygroups.school import School
+from model.entitymanagers.enemymanager import EnemyManager
+from model.entitymanagers.entitymanager import EntityManager, FrameActionContext, MovementContext
+from model.entitymanagers.jellyfishswarm import JellyfishSwarm
+from model.entitymanagers.school import School
 
 from model.player.player import Player
 from model.world.entitymanagerindex import EntityManagerIndex
@@ -26,13 +28,14 @@ class Model:
             self._world_specs
         )
         self._movement_context: MovementContext = MovementContext(
-            self._world_specs
+            self._world_specs,
+            self._player
         )
 
-    def update(self, dt) -> None:
-        # TODO update player
-        self.perform_frame_actions(dt)
-        # TODO Move player
+    def update(self, key_presses: ScancodeWrapper, dt: float) -> None:
+        self._player.update(self._grid_space, self._entity_manager_indexes, dt)
+        self.perform_entity_frame_actions(dt)
+        self._player.move_player(key_presses, dt)
         self.move_entities(dt)
 
     def add_entity_manager(self, entity_manager: EntityManager) -> None:
@@ -60,7 +63,7 @@ class Model:
             if manager_id in ids:
                 ids.remove(manager_id)
 
-    def perform_frame_actions(self, dt) -> None:
+    def perform_entity_frame_actions(self, dt) -> None:
         # TODO process frame actions for projectiles before enemies
         for entity_manager in self._entity_managers.values():
             entity_manager.frame_actions(self._frame_action_context, dt)

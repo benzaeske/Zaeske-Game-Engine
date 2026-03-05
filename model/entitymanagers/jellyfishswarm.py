@@ -4,8 +4,8 @@ from model.entities.enemy import Enemy
 from model.entities.enemyconfig import EnemyConfig
 from model.entities.jellyfish import Jellyfish
 from model.entities.jellyfishconfig import JellyfishConfig
-from model.entitygroups.enemymanager import EnemyManager
-from model.entitygroups.entitymanager import FrameActionContext
+from model.entitymanagers.enemymanager import EnemyManager
+from model.entitymanagers.entitymanager import FrameActionContext
 from model.world.entitymanagerindex import EntityManagerIndex
 
 
