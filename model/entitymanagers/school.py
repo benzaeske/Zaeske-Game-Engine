@@ -1,10 +1,11 @@
+import copy
 import random
 
 from pygame import Vector2, Surface, Rect
 
 from model.entities.boid import Boid
 from model.entities.fishconfig import FishConfig, FishType
-from model.entitymanagers.entitymanager import EntityManager, FrameActionContext, MovementContext
+from model.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.utils.vectorutils import limit_magnitude
 
 
@@ -18,7 +19,7 @@ class School(EntityManager):
         self._sprite: Surface = sprite
         self._did_spawn: bool = False
 
-    def frame_actions(self, context: FrameActionContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, dt: float) -> None:
         if not self._did_spawn:
             # Only hatch fish once at the beginning
             self.hatch(context)
@@ -31,11 +32,13 @@ class School(EntityManager):
                 context.get_world_height()
             )
 
-    def movement(self, context: MovementContext, dt: float) -> None:
+    def movement(self, context: ModelContext, dt: float) -> None:
         for fish in self._fish:
+            old_pos: Vector2 = copy.deepcopy(fish.get_position())
             fish.move(context.get_world_width(), context.get_world_height(), dt)
+            context.grid_space.process_moved_entity(old_pos, fish)
 
-    def hatch(self, context: FrameActionContext) -> None:
+    def hatch(self, context: ModelContext) -> None:
         """
         Hatch all the fish according to this school's amount property, fish config and hatch region
         """

@@ -23,7 +23,10 @@ class Entity(ABC):
         :param screen: The screen to blit the entity on
         :param camera: The current size and position of the camera relative to the world space
         """
-        screen.blit(self._sprite, self.to_camera_pos(camera))
+        # TODO adjust is temporary until wrapping is removed
+        draw_pos: Tuple[float, float] = self.to_camera_pos(camera)
+        #draw_pos = (draw_pos[0] - adjust.x, draw_pos[1] - adjust.y)
+        screen.blit(self._sprite, draw_pos)
 
     def to_camera_pos(self, camera: Rect) -> Tuple[float, float]:
         """

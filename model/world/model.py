@@ -4,7 +4,7 @@ from pygame.key import ScancodeWrapper
 
 from model.entities.fishconfig import FishType
 from model.entitymanagers.enemymanager import EnemyManager
-from model.entitymanagers.entitymanager import EntityManager, FrameActionContext, MovementContext
+from model.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.entitymanagers.jellyfishswarm import JellyfishSwarm
 from model.entitymanagers.school import School
 
@@ -21,15 +21,11 @@ class Model:
         self._entity_managers: dict[UUID, EntityManager] = {}
         self._entity_manager_indexes: dict[EntityManagerIndex, set[UUID]] = {index: set() for index in EntityManagerIndex}
         self._player: Player = player
-        self._frame_action_context: FrameActionContext = FrameActionContext(
+        self._frame_action_context: ModelContext = ModelContext(
             self._grid_space,
             self._entity_manager_indexes,
             self._player,
             self._world_specs
-        )
-        self._movement_context: MovementContext = MovementContext(
-            self._world_specs,
-            self._player
         )
 
     def update(self, key_presses: ScancodeWrapper, dt: float) -> None:
@@ -70,7 +66,10 @@ class Model:
 
     def move_entities(self, dt) -> None:
         for entity_manager in self._entity_managers.values():
-            entity_manager.movement(self._movement_context, dt)
+            entity_manager.movement(self._frame_action_context, dt)
+
+    def get_player(self) -> Player:
+        return self._player
 
 
 

@@ -5,7 +5,7 @@ from model.entities.enemyconfig import EnemyConfig
 from model.entities.jellyfish import Jellyfish
 from model.entities.jellyfishconfig import JellyfishConfig
 from model.entitymanagers.enemymanager import EnemyManager
-from model.entitymanagers.entitymanager import FrameActionContext
+from model.entitymanagers.entitymanager import ModelContext
 from model.world.entitymanagerindex import EntityManagerIndex
 
 
@@ -18,7 +18,7 @@ class JellyfishSwarm(EnemyManager[Jellyfish]):
         self._jellyfish_config: JellyfishConfig = jellyfish_config
         self._sprite: Surface = sprite
 
-    def frame_actions(self, context: FrameActionContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, dt: float) -> None:
         super().frame_actions(context, dt)
         for jellyfish in self._enemies:
             jellyfish.avoid_fish(

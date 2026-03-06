@@ -3,7 +3,7 @@ import copy
 from pygame import Rect, Vector2
 
 from model.entities.shield import Shield
-from model.entitymanagers.entitymanager import EntityManager, MovementContext, FrameActionContext
+from model.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 from model.world.entitymanagerindex import EntityManagerIndex
 
@@ -19,7 +19,7 @@ class ShieldManager(EntityManager):
         self._shield = Shield(self.get_manager_id(), config.shield_radius)
         self._shield_cell_detection_range = config.shield_cell_detection_range
 
-    def frame_actions(self, context: FrameActionContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, dt: float) -> None:
         if context.player.get_cohere_yellow():
             self._shield.charge_shield(dt)
         # Detect collisions with enemies
@@ -48,5 +48,5 @@ class ShieldManager(EntityManager):
         # Update the sprite at the very end after all increment/decrement operations have been performed
         self._shield.update_sprite()
 
-    def movement(self, context: MovementContext, dt: float) -> None:
+    def movement(self, context: ModelContext, dt: float) -> None:
         self._shield.set_position(context.get_player_position())

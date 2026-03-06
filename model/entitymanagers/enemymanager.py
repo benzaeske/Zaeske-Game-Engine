@@ -1,3 +1,4 @@
+import copy
 import random
 from abc import abstractmethod, ABC
 
@@ -6,7 +7,7 @@ from pygame import Vector2
 from model.entities.enemy import Enemy
 from model.entities.enemyconfig import EnemyConfig
 from model.entities.entity import Entity
-from model.entitymanagers.entitymanager import EntityManager, FrameActionContext, MovementContext
+from model.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.world.entitymanagerindex import EntityManagerIndex
 
 
@@ -21,7 +22,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         self._spawn_timer: float = 0.0
         self._amount: int = initial_amount
 
-    def frame_actions(self, context: FrameActionContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, dt: float) -> None:
         # Destroy enemies that have no hp
         for enemy in self._enemies.copy():
             if enemy.get_hp() <= 0:
@@ -44,9 +45,11 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
                 context.get_world_width()
             )
 
-    def movement(self, context: MovementContext, dt: float) -> None:
+    def movement(self, context: ModelContext, dt: float) -> None:
         for enemy in self._enemies:
+            old_pos: Vector2 = copy.deepcopy(enemy.get_position())
             enemy.move(context.get_world_width(), context.get_world_height(), dt)
+            context.grid_space.process_moved_entity(old_pos, enemy)
 
     def tick_spawn_timer(self, dt: float) -> bool:
         """
@@ -60,7 +63,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
             return True
         return False
 
-    def spawn(self, context: FrameActionContext) -> None:
+    def spawn(self, context: ModelContext) -> None:
         """
         Creates new enemies according to this spawner's amount property. Adds new enemies to this group's list as well
         as to the grid space.
@@ -83,7 +86,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         pass
 
     @staticmethod
-    def _get_initial_position(context: FrameActionContext) -> Vector2:
+    def _get_initial_position(context: ModelContext) -> Vector2:
         """
         Get a random x and y position evenly distributed between the edges of the camera and the boundary of the world
         """
