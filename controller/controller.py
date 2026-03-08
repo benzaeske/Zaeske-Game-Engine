@@ -12,7 +12,7 @@ from model.entitymanagers.jellyfishswarm import JellyfishSwarm
 from model.entitymanagers.school import School
 from model.player.cameraspecs import CameraSpecs
 from model.player.player import Turtle
-from model.world.grid_cell import GridCell
+from model.world.gridspace.grid_cell import GridCell
 from model.world.model import Model
 from model.world.worldspecs import WorldSpecs
 from view.view import View, WindowOptions
@@ -179,7 +179,7 @@ class GameController:
                     entity_adj = Vector2(self.options.world_specs.world_width, 0)
                 # Get the grid cell that holds the entities we need to draw
                 grid_cell: GridCell = self.model._grid_space.get_grid_cell((row, wrapped_col))
-                for group_id, entities in grid_cell.contained_entities_by_group_id.items():
+                for group_id, entities in grid_cell.contained_entities_by_manager_id.items():
                     for entity in entities:
                         entity.draw(self.view.screen, self.model.get_player().camera)
 

@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from pygame import Vector2
 
 from model.entities.gameentity import GameEntity
-from model.world.entitymanagerindex import EntityManagerIndex
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 

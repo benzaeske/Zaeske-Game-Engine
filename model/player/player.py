@@ -7,11 +7,12 @@ import pygame
 from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
+from model.entities.fishconfig import FishType
 from model.player.cameraspecs import CameraSpecs
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 from model.utils.vectorutils import limit_magnitude
-from model.world.entitymanagerindex import EntityManagerIndex
-from model.world.grid_cell import GridCell
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
+from model.world.gridspace.grid_cell import GridCell
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 
@@ -52,9 +53,7 @@ class Player(ABC):
         self.current_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
         self.current_hp_surface.fill((222, 0, 0))
         # Fish coherency
-        self.cohere_red: int = 0
-        self.cohere_yellow: int = 0
-        self.cohere_green: int = 0
+        self._fish_coherency: dict[FishType, int] = {}
 
     def update(self, grid_space: GridSpace, entity_manager_indexes: dict[EntityManagerIndex, set[UUID]], dt: float) -> None:
         self.process_fish_coherency(grid_space, entity_manager_indexes)
@@ -66,18 +65,18 @@ class Player(ABC):
         # Player's grid cell
         p_grid_cell: GridCell = grid_space.get_grid_cell(p_coord)
         # Set coherence amounts on player so other functions can reference it quickly
-        self.cohere_red = len(
-            p_grid_cell.get_entities_by_group_ids(
+        self._fish_coherency[FishType.RED] = len(
+            p_grid_cell.get_entities_by_manager_ids(
                 entity_manager_indexes.get(EntityManagerIndex.RED_FISH, set())
             )
         )
-        self.cohere_yellow = len(
-            p_grid_cell.get_entities_by_group_ids(
+        self._fish_coherency[FishType.YELLOW] = len(
+            p_grid_cell.get_entities_by_manager_ids(
                 entity_manager_indexes.get(EntityManagerIndex.YELLOW_FISH, set())
             )
         )
-        self.cohere_green = len(
-            p_grid_cell.get_entities_by_group_ids(
+        self._fish_coherency[FishType.GREEN] = len(
+            p_grid_cell.get_entities_by_manager_ids(
                 entity_manager_indexes.get(EntityManagerIndex.GREEN_FISH, set())
             )
         )

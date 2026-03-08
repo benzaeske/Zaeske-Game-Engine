@@ -8,11 +8,11 @@ from pygame.key import ScancodeWrapper
 from model.entitymanagers.entitygroupv1 import EntityGroupV1
 from model.entities.gameentity import GameEntity
 from model.spawners.spawner import Spawner
-from model.world.entitymanagerindex import EntityManagerIndex
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.entitymanagerv1 import EntityManagerV1
 from model.world.gridspace import GridSpace
 from model.player.player import Player
-from model.world.grid_cell import GridCell
+from model.world.gridspace.grid_cell import GridCell
 from model.world.worldspecs import WorldSpecs
 
 

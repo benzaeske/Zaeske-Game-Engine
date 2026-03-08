@@ -8,7 +8,7 @@ from model.entities.enemy import Enemy
 from model.entities.enemyconfig import EnemyConfig
 from model.entities.entity import Entity
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
-from model.world.entitymanagerindex import EntityManagerIndex
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 
 
 class EnemyManager[T: Enemy](EntityManager, ABC):

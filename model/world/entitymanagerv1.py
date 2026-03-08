@@ -8,7 +8,7 @@ from model.entitymanagers.entitygroupv1 import EntityGroupV1
 from model.entities.gameentity import GameEntity
 from model.entitymanagers.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
 from model.entitymanagers.schoolfolder.schoolv1 import SchoolV1
-from model.world.entitymanagerindex import EntityManagerIndex
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace import GridSpace
 from model.world.worldspecs import WorldSpecs
 

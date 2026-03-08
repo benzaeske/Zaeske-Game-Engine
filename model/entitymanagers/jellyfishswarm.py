@@ -6,7 +6,7 @@ from model.entities.jellyfish import Jellyfish
 from model.entities.jellyfishconfig import JellyfishConfig
 from model.entitymanagers.enemymanager import EnemyManager
 from model.entitymanagers.entitymanager import ModelContext
-from model.world.entitymanagerindex import EntityManagerIndex
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 
 
 class JellyfishSwarm(EnemyManager[Jellyfish]):

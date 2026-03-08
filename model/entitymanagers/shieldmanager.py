@@ -5,7 +5,7 @@ from pygame import Rect, Vector2
 from model.entities.shield import Shield
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
-from model.world.entitymanagerindex import EntityManagerIndex
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 
 
 class ShieldConfig:
