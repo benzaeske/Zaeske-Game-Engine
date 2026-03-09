@@ -6,9 +6,7 @@ from pygame import Vector2
 
 from model.entities.enemy import Enemy
 from model.entities.enemyconfig import EnemyConfig
-from model.entities.entity import Entity
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
-from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 
 
 class EnemyManager[T: Enemy](EntityManager, ABC):
@@ -28,27 +26,18 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
             if enemy.get_hp() <= 0:
                 self._enemies.remove(enemy)
                 context.grid_space.remove_entity(enemy)
+        # TODO destroy enemies that leave a certain range of the player
         # Spawn new enemies
         if self.tick_spawn_timer(dt):
             self.spawn(context)
         # Accelerate all enemies towards the player and avoid close neighbors
         for enemy in self._enemies:
-            neighbors: list[Entity] = context.grid_space.get_entity_neighbors(
-                enemy,
-                self.get_enemy_config().neighbor_cell_range,
-                context.get_manager_ids_by_type(EntityManagerIndex.ENEMY)
-            )
-            enemy.swarm_to_player(
-                self.get_enemy_config(),
-                context.get_player_position(),
-                neighbors,
-                context.get_world_width()
-            )
+            enemy.frame_actions(context, dt)
 
     def movement(self, context: ModelContext, dt: float) -> None:
         for enemy in self._enemies:
             old_pos: Vector2 = copy.deepcopy(enemy.get_position())
-            enemy.move(context.get_world_width(), context.get_world_height(), dt)
+            enemy.move(context, dt)
             context.grid_space.process_moved_entity(old_pos, enemy)
 
     def tick_spawn_timer(self, dt: float) -> bool:
@@ -88,7 +77,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
     @staticmethod
     def _get_initial_position(context: ModelContext) -> Vector2:
         """
-        Get a random x and y position evenly distributed between the edges of the camera and the boundary of the world
+        Get a random x and y position within 16 grid cells of the player but outside the camera range
         """
         camera_specs = context.player.camera_specs
         camera_position = Vector2(context.player.camera.center)

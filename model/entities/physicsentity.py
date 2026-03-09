@@ -5,6 +5,7 @@ from pygame import Surface, Vector2
 
 from model.entities.entity import Entity
 from model.utils.vectorutils import limit_magnitude, safe_normalize
+from model.world.modelcontext import ModelContext
 
 
 class PhysicsEntity(Entity, ABC):
@@ -24,15 +25,15 @@ class PhysicsEntity(Entity, ABC):
         self._max_speed: float = max_speed
         self._max_acceleration: float = max_acceleration
 
-    def move(self, world_w: float, world_h: float, dt: float) -> None:
+    def move(self, context: ModelContext, dt: float) -> None:
         self._velocity += (self._acceleration * dt)
         limit_magnitude(self._velocity, self._max_speed)
         self._position += self._velocity * dt
-        self._position.x = (self._position.x + world_w) % world_w
+        self._position.x = (self._position.x + context.get_world_w()) % context.get_world_w()
         if self._position.y < 0:
             self._position.y = 0
-        if self._position.y >= world_h:
-            self._position.y = world_h - 1
+        if self._position.y >= context.get_world_h():
+            self._position.y = context.get_world_h() - 1
         # Acceleration is reset each frame
         self._acceleration *= 0.0
 

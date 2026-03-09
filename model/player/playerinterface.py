@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
-from pygame import Vector2
+from pygame import Vector2, Rect
 
 from model.entities.fishconfig import FishType
+from model.player.camera import Camera
 
 
 class PlayerInterface(ABC):
@@ -20,7 +21,14 @@ class PlayerInterface(ABC):
         pass
 
     @abstractmethod
-    def update_hp(self, n: float) -> None:
+    def get_camera(self) -> Camera:
+        """
+        :return: A pygame Rect representing the camera at its current position.
+        """
+        pass
+
+    @abstractmethod
+    def update_hp(self, hp_diff: float) -> None:
         """
         Adds the provided value to the player's hp.
         """
@@ -29,7 +37,7 @@ class PlayerInterface(ABC):
     @abstractmethod
     def get_fish_coherency(self, fish_type: FishType) -> int:
         """
-        Gets the player's current coherency with the given fish type. Coherency is the number of fish in player's
+        Gets the player's current coherency with the given fish type. Coherency is the number of fish in the player's
         coherency radius.
         """
         pass

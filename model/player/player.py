@@ -1,103 +1,70 @@
-import copy
 from abc import ABC, abstractmethod
-from typing import Tuple
-from uuid import UUID
 
 import pygame
 from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
 from model.entities.fishconfig import FishType
-from model.player.cameraspecs import CameraSpecs
-from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
+from model.player.camera import Camera
+from model.player.playerinterface import PlayerInterface
 from model.utils.vectorutils import limit_magnitude
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
+from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
 from model.world.gridspace.grid_cell import GridCell
-from model.world.gridspace import GridSpace
-from model.world.worldspecs import WorldSpecs
+from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 
-
-class Player(ABC):
+class Player(PlayerInterface, ABC):
     def __init__(
         self,
+        camera_width: float,
+        camera_height: float,
         hitbox_width: float,
         hitbox_height: float,
-        surface_width: float,
-        surface_height: float,
-        camera_specs: CameraSpecs,
-        world_specs: WorldSpecs,
-        start_pos: Vector2 = Vector2(0.0, 0.0),
-        max_speed: float = 1.0,
+        max_speed: float,
+        max_health: float
     ) -> None:
-        self.position: Vector2 = start_pos
-        self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
-        self.hitbox.center = (int(self.position.x), int(self.position.y))
-        self.camera_specs: CameraSpecs = camera_specs
-        self.camera: Rect = Rect(
-            0, 0, self.camera_specs.camera_width, self.camera_specs.camera_height
-        )
-        self.camera.center = (int(self.position.x), int(self.position.y))
-        self.world_specs: WorldSpecs = world_specs
-        self.facing_direction: int = 1
-        self.max_speed: float = max_speed
-        # Sprite
-        self.surface_rect: Rect = Rect(0, 0, surface_width, surface_height)
-        self.surface_rect.center = (int(self.position.x), int(self.position.y))
-        self.surface_w_adj: float = surface_width / 2
-        self.surface_h_adj: float = surface_height / 2
-        # Health
-        self.max_health: float = 100.0
-        self.health: float = self.max_health
-        self.max_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
-        self.max_hp_surface.fill((0, 0, 0))
-        self.current_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
-        self.current_hp_surface.fill((222, 0, 0))
-        # Fish coherency
+        super().__init__()
+        self._position: Vector2 = Vector2(0.0, 0.0)
+        self._hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
+        self._camera: Camera = Camera(camera_width, camera_height)
+        self._max_speed: float = max_speed
+        self._max_health: float = max_health
+        self._current_health: float = self._max_health
         self._fish_coherency: dict[FishType, int] = {}
+        self._facing_direction: int = 0
 
-    def update(self, grid_space: GridSpace, entity_manager_indexes: dict[EntityManagerIndex, set[UUID]], dt: float) -> None:
-        self.process_fish_coherency(grid_space, entity_manager_indexes)
-        self.process_enemy_collisions(grid_space, entity_manager_indexes, dt)
+    def update(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface, dt: float) -> None:
+        self.process_enemy_collisions(grid_space, entity_repository, dt)
+        self.process_fish_coherency(grid_space, entity_repository)
 
-    def process_fish_coherency(self, grid_space: GridSpace, entity_manager_indexes: dict[EntityManagerIndex, set[UUID]]) -> None:
-        # Player's grid space coordinate
-        p_coord: Tuple[int, int] = grid_space.get_grid_cell_coord_from_position(self.position.x, self.position.y)
-        # Player's grid cell
-        p_grid_cell: GridCell = grid_space.get_grid_cell(p_coord)
-        # Set coherence amounts on player so other functions can reference it quickly
+    def process_enemy_collisions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface,
+                                 dt: float) -> None:
+        cell_range: int = 1
+        for enemy in grid_space.get_neighbors(self._position, cell_range,
+                                              entity_repository.get_manager_ids(EntityManagerIndex.ENEMY)):
+            if enemy.get_hitbox().colliderect(self._hitbox):
+                self.update_hp(-enemy.get_damage() * dt)
+
+    def process_fish_coherency(self, grid_space: GridSpaceInterface,
+                               entity_repository: EntityRepositoryInterface) -> None:
+        p_grid_cell: GridCell = grid_space.get_grid_cell(self._position)
         self._fish_coherency[FishType.RED] = len(
             p_grid_cell.get_entities_by_manager_ids(
-                entity_manager_indexes.get(EntityManagerIndex.RED_FISH, set())
+                entity_repository.get_manager_ids(EntityManagerIndex.RED_FISH)
             )
         )
         self._fish_coherency[FishType.YELLOW] = len(
             p_grid_cell.get_entities_by_manager_ids(
-                entity_manager_indexes.get(EntityManagerIndex.YELLOW_FISH, set())
+                entity_repository.get_manager_ids(EntityManagerIndex.YELLOW_FISH)
             )
         )
         self._fish_coherency[FishType.GREEN] = len(
             p_grid_cell.get_entities_by_manager_ids(
-                entity_manager_indexes.get(EntityManagerIndex.GREEN_FISH, set())
+                entity_repository.get_manager_ids(EntityManagerIndex.GREEN_FISH)
             )
         )
 
-    def process_enemy_collisions(self, grid_space: GridSpace, entity_manager_indexes: dict[EntityManagerIndex, set[UUID]], dt: float) -> None:
-        cell_range: int = 1
-        for enemy in grid_space.get_neighbors(self.position.x, self.position.y, cell_range,
-                                              entity_manager_indexes.get(EntityManagerIndex.ENEMY, set())):
-            enemy_hitbox: Rect = copy.deepcopy(enemy.get_hitbox())
-            d, other_pos = calculate_shortest_distance_and_virtual_position(
-                self.position, enemy.get_position(), self.world_specs.world_width
-            )
-            enemy_hitbox.center = other_pos
-            if enemy_hitbox.colliderect(self.hitbox):
-                self.health -= (enemy.get_damage() * dt)
-
-    def move_player(
-        self,
-        key_presses: ScancodeWrapper,
-        dt: float,
-    ) -> None:
+    def move_player(self, key_presses: ScancodeWrapper, dt: float) -> None:
         """
         Moves the player according to the keys pressed. Movement is scaled with delta time like all other entities.
         Limits the camera position to be confined within positive x,y coordinates and under the provided world boundary.
@@ -105,119 +72,39 @@ class Player(ABC):
         velocity: Vector2 = Vector2(0.0, 0.0)
         # Calculate velocity as the sum of key presses
         if key_presses[pygame.K_LEFT]:
-            velocity += Vector2(-self.max_speed, 0)
+            velocity += Vector2(-self._max_speed, 0)
         if key_presses[pygame.K_RIGHT]:
-            velocity += Vector2(self.max_speed, 0)
+            velocity += Vector2(self._max_speed, 0)
         if key_presses[pygame.K_UP]:
-            velocity += Vector2(0, self.max_speed)
+            velocity += Vector2(0, self._max_speed)
         if key_presses[pygame.K_DOWN]:
-            velocity += Vector2(0, -self.max_speed)
-        limit_magnitude(velocity, self.max_speed)
-        self.position += velocity * dt
-        # Wrap on x axis
-        self.position.x = (
-            self.position.x + self.world_specs.world_width
-        ) % self.world_specs.world_width
-        # Prevent sprite from leaving world boundary on y-axis
-        if self.position.y < self.surface_h_adj:
-            self.position.y = self.surface_h_adj
-        if self.position.y + self.surface_h_adj >= self.world_specs.world_height:
-            self.position.y = self.world_specs.world_height - self.surface_h_adj
-        # Update Hitbox
-        self.hitbox.center = (int(self.position.x), int(self.position.y))
-        # Update sprite
-        self.surface_rect.center = (int(self.position.x), int(self.position.y))
-        # Update camera. Prevent camera from leaving world boundary on y-axis
-        self.camera.center = (int(self.position.x), int(self.position.y))
-        if self.camera.bottom >= self.world_specs.world_height - 1:
-            self.camera.bottom = int(self.world_specs.world_height) - 1
-        if self.camera.top < 0:
-            self.camera.top = 0
+            velocity += Vector2(0, -self._max_speed)
+        limit_magnitude(velocity, self._max_speed)
+        self._position += velocity * dt
+        self._hitbox.center = self._position
         # Update facing direction for drawing
         if velocity.x != 0:
             if velocity.x > 0:
-                self.facing_direction = 1
+                self._facing_direction = 1
             else:
-                self.facing_direction = -1
+                self._facing_direction = 0
 
-    def draw(self, screen: Surface) -> None:
-        # Blit the player sprite
-        screen.blit(self.get_surface(), self.get_camera_adjusted_position())
-        # Blit the black max hp indicator
-        hp_bar_location = self.get_camera_adjusted_hp_pos()
-        screen.blit(self.max_hp_surface, hp_bar_location)
-        # Blit the hp bar with width scaled down to the percentage of max hp the player currently has
-        ratio: float = self.health / self.max_health
-        screen.blit(
-            self.current_hp_surface,
-            hp_bar_location,
-            (
-                0,
-                0,
-                ratio * self.current_hp_surface.get_width(),
-                self.current_hp_surface.get_height(),
-            ),
-        )
+    def get_position(self) -> Vector2:
+        return self._position
 
-    def get_camera_adjusted_position(self) -> Tuple[float, float]:
-        return (
-            self.surface_rect.left - self.camera.left,
-            self.camera.bottom - self.surface_rect.bottom,
-        )
+    def get_camera(self) -> Camera:
+        return self._camera
 
-    def get_camera_adjusted_hp_pos(self) -> Tuple[float, float]:
-        return (
-            self.hitbox.left - self.camera.left,
-            self.camera.bottom - self.hitbox.top - self.max_hp_surface.get_height(),
-        )
+    def update_hp(self, hp_diff: float) -> None:
+        self._current_health += hp_diff
+        if self._current_health > self._max_health:
+            self._current_health = self._max_health
+        if self._current_health < 0:
+            self._current_health = 0
+
+    def get_fish_coherency(self, fish_type: FishType) -> int:
+        return self._fish_coherency.get(fish_type, 0)
 
     @abstractmethod
-    def get_surface(self):
+    def draw(self, screen: Surface) -> None:
         pass
-
-    def get_cohere_red(self):
-        return self.cohere_red
-
-    def get_cohere_green(self):
-        return self.cohere_green
-
-    def get_cohere_yellow(self):
-        return self.cohere_yellow
-
-class Turtle(Player):
-    def __init__(
-        self,
-        camera_specs: CameraSpecs,
-        world_specs: WorldSpecs,
-    ) -> None:
-        hitbox_width: float = 100.0
-        hitbox_height: float = 100.0
-        surface_width: float = 128.0
-        surface_height: float = 128.0
-        turtle_speed: float = 256.0
-        self.surface_left: Surface = pygame.image.load("images/baby_turtle_left.png")
-        self.surface_left = self.surface_left.convert_alpha()
-        self.surface_left = pygame.transform.scale(
-            self.surface_left, (surface_width, surface_height)
-        )
-        self.surface_right: Surface = pygame.image.load("images/baby_turtle_right.png")
-        self.surface_right = self.surface_right.convert_alpha()
-        self.surface_right = pygame.transform.scale(
-            self.surface_right, (surface_width, surface_height)
-        )
-        super().__init__(
-            hitbox_width,
-            hitbox_height,
-            surface_width,
-            surface_height,
-            camera_specs,
-            world_specs,
-            Vector2(world_specs.world_width / 2, world_specs.world_height / 2),
-            turtle_speed,
-        )
-
-    def get_surface(self):
-        if self.facing_direction > 0:
-            return self.surface_right
-        else:
-            return self.surface_left

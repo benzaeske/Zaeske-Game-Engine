@@ -50,7 +50,7 @@ class GridSpaceInterface(ABC):
         :param entity: The entity to get neighbors for
         :param cell_range: The range of grid cells to look for neighbors
         :param manager_ids: Only entities belonging to these managers will be returned. If None, will use the manager
-        id of the input entity
+            id of the input entity
         :return: A list of Entities
         """
         pass

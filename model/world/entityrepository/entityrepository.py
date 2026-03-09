@@ -43,8 +43,9 @@ class EntityRepository(EntityRepositoryInterface):
     def get_manager_ids(self, index: EntityManagerIndex) -> set[UUID]:
         return self._entity_manager_indexes.get(index, set())
 
-    def update_entities(self) -> None:
-        pass
+    def perform_frame_actions(self, context: FrameActionContext) -> None:
+        for entity_manager in self._entity_managers.values():
+            entity_manager.frame_actions()
 
     def move_entities(self) -> None:
         pass

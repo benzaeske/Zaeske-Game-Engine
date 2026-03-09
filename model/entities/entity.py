@@ -1,8 +1,10 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Tuple
 from uuid import UUID, uuid4
 
 from pygame import Vector2, Surface, Rect
+
+from model.world.modelcontext import ModelContext
 
 
 class Entity(ABC):
@@ -17,15 +19,32 @@ class Entity(ABC):
         self._sprite_w_adj: float = sprite.get_width() / 2
         self._sprite_h_adj: float = sprite.get_height() / 2
 
+    @abstractmethod
+    def frame_actions(self, context: ModelContext, dt: float) -> None:
+        """
+        Actions that an entity takes each frame. May alter the state of this entity, other entities, the player, or
+        the world state.
+        :param context: A ModelContext representing the current state of the world model
+        :param dt: The time delta between frames
+        """
+        pass
+
+    @abstractmethod
+    def move(self, context: ModelContext, dt: float) -> None:
+        """
+        Moves this entity
+        :param context: A ModelContext representing the current state of the world model
+        :param dt: The time delta between frames
+        """
+        pass
+
     def draw(self, screen: Surface, camera: Rect) -> None:
         """
         Draws the entity on the provided pygame screen
         :param screen: The screen to blit the entity on
         :param camera: The current size and position of the camera relative to the world space
         """
-        # TODO adjust is temporary until wrapping is removed
         draw_pos: Tuple[float, float] = self.to_camera_pos(camera)
-        #draw_pos = (draw_pos[0] - adjust.x, draw_pos[1] - adjust.y)
         screen.blit(self._sprite, draw_pos)
 
     def to_camera_pos(self, camera: Rect) -> Tuple[float, float]:
