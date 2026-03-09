@@ -1,8 +1,6 @@
 from typing import Tuple
 from uuid import UUID
 
-from pygame import Surface
-
 from model.entities.entity import Entity
 
 
@@ -12,12 +10,10 @@ class GridCell:
     """
     def __init__(
         self,
-        coordinates: Tuple[int, int],
-        background_surface: Surface,
+        coordinate: Tuple[int, int]
     ):
-        self.coordinates: Tuple[int, int] = coordinates
+        self._coordinate: Tuple[int, int] = coordinate
         self.contained_entities_by_manager_id: dict[UUID, set[Entity]] = {}
-        self.background_surface: Surface = background_surface
 
     def add_entity(self, entity: Entity):
         if entity.manager_id not in self.contained_entities_by_manager_id:

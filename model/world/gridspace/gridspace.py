@@ -8,35 +8,16 @@ from pygame import Surface, Vector2
 from model.entities.entity import Entity
 from model.world.gridspace.grid_cell import GridCell
 from model.world.gridspace.gridspaceinterface import GridSpaceInterface
-from model.world.worldspecs import WorldSpecs
 
 
 class GridSpace(GridSpaceInterface):
-    def __init__(self, world_specs: WorldSpecs) -> None:
+    def __init__(self, cell_size: float) -> None:
         super().__init__()
-        self.cell_size: float = world_specs.cell_size
-        self.grid_width: int = world_specs.grid_width
-        self.grid_height: int = world_specs.grid_height
-        self._grid: dict[Tuple[int, int], GridCell] = self.initialize_grid_space()
-
-    def initialize_grid_space(self) -> dict[Tuple[int, int], GridCell]:
-        new_grid: dict[Tuple[int, int], GridCell] = {}
-        for row in range(self.grid_height):
-            for col in range(self.grid_width):
-                new_grid[(row, col)] = self.get_new_grid_cell((row, col))
-        return new_grid
-
-    def get_new_grid_cell(self, coord: Tuple[int, int]) -> GridCell:
-        background: Surface = pygame.Surface((self.cell_size, self.cell_size))
-        noise: int = random.randint(0, 25)
-        if coord[0] == 0:
-            background.fill((99, 85, 52))
-        else:
-            background.fill((0, 50 + noise, 115 + noise * 2))
-        return GridCell(coord, background)
+        self._cell_size: float = cell_size
+        self._grid: dict[Tuple[int, int], GridCell] = {}
 
     def get_grid_cell_coord_from_position(self, p: Vector2) -> Tuple[int, int]:
-        return int(p.y / self.cell_size), int(p.x / self.cell_size)
+        return int(p.y / self._cell_size), int(p.x / self._cell_size)
 
     def add_entity(self, entity: Entity) -> None:
         coord: Tuple[int, int] = self.get_grid_cell_coord_from_position(entity.get_position())
@@ -44,7 +25,7 @@ class GridSpace(GridSpaceInterface):
 
     def add_entity_at_coord(self, coord: Tuple[int, int], entity: Entity) -> None:
         if coord not in self._grid:
-            self._grid[coord] = self.get_new_grid_cell(coord)
+            self._grid[coord] = GridCell(coord)
         self._grid[coord].add_entity(entity)
 
     def remove_entity(self, entity: Entity) -> None:
@@ -72,8 +53,8 @@ class GridSpace(GridSpaceInterface):
 
     def get_neighbors(self, p: Vector2, cell_range: int, manager_ids: set[UUID]) -> list[Entity]:
         neighbors: list[Entity] = []
-        r: int = int(p.y / self.cell_size)
-        c: int = int(p.x / self.cell_size)
+        r: int = int(p.y / self._cell_size)
+        c: int = int(p.x / self._cell_size)
         for dr in range(-cell_range, cell_range + 1):
             for dc in range(-cell_range, cell_range + 1):
                 grid_r: int = r + dr
@@ -88,3 +69,12 @@ class GridSpace(GridSpaceInterface):
         if old_coord != current_coord:
             self.remove_entity_at_coord(old_coord, entity)
             self.add_entity_at_coord(current_coord, entity)
+
+    # TODO remove after refactor
+    def generate_random_background_noise(self, coord: Tuple[int, int]):
+        background: Surface = pygame.Surface((self._cell_size, self._cell_size))
+        noise: int = random.randint(0, 25)
+        if coord[0] == 0:
+            background.fill((99, 85, 52))
+        else:
+            background.fill((0, 50 + noise, 115 + noise * 2))

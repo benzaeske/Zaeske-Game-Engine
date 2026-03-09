@@ -1,7 +1,7 @@
 import copy
 import random
 
-from pygame import Vector2, Surface, Rect
+from pygame import Vector2, Surface, Rect, image, transform
 
 from model.entities.boid import Boid
 from model.entities.fishconfig import FishConfig, FishType
@@ -10,13 +10,13 @@ from model.utils.vectorutils import limit_magnitude
 
 
 class School(EntityManager):
-    def __init__(self, fish_config: FishConfig, amount: int, hatch_region: Rect, sprite: Surface) -> None:
+    def __init__(self, fish_config: FishConfig, amount: int, hatch_region: Rect) -> None:
         super().__init__()
-        self._fish: set[Boid] = set()
         self._fish_config: FishConfig = fish_config
+        self._sprite: Surface = self._get_sprite()
+        self._fish: set[Boid] = set()
         self._amount: int = amount
         self._hatch_region: Rect = hatch_region
-        self._sprite: Surface = sprite
         self._did_spawn: bool = False
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
@@ -25,17 +25,12 @@ class School(EntityManager):
             self.hatch(context)
             self._did_spawn = True
         for fish in self._fish:
-            fish.frame_actions(
-                self._fish_config.boid_config,
-                context.grid_space.get_entity_neighbors(fish, self._fish_config.boid_config.interaction_cell_range),
-                context.get_world_width(),
-                context.get_world_height()
-            )
+            fish.frame_actions(context, dt)
 
     def movement(self, context: ModelContext, dt: float) -> None:
         for fish in self._fish:
             old_pos: Vector2 = copy.deepcopy(fish.get_position())
-            fish.move(context.get_world_width(), context.get_world_height(), dt)
+            fish.move(context, dt)
             context.grid_space.process_moved_entity(old_pos, fish)
 
     def hatch(self, context: ModelContext) -> None:
@@ -47,12 +42,27 @@ class School(EntityManager):
                 self._sprite,
                 self.get_manager_id(),
                 self._fish_config.max_speed,
-                self._fish_config.max_acceleration
+                self._fish_config.max_acceleration,
+                self._fish_config.boid_config
             )
             new_fish.set_position(self._get_initial_position())
             new_fish.set_velocity(self._get_initial_velocity())
             self._fish.add(new_fish)
-            context.grid_space.add_entity(new_fish, None)
+            context.grid_space.add_entity(new_fish)
+
+    def _get_sprite(self) -> Surface:
+        match self._fish_config.fish_type:
+            case FishType.RED:
+                return self.load_sprite("images/red_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
+            case FishType.YELLOW:
+                return self.load_sprite("images/yellow_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
+            case FishType.GREEN:
+                return self.load_sprite("images/green_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
+
+    @staticmethod
+    def load_sprite(image_location: str, w, h) -> Surface:
+        surface: Surface = image.load(image_location).convert_alpha()
+        return transform.scale(surface, (w, h))
 
     def _get_initial_position(self) -> Vector2:
         """
@@ -77,4 +87,4 @@ class School(EntityManager):
         return initial_velocity
 
     def get_fish_type(self) -> FishType:
-        return self._fish_config.type
+        return self._fish_config.fish_type

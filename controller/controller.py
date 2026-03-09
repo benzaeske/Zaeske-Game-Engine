@@ -10,8 +10,6 @@ from pygame.time import Clock
 
 from model.entitymanagers.jellyfishswarm import JellyfishSwarm
 from model.entitymanagers.school import School
-from model.player.cameraspecs import CameraSpecs
-from model.player.player import Turtle
 from model.world.gridspace.grid_cell import GridCell
 from model.world.model import Model
 from model.world.worldspecs import WorldSpecs

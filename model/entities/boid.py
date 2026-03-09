@@ -1,8 +1,7 @@
 import math
 from uuid import UUID
 
-from pygame import Surface, Vector2, Rect
-from pygame.transform import rotate
+from pygame import Surface, Vector2, Rect, transform
 
 from model.entities.boidconfig import BoidConfig
 from model.entities.physicsentity import PhysicsEntity
@@ -27,7 +26,6 @@ class Boid(PhysicsEntity):
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         self.flock(context)
         self.flock_to_target()
-        self.avoid_walls(context)
 
     def flock(self, context: ModelContext) -> None:
         """
@@ -88,5 +86,5 @@ class Boid(PhysicsEntity):
 
     def draw(self, screen: Surface, camera: Rect) -> None:
         # Rotate the boid according to its velocity then blit it to the screen
-        rotated_surface: Surface = rotate(self._sprite, math.degrees(math.atan2(self._velocity.y, self._velocity.x)))
+        rotated_surface: Surface = transform.rotate(self._sprite, math.degrees(math.atan2(self._velocity.y, self._velocity.x)))
         screen.blit(rotated_surface, self.to_camera_pos(camera))
