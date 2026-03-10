@@ -5,6 +5,7 @@ from uuid import UUID
 
 from pygame import Vector2
 
+from model.player.camera import Camera
 from model.world.gridspace.grid_cell import GridCell
 
 if TYPE_CHECKING:
@@ -39,6 +40,13 @@ class GridSpaceInterface(ABC):
         """
         :param p: A vector representing a point in grid space.
         :return: The grid cell that contains the provided point.
+        """
+        pass
+
+    @abstractmethod
+    def get_grid_cells_in_camera_range(self, camera: Camera) -> list[GridCell]:
+        """
+        Returns a list of all grid cells that are visible within the provided camera's boundaries.
         """
         pass
 

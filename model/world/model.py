@@ -31,5 +31,5 @@ class Model:
     def remove_entity_manager(self, manager_id: UUID) -> None:
         self._entity_repository.remove_entity_manager(manager_id)
 
-    def get_player(self) -> Player:
-        return self._player
+    def get_model_context(self) -> ModelContext:
+        return self._model_context

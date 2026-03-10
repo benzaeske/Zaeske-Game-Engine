@@ -3,9 +3,10 @@ from typing import Tuple
 from uuid import UUID
 
 import pygame
-from pygame import Surface, Vector2
+from pygame import Surface, Vector2, Rect
 
 from model.entities.entity import Entity
+from model.player.camera import Camera
 from model.world.gridspace.grid_cell import GridCell
 from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 
@@ -44,6 +45,19 @@ class GridSpace(GridSpaceInterface):
             return self._grid[coord]
         else:
             raise ValueError("Attempting to get a grid cell that is not in loaded grid space")
+
+    def get_grid_cells_in_camera_range(self, camera: Camera) -> list[GridCell]:
+        grid_cells: list[GridCell] = []
+        window: Rect = camera.get_window()
+        bottom: int = int(window.top // self._cell_size) # Pygame Rect has inverted y coordinates
+        top: int = int(window.bottom // self._cell_size) # Pygame Rect has inverted y coordinates
+        left: int = int(window.left // self._cell_size)
+        right: int = int(window.right // self._cell_size)
+        for row in range(bottom, top + 1):
+            for col in range(left, right + 1):
+                if (row, col) in self._grid:
+                    grid_cells.append(self._grid[(row, col)])
+        return grid_cells
 
     def get_neighbors_for_entity(self, entity: Entity, cell_range: int, manager_ids: set[UUID] | None = None) -> list[Entity]:
         if manager_ids is None:

@@ -82,6 +82,7 @@ class Player(PlayerInterface, ABC):
         limit_magnitude(velocity, self._max_speed)
         self._position += velocity * dt
         self._hitbox.center = self._position
+        self._camera.set_window_position(self._position)
         # Update facing direction for drawing
         if velocity.x != 0:
             if velocity.x > 0:
