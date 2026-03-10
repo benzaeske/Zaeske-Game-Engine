@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from pygame import Surface, SRCALPHA, draw, Vector2
+from pygame import Surface, SRCALPHA, draw
 
 from model.entities.entity import Entity
+from model.world.modelcontext import ModelContext
 
 
 class Shield(Entity):
@@ -33,6 +34,12 @@ class Shield(Entity):
             self._shield_radius,
         )
         return shield_surface
+
+    def frame_actions(self, context: ModelContext, dt: float) -> None:
+        pass
+
+    def move(self, context: ModelContext, dt: float) -> None:
+        pass
 
     def update_sprite(self):
         self._sprite = self.get_shield_surface()

@@ -75,8 +75,14 @@ class Entity(ABC):
     def get_x(self) -> float:
         return self._position.x
 
+    def set_x(self, x: float) -> None:
+        self._position.x = x
+
     def get_y(self) -> float:
         return self._position.y
+
+    def set_y(self, y: float) -> None:
+        self._position.y = y
 
     # Implement functions needed to make entities usable in a python set
 

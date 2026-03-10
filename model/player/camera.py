@@ -13,6 +13,12 @@ class Camera:
     def get_window(self) -> Rect:
         return self._window
 
+    def get_width(self) -> float:
+        return self._window.width
+
+    def get_height(self) -> float:
+        return self._window.height
+
     def get_width_adj(self) -> float:
         return self._width_adj
 

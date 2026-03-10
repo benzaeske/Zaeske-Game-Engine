@@ -4,6 +4,7 @@ import random
 from pygame import Vector2, Surface, Rect, image, transform
 
 from model.entities.boid import Boid
+from model.entities.entity import Entity
 from model.entities.fishconfig import FishConfig, FishType
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.utils.vectorutils import limit_magnitude
@@ -17,6 +18,10 @@ class School(EntityManager):
         self._fish: set[Boid] = set()
         self._amount: int = amount
         self._hatch_region: Rect = hatch_region
+        self._bound_w: float = 128.0 * 32 # Fish should stay bounded within a 32x32 grid-cell region relative to the player
+        self._bound_w_adj: float = self._bound_w / 2
+        self._bound_h: float = 128.0 * 32 # Fish should stay bounded within a 32x32 grid-cell region relative to the player
+        self._bound_h_adj: float = self._bound_h / 2
         self._did_spawn: bool = False
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
@@ -28,10 +33,45 @@ class School(EntityManager):
             fish.frame_actions(context, dt)
 
     def movement(self, context: ModelContext, dt: float) -> None:
+        # Pre-calculated constants used for position wrapping performed in the inner loop
+        min_x: float = context.player.get_position().x - self._bound_w_adj
+        min_y: float = context.player.get_position().y - self._bound_h_adj
+        max_x: float = context.player.get_position().x + self._bound_w_adj
+        max_y: float = context.player.get_position().y + self._bound_h_adj
+        w_minus_min_x: float = self._bound_w - min_x
+        h_minus_min_y: float = self._bound_h - min_y
         for fish in self._fish:
             old_pos: Vector2 = copy.deepcopy(fish.get_position())
             fish.move(context, dt)
+            # Wrap each fish's position to keep it inside a bounding box centered on the player's position
+            if fish.get_x() < min_x or fish.get_x() > max_x:
+                self.wrap_x_around_bounding_box(fish, min_x, self._bound_w, w_minus_min_x)
+            if fish.get_y() < min_y or fish.get_y() > max_y:
+                self.wrap_y_around_bounding_box(fish, min_y, self._bound_h, h_minus_min_y)
+            # Update grid cell if necessary
             context.grid_space.process_moved_entity(old_pos, fish)
+
+    @staticmethod
+    def wrap_x_around_bounding_box(entity: Entity, min_x: float, width: float, w_minus_min_x: float) -> None:
+        """
+        Wraps the given Entity's x coordinate based on a rectangular boundary defined by the input parameters.
+        :param entity: The entity whose position is to be wrapped.
+        :param min_x: The left edge of the bounding box.
+        :param width: The width of the bounding box.
+        :param w_minus_min_x: A precalculated constant: width - min_x
+        """
+        entity.set_x(min_x + ((entity.get_x() + w_minus_min_x) % width))
+
+    @staticmethod
+    def wrap_y_around_bounding_box(entity: Entity, min_y: float, height: float, h_minus_min_y: float) -> None:
+        """
+        Wraps the given Entity's y coordinate based on a rectangular boundary defined by the input parameters.
+        :param entity: The entity whose position is to be wrapped.
+        :param min_y: The bottom edge of the bounding box.
+        :param height: The height of the bounding box.
+        :param h_minus_min_y: A precalculated constant: height - min_y
+        """
+        entity.set_y(min_y + ((entity.get_y() + h_minus_min_y) % height))
 
     def hatch(self, context: ModelContext) -> None:
         """

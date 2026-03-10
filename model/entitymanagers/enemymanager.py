@@ -61,7 +61,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
             new_enemy: T = self.get_new_enemy()
             new_enemy.set_position(self._get_initial_position(context))
             self._enemies.add(new_enemy)
-            context.grid_space.add_entity(new_enemy, None)
+            context.grid_space.add_entity(new_enemy)
 
     @abstractmethod
     def get_new_enemy(self) -> T:
