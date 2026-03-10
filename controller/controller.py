@@ -112,7 +112,7 @@ class GameController:
         self.draw_entities(camera_grid_cells, EntityManagerIndex.PROJECTILE)
 
     def draw_background(self) -> None:
-        self._view.draw_background(self._model.get_model_context().player.get_camera())
+        self._view.draw_background(self._player.get_camera())
 
     def draw_entities(self, grid_cells: list[GridCell], entity_type: EntityManagerIndex) -> None:
         """

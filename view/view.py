@@ -1,3 +1,4 @@
+import copy
 import math
 from typing import Tuple
 
@@ -66,16 +67,24 @@ class View:
         return self._screen_height
 
     def draw_background(self, camera: Camera) -> None:
-        # TODO fix this
-        # Loop over grid cells within camera range.
-        camera_window: Rect = camera.get_window()
+        # Pull out some constants for readability
         tile_size: int = self._background.get_tile_size()
+        background_width: int = self._background.get_background_dimensions()[0]
+        background_height: int = self._background.get_background_dimensions()[1]
+
+        # Adjust camera window center so that it is at its relative position inside the background
+        camera_window: Rect = copy.deepcopy(camera.get_window())
+        camera_window.center = (
+            ((camera_window.centerx % background_width) + background_width) % background_width,
+            ((camera_window.centery % background_height) + background_height) % background_height
+        )
+
+        # Define the left/right/bottom/top ranges of tiles to draw
         left: int = int(camera_window.left // tile_size)
         right: int = int(camera_window.right // tile_size)
         bottom: int = int(camera_window.top // tile_size) # Pygame Rects use inverted y
         top: int = int(camera_window.bottom // tile_size) # Pygame Rects use inverted y
-        background_width: int = self._background.get_background_dimensions()[0]
-        background_height: int = self._background.get_background_dimensions()[1]
+        # Loop through and draw the tiles
         for row in range(bottom, top + 1):
             for col in range(left, right + 1):
                 grid_r = (row + background_height) % background_height
@@ -85,7 +94,7 @@ class View:
                 y = (row + 1) * tile_size
                 # Adjust to screen relative coordinates
                 x = x - camera_window.left
-                y = camera_window.bottom - y
+                y = camera_window.bottom - y # Pygame Rects use inverted y
                 self.draw_surface(self._background.get_background_tile(grid_r, grid_c), (x, y))
 
     def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
