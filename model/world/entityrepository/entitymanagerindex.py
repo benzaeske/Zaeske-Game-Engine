@@ -5,8 +5,10 @@ class EntityManagerIndex(Enum):
     """
     Indexes that can be used to quickly query for all entity manager ids based on a type of entity
     """
-    RED_FISH = 0,
-    YELLOW_FISH = 1,
-    GREEN_FISH = 2,
-    JELLY = 3,
-    ENEMY = 4
+    FISH = 0
+    RED_FISH = 1,
+    YELLOW_FISH = 2,
+    GREEN_FISH = 3,
+    ENEMY = 4,
+    PROJECTILE = 5,
+    ITEM = 6

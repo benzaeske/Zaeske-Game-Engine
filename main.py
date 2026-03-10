@@ -114,7 +114,7 @@ for _ in range(num_red_schools):
 
 
 num_yellow_schools = 1
-center_spawn_region = Rect(0, 0, game_controller.view.screen_width, game_controller.view.screen_height)
+center_spawn_region = Rect(0, 0, game_controller._view._screen_width, game_controller._view._screen_height)
 center_spawn_region.center = (
     int(game_controller.model.get_player().position.x),
     int(game_controller.model.get_player().position.y),

@@ -22,11 +22,10 @@ class EntityRepository(EntityRepositoryInterface):
             self.index_entity_manager(entity_manager)
 
     def index_entity_manager(self, entity_manager: EntityManager) -> None:
-        if isinstance(entity_manager, JellyfishSwarm):
-            self._entity_manager_indexes[EntityManagerIndex.JELLY].add(entity_manager.get_manager_id())
-        elif isinstance(entity_manager, EnemyManager):
+        if isinstance(entity_manager, EnemyManager):
             self._entity_manager_indexes[EntityManagerIndex.ENEMY].add(entity_manager.get_manager_id())
         elif isinstance(entity_manager, School):
+            self._entity_manager_indexes[EntityManagerIndex.FISH].add(entity_manager.get_manager_id())
             match entity_manager.get_fish_type():
                 case FishType.RED:
                     self._entity_manager_indexes[EntityManagerIndex.RED_FISH].add(entity_manager.get_manager_id())

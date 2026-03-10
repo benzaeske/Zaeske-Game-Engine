@@ -2,7 +2,10 @@ import math
 from typing import Tuple
 
 import pygame
-from pygame import Surface, Rect, Font
+from pygame import Surface, Font, Rect
+
+from model.player.camera import Camera
+from view.background import Background
 
 
 class WindowOptions:
@@ -21,57 +24,88 @@ class View:
     """
 
     def __init__(self, options: WindowOptions) -> None:
-        self.options: WindowOptions = options
+        self._options: WindowOptions = options
         # Screen sizing
         display_info = pygame.display.Info()
         # Width the display being used as detected by pygame's built in display Info class
         self._display_width: int = display_info.current_w
         self._display_height: int = display_info.current_h
         # The screen that will be used to blit each frame
-        self.screen: Surface = self._get_screen()
+        self._screen: Surface = self._initialize_screen()
         # Get dimensions from created screen
-        self.screen_width: int = self.screen.get_width()
-        self.screen_height: int = self.screen.get_height()
-
+        self._screen_width: int = self._screen.get_width()
+        self._screen_height: int = self._screen.get_height()
         # Font
-        self.font: Font = pygame.font.SysFont("Arial", 48)
-
+        self._font: Font = pygame.font.SysFont("Arial", 48)
         print(
             "Initialized view with pygame screen Surface dimensions: ",
-            self.screen_width,
-            self.screen_height,
+            self._screen_width,
+            self._screen_height,
         )
+        self._background: Background = Background((64, 64), 128)
 
-    def _get_screen(self) -> Surface:
+    def _initialize_screen(self) -> Surface:
         """
         Get the screen that will be used for displaying the game
         """
-        if self.options.full_screen:
+        if self._options.full_screen:
             return pygame.display.set_mode((self._display_width, self._display_height), pygame.FULLSCREEN)
         else:
             # Don't let the width/height exceed the maximum dimensions of the current display
-            width: int = self.options.screen_width if self.options.screen_width is not None and self.options.screen_width < self._display_width else self._display_width
-            height: int = self.options.screen_height if self.options.screen_height is not None and self.options.screen_height < self._display_height else self._display_height
+            width: int = self._options.screen_width if self._options.screen_width is not None and self._options.screen_width < self._display_width else self._display_width
+            height: int = self._options.screen_height if self._options.screen_height is not None and self._options.screen_height < self._display_height else self._display_height
             return pygame.display.set_mode((width, height))
 
+    def get_screen(self) -> Surface:
+        return self._screen
+
+    def get_screen_width(self) -> int:
+        return self._screen_width
+
+    def get_screen_height(self) -> int:
+        return self._screen_height
+
+    def draw_background(self, camera: Camera) -> None:
+        # TODO fix this
+        # Loop over grid cells within camera range.
+        camera_window: Rect = camera.get_window()
+        tile_size: int = self._background.get_tile_size()
+        left: int = int(camera_window.left // tile_size)
+        right: int = int(camera_window.right // tile_size)
+        bottom: int = int(camera_window.top // tile_size) # Pygame Rects use inverted y
+        top: int = int(camera_window.bottom // tile_size) # Pygame Rects use inverted y
+        background_width: int = self._background.get_background_dimensions()[0]
+        background_height: int = self._background.get_background_dimensions()[1]
+        for row in range(bottom, top + 1):
+            for col in range(left, right + 1):
+                grid_r = (row + background_height) % background_height
+                grid_c = (col + background_width) % background_width
+                # Convert top left of row, col to coordinates on the background surface
+                x = col * tile_size
+                y = (row + 1) * tile_size
+                # Adjust to screen relative coordinates
+                x = x - camera_window.left
+                y = camera_window.bottom - y
+                self.draw_surface(self._background.get_background_tile(grid_r, grid_c), (x, y))
+
     def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
-        self.screen.blit(surface, dest, area)
+        self._screen.blit(surface, dest, area)
 
     def print_fps_to_screen(self, fps: float, player_x: int, player_y: int) -> None:
-        fps_surface: Surface = self.font.render(
+        fps_surface: Surface = self._font.render(
             str(math.floor(fps)), True, (255, 255, 255)
         )
-        self.screen.blit(fps_surface, fps_surface.get_rect(x=0, y=0))
+        self._screen.blit(fps_surface, fps_surface.get_rect(x=0, y=0))
 
     def print_location_to_screen(self, player_x: int, player_y: int) -> None:
-        x_surface: Surface = self.font.render(
+        x_surface: Surface = self._font.render(
             "x: " + str(player_x), True, (255, 255, 255)
         )
-        self.screen.blit(x_surface, x_surface.get_rect(x=0, y=fps_surface.get_height()))
-        y_surface: Surface = self.font.render(
+        self._screen.blit(x_surface, x_surface.get_rect(x=0, y=fps_surface.get_height()))
+        y_surface: Surface = self._font.render(
             "y: " + str(player_y), True, (255, 255, 255)
         )
-        self.screen.blit(
+        self._screen.blit(
             y_surface,
             y_surface.get_rect(
                 x=0, y=fps_surface.get_height() + x_surface.get_height()
@@ -81,8 +115,8 @@ class View:
     def print_score_to_screen(self, score: int | None) -> None:
         if score is None:
             score = 0
-        score_surface: Surface = self.font.render("Score: " + str(score), True, (255, 255, 255))
-        self.screen.blit(score_surface, score_surface.get_rect(x=0, y=0))
+        score_surface: Surface = self._font.render("Score: " + str(score), True, (255, 255, 255))
+        self._screen.blit(score_surface, score_surface.get_rect(x=0, y=0))
 
 
     @staticmethod

@@ -18,7 +18,7 @@ class GridSpace(GridSpaceInterface):
         self._grid: dict[Tuple[int, int], GridCell] = {}
 
     def get_grid_cell_coord_from_position(self, p: Vector2) -> Tuple[int, int]:
-        return int(p.y / self._cell_size), int(p.x / self._cell_size)
+        return int(p.y // self._cell_size), int(p.x // self._cell_size)
 
     def add_entity(self, entity: Entity) -> None:
         coord: Tuple[int, int] = self.get_grid_cell_coord_from_position(entity.get_position())
