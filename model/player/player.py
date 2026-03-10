@@ -48,21 +48,22 @@ class Player(PlayerInterface, ABC):
     def process_fish_coherency(self, grid_space: GridSpaceInterface,
                                entity_repository: EntityRepositoryInterface) -> None:
         p_grid_cell: GridCell = grid_space.get_grid_cell(self._position)
-        self._fish_coherency[FishType.RED] = len(
-            p_grid_cell.get_entities_by_manager_ids(
-                entity_repository.get_manager_ids(EntityManagerIndex.RED_FISH)
+        if p_grid_cell is not None:
+            self._fish_coherency[FishType.RED] = len(
+                p_grid_cell.get_entities_by_manager_ids(
+                    entity_repository.get_manager_ids(EntityManagerIndex.RED_FISH)
+                )
             )
-        )
-        self._fish_coherency[FishType.YELLOW] = len(
-            p_grid_cell.get_entities_by_manager_ids(
-                entity_repository.get_manager_ids(EntityManagerIndex.YELLOW_FISH)
+            self._fish_coherency[FishType.YELLOW] = len(
+                p_grid_cell.get_entities_by_manager_ids(
+                    entity_repository.get_manager_ids(EntityManagerIndex.YELLOW_FISH)
+                )
             )
-        )
-        self._fish_coherency[FishType.GREEN] = len(
-            p_grid_cell.get_entities_by_manager_ids(
-                entity_repository.get_manager_ids(EntityManagerIndex.GREEN_FISH)
+            self._fish_coherency[FishType.GREEN] = len(
+                p_grid_cell.get_entities_by_manager_ids(
+                    entity_repository.get_manager_ids(EntityManagerIndex.GREEN_FISH)
+                )
             )
-        )
 
     def move_player(self, key_presses: ScancodeWrapper, dt: float) -> None:
         """
@@ -95,6 +96,9 @@ class Player(PlayerInterface, ABC):
 
     def get_camera(self) -> Camera:
         return self._camera
+
+    def get_current_hp(self) -> float:
+        return self._current_health
 
     def update_hp(self, hp_diff: float) -> None:
         self._current_health += hp_diff

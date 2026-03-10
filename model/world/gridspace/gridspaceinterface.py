@@ -6,10 +6,10 @@ from uuid import UUID
 from pygame import Vector2
 
 from model.player.camera import Camera
-from model.world.gridspace.grid_cell import GridCell
 
 if TYPE_CHECKING:
     from model.entities.entity import Entity
+    from model.world.gridspace.grid_cell import GridCell
 
 
 class GridSpaceInterface(ABC):
@@ -36,7 +36,7 @@ class GridSpaceInterface(ABC):
         pass
 
     @abstractmethod
-    def get_grid_cell(self, p: Vector2) -> GridCell:
+    def get_grid_cell(self, p: Vector2) -> GridCell | None:
         """
         :param p: A vector representing a point in grid space.
         :return: The grid cell that contains the provided point.

@@ -6,7 +6,7 @@ import pygame
 from pygame import Surface, Font, Rect
 
 from model.player.camera import Camera
-from view.background import Background
+from view.background import Background, BackgroundOptions
 
 
 class WindowOptions:
@@ -24,8 +24,8 @@ class View:
     Pygame uses an inverted y-axis which is why coordinates are being converted when coming from the model.
     """
 
-    def __init__(self, options: WindowOptions) -> None:
-        self._options: WindowOptions = options
+    def __init__(self, window_options: WindowOptions, background_options: BackgroundOptions) -> None:
+        self._options: WindowOptions = window_options
         # Screen sizing
         display_info = pygame.display.Info()
         # Width the display being used as detected by pygame's built in display Info class
@@ -43,7 +43,7 @@ class View:
             self._screen_width,
             self._screen_height,
         )
-        self._background: Background = Background((64, 64), 128)
+        self._background: Background = Background(background_options)
 
     def _initialize_screen(self) -> Surface:
         """
@@ -67,35 +67,7 @@ class View:
         return self._screen_height
 
     def draw_background(self, camera: Camera) -> None:
-        # Pull out some constants for readability
-        tile_size: int = self._background.get_tile_size()
-        background_width: int = self._background.get_background_dimensions()[0]
-        background_height: int = self._background.get_background_dimensions()[1]
-
-        # Adjust camera window center so that it is at its relative position inside the background
-        camera_window: Rect = copy.deepcopy(camera.get_window())
-        camera_window.center = (
-            ((camera_window.centerx % background_width) + background_width) % background_width,
-            ((camera_window.centery % background_height) + background_height) % background_height
-        )
-
-        # Define the left/right/bottom/top ranges of tiles to draw
-        left: int = int(camera_window.left // tile_size)
-        right: int = int(camera_window.right // tile_size)
-        bottom: int = int(camera_window.top // tile_size) # Pygame Rects use inverted y
-        top: int = int(camera_window.bottom // tile_size) # Pygame Rects use inverted y
-        # Loop through and draw the tiles
-        for row in range(bottom, top + 1):
-            for col in range(left, right + 1):
-                grid_r = (row + background_height) % background_height
-                grid_c = (col + background_width) % background_width
-                # Convert top left of row, col to coordinates on the background surface
-                x = col * tile_size
-                y = (row + 1) * tile_size
-                # Adjust to screen relative coordinates
-                x = x - camera_window.left
-                y = camera_window.bottom - y # Pygame Rects use inverted y
-                self.draw_surface(self._background.get_background_tile(grid_r, grid_c), (x, y))
+        self._background.draw(self._screen, camera)
 
     def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
         self._screen.blit(surface, dest, area)

@@ -14,6 +14,7 @@ from model.player.turtle import Turtle
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace.grid_cell import GridCell
 from model.world.model import Model
+from view.background import BackgroundOptions
 from view.view import View, WindowOptions
 
 
@@ -21,8 +22,10 @@ class ControllerOptions:
     def __init__(
         self,
         window_options: WindowOptions,
+        background_options: BackgroundOptions,
     ) -> None:
         self.window_options: WindowOptions = window_options
+        self.background_options: BackgroundOptions = background_options
 
 
 class GameController:
@@ -32,7 +35,7 @@ class GameController:
     ) -> None:
         pygame.init()
         self._options: ControllerOptions = options
-        self._view: View = View(self._options.window_options)
+        self._view: View = View(self._options.window_options, self._options.background_options)
         self._player: Player = Turtle(self._view.get_screen_width(), self._view.get_screen_height())
         self._model: Model = Model(
             128.0,
@@ -83,7 +86,7 @@ class GameController:
                 sys.exit()
         if self._key_presses[pygame.K_ESCAPE]:
             sys.exit()
-        if self.model.get_player().health <= 0:
+        if self._player.get_current_hp() <= 0.0:
             sys.exit()
 
     def check_for_pause(self):

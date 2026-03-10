@@ -39,12 +39,12 @@ class GridSpace(GridSpaceInterface):
         else:
             raise ValueError(f"Attempting to remove entity at coordinate that is not in loaded grid space: {coord}")
 
-    def get_grid_cell(self, p: Vector2) -> GridCell:
+    def get_grid_cell(self, p: Vector2) -> GridCell | None:
         coord: Tuple[int, int] = self.get_grid_cell_coord_from_position(p)
         if coord in self._grid:
             return self._grid[coord]
         else:
-            raise ValueError("Attempting to get a grid cell that is not in loaded grid space")
+            return None
 
     def get_grid_cells_in_camera_range(self, camera: Camera) -> list[GridCell]:
         grid_cells: list[GridCell] = []

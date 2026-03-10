@@ -7,11 +7,7 @@ from model.entities.boidconfig import BoidConfig
 from model.entities.enemyconfig import EnemyConfig
 from model.entities.fishconfig import FishConfig, FishType
 from model.entities.jellyfishconfig import JellyfishConfig
-from model.entities.jellyfishfolder.jellyfishsettingsv1 import JellyfishSettingsV1, JellyfishType
-from model.entitymanagers.jellyfishswarm import JellyfishSwarm
-from model.entitymanagers.jellyfishswarmfolder.jellyfishswarmv1 import JellyfishSwarmV1
-from model.entitymanagers.school import School
-from model.world.worldspecs import WorldSpecs
+from view.background import BackgroundOptions
 from view.view import WindowOptions
 
 
@@ -61,155 +57,15 @@ def load_sprite(image_location: str, w, h) -> Surface:
 # Create the game world:
 ########################
 
-cell_size: float = 128.0
-grid_width: int = 32
-grid_height: int = 32
-# Defines the size of the game world
-world_specs: WorldSpecs = WorldSpecs(cell_size, grid_width, grid_height)
-world_width: float = world_specs.world_width
-world_height: float = world_specs.world_height
-
 # Defines the size of the display window and if fullscreen will be used
 window_options: WindowOptions = WindowOptions()
-
+# Define background grid cell size and dimensions
+cell_size: int = 64
+grid_width: int = 64
+grid_height: int = 64
+background_options: BackgroundOptions = BackgroundOptions((grid_width, grid_height), cell_size)
 # Inputs for the main game controller
-controller_options: ControllerOptions = ControllerOptions(world_specs, window_options)
-
+controller_options: ControllerOptions = ControllerOptions(window_options, background_options)
 game_controller: GameController = GameController(controller_options)
 
-# Create schools of fish and add to the world
-spawn_region_size = 512.0
-
-num_red_schools = 4
-for _ in range(num_red_schools):
-    red_school = School(
-        FishConfig(
-            FishType.RED,
-            175.0,
-            30.0,
-            BoidConfig(
-                128.0,
-                48.0,
-                1,
-                1.0,
-                1.8,
-                1.0,
-                get_random_shoal_location(
-                    game_controller.model.get_player().camera.width,
-                    game_controller.model.get_player().camera.height,
-                    world_height,
-                    world_width
-                ),
-                128.0,
-                1.2
-            )
-        ),
-        16,
-        get_random_spawn_region(
-            spawn_region_size, spawn_region_size, world_width, world_height
-        ),
-        load_sprite("images/red_fish.png", 32.0, 32.0)
-    )
-    game_controller.add_school(red_school)
-
-
-num_yellow_schools = 1
-center_spawn_region = Rect(0, 0, game_controller._view._screen_width, game_controller._view._screen_height)
-center_spawn_region.center = (
-    int(game_controller.model.get_player().position.x),
-    int(game_controller.model.get_player().position.y),
-)
-global_spawn_region = Rect(0, 0, world_width, world_height)
-for _ in range(num_yellow_schools):
-    yellow_school = School(
-        FishConfig(
-            FishType.YELLOW,
-            300.0,
-            48.0,
-            BoidConfig(
-                128.0,
-                48.0,
-                1,
-                1.0,
-                1.8,
-                1.0,
-                None,
-                1.0,
-                1.0
-            )
-        ),
-        175,
-        center_spawn_region,
-        load_sprite("images/yellow_fish.png", 30.0, 30.0)
-    )
-    game_controller.add_school(yellow_school)
-
-
-num_green_schools = 1
-for _ in range(num_green_schools):
-    green_school = School(
-        FishConfig(
-            FishType.GREEN,
-            125.0,
-            24.0,
-            BoidConfig(
-                256.0,
-                96.0,
-                2,
-                1.0,
-                1.8,
-                1.0,
-                Vector2(world_width / 2, 256.0),
-                128.0,
-                1.0
-            )
-        ),
-        32,
-        get_random_spawn_region(
-            spawn_region_size, spawn_region_size, world_width, world_height
-        ),
-        load_sprite("images/green_fish.png", 48.0, 48.0)
-    )
-    game_controller.add_school(green_school)
-
-jelly_spawn_cd = 10.0 # Spawner cooldown in seconds
-num_jellies_per_spawn = 10
-jellyfish_swarm_v1 = JellyfishSwarmV1(
-    JellyfishSettingsV1(
-        JellyfishType.RED,
-        96.0,
-        96.0,
-        128.0,
-        90,
-        100,
-        10,
-        1,
-        2
-    ),
-    1,
-)
-jellyfish_swarm = JellyfishSwarm(
-    jelly_spawn_cd,
-    num_jellies_per_spawn,
-    JellyfishConfig(
-        EnemyConfig(
-            128.0,
-            90.0,
-            96.0,
-            96.0,
-            100,
-            10,
-            1,
-            96.0,
-            2.0
-        ),
-        2,
-        192.0,
-        3.0
-    ),
-    load_sprite("images/red_jelly.png", 96.0, 96.0)
-)
-game_controller.add_jellyfish_swarm(jellyfish_swarm)
-
-# Start the game loop:
 game_controller.start_game()
