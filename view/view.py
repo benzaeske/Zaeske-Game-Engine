@@ -1,12 +1,11 @@
-import copy
 import math
 from typing import Tuple
 
 import pygame
-from pygame import Surface, Font, Rect
+from pygame import Surface, Font
 
 from model.player.camera import Camera
-from view.background import Background, BackgroundOptions
+from view.background import Background
 
 
 class WindowOptions:
@@ -24,11 +23,11 @@ class View:
     Pygame uses an inverted y-axis which is why coordinates are being converted when coming from the model.
     """
 
-    def __init__(self, window_options: WindowOptions, background_options: BackgroundOptions) -> None:
+    def __init__(self, window_options: WindowOptions) -> None:
         self._options: WindowOptions = window_options
         # Screen sizing
         display_info = pygame.display.Info()
-        # Width the display being used as detected by pygame's built in display Info class
+        # Width of the display being used. Detected by pygame's built in display Info class
         self._display_width: int = display_info.current_w
         self._display_height: int = display_info.current_h
         # The screen that will be used to blit each frame
@@ -43,7 +42,7 @@ class View:
             self._screen_width,
             self._screen_height,
         )
-        self._background: Background = Background(background_options)
+        self._background: Background = Background(self._display_width, self._display_height)
 
     def _initialize_screen(self) -> Surface:
         """

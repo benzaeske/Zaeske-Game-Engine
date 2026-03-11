@@ -3,11 +3,6 @@ import random
 from pygame import Vector2, Rect, Surface, image, transform
 
 from controller.controller import GameController, ControllerOptions
-from model.entities.boidconfig import BoidConfig
-from model.entities.enemyconfig import EnemyConfig
-from model.entities.fishconfig import FishConfig, FishType
-from model.entities.jellyfishconfig import JellyfishConfig
-from view.background import BackgroundOptions
 from view.view import WindowOptions
 
 
@@ -57,15 +52,8 @@ def load_sprite(image_location: str, w, h) -> Surface:
 # Create the game world:
 ########################
 
-# Defines the size of the display window and if fullscreen will be used
-window_options: WindowOptions = WindowOptions()
-# Define background grid cell size and dimensions
-cell_size: int = 64
-grid_width: int = 64
-grid_height: int = 64
-background_options: BackgroundOptions = BackgroundOptions((grid_width, grid_height), cell_size)
-# Inputs for the main game controller
-controller_options: ControllerOptions = ControllerOptions(window_options, background_options)
+window_options: WindowOptions = WindowOptions() # Defines the size of the display window and if fullscreen will be used
+controller_options: ControllerOptions = ControllerOptions(window_options)
 game_controller: GameController = GameController(controller_options)
 
 game_controller.start_game()
