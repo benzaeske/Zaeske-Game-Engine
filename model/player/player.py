@@ -5,9 +5,9 @@ from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
 from model.entities.fishconfig import FishType
+from model.modelutils import limit_magnitude
 from model.player.camera import Camera
 from model.player.playerinterface import PlayerInterface
-from model.utils.vectorutils import limit_magnitude
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
 from model.world.gridspace.grid_cell import GridCell

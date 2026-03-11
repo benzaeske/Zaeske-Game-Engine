@@ -7,7 +7,7 @@ from model.entities.boid import Boid
 from model.entities.entity import Entity
 from model.entities.fishconfig import FishConfig, FishType
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
-from model.utils.vectorutils import limit_magnitude
+from model.modelutils import limit_magnitude
 
 
 class School(EntityManager):

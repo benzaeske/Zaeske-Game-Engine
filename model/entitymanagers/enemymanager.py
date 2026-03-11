@@ -2,10 +2,9 @@ import copy
 import random
 from abc import abstractmethod, ABC
 
-from pygame import Vector2
+from pygame import Vector2, Rect
 
 from model.entities.enemy import Enemy
-from model.entities.enemyconfig import EnemyConfig
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
 
 
@@ -13,12 +12,13 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
     """
     Base class for a group of enemies that continue to spawn on a given cooldown interval.
     """
-    def __init__(self, initial_cooldown: float, initial_amount: int) -> None:
+    def __init__(self, initial_cooldown: float, initial_spawn_amount: int) -> None:
         super().__init__()
         self._enemies: set[T] = set()
         self._cooldown: float = initial_cooldown
         self._spawn_timer: float = 0.0
-        self._amount: int = initial_amount
+        self._spawn_amount: int = initial_spawn_amount
+        self._spawn_state: int = 0 # Used to rotate where random enemy positions are sampled from
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         # Destroy enemies that have no hp
@@ -57,7 +57,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         Creates new enemies according to this spawner's amount property. Adds new enemies to this group's list as well
         as to the grid space.
         """
-        for _ in range(self._amount):
+        for _ in range(self._spawn_amount):
             new_enemy: T = self.get_new_enemy()
             new_enemy.set_position(self._get_initial_position(context))
             self._enemies.add(new_enemy)
@@ -70,32 +70,37 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         """
         pass
 
-    @abstractmethod
-    def get_enemy_config(self) -> EnemyConfig:
-        pass
-
-    @staticmethod
-    def _get_initial_position(context: ModelContext) -> Vector2:
+    def _get_initial_position(self, context: ModelContext) -> Vector2:
         """
-        Get a random x and y position within 16 grid cells of the player but outside the camera range
+        Get a random x and y position just outside camera range. Rotate which side of the camera (left, right, top,
+        or bottom) to sample from each time the method is called
         """
-        camera_specs = context.player.camera_specs
-        camera_position = Vector2(context.player.camera.center)
+        camera_window: Rect = context.player.get_camera().get_window()
+        spawn_range: float = 256.0
+        pos: Vector2 = Vector2(0.0, 0.0)
+        match self._spawn_state:
+            case 0:
+                # Top
+                pos.x = random.uniform(camera_window.left, camera_window.right)
+                pos.y = random.uniform(camera_window.bottom, camera_window.bottom + spawn_range) # Pygame Rect uses inverted y
+            case 1:
+                # Right
+                pos.x = random.uniform(camera_window.right, camera_window.right + spawn_range)
+                pos.y = random.uniform(camera_window.top, camera_window.bottom)
+            case 2:
+                # Bottom
+                pos.x = random.uniform(camera_window.left, camera_window.right)
+                pos.y = random.uniform(camera_window.top, camera_window.top - spawn_range)
+            case 3:
+                # Left
+                pos.x = random.uniform(camera_window.left, camera_window.left - spawn_range)
+                pos.y = random.uniform(camera_window.top, camera_window.bottom)
+        self._update_spawn_state()
+        return pos
 
-        x_ranges = [
-            [0, camera_position.x - camera_specs.camera_width_adj],
-            [camera_position.x + camera_specs.camera_width_adj, context.get_world_width()],
-        ]
-        x_weights = [interval[1] - interval[0] for interval in x_ranges]
-        x_range = random.choices(x_ranges, weights=x_weights, k=1)[0]
-        x_pos = random.uniform(x_range[0], x_range[1])
+    def _update_spawn_state(self):
+        self._spawn_state += 1
+        if self._spawn_state > 3:
+            self._spawn_state = 0
 
-        y_ranges = [
-            [0, camera_position.y - camera_specs.camera_height_adj],
-            [camera_position.y + camera_specs.camera_height_adj, context.get_world_height()],
-        ]
-        y_weights = [interval[1] - interval[0] for interval in y_ranges]
-        y_range = random.choices(y_ranges, weights=y_weights, k=1)[0]
-        y_pos = random.uniform(y_range[0], y_range[1])
 
-        return Vector2(x_pos, y_pos)

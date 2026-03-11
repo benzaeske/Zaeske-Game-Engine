@@ -6,10 +6,10 @@ from pygame import Surface, Rect
 
 from model.player.camera import Camera
 
-TILE_SIZE: int = 16
+TILE_SIZE: int = 64
 GRID_WIDTH: int = 128
 GRID_HEIGHT: int = 128
-NOISE_RESOLUTION: Tuple[int, int] = (4, 4)
+NOISE_RESOLUTION: Tuple[int, int] = (8, 8)
 
 class Background:
     def __init__(self, display_w: int, display_h: int) -> None:  # (width, height) of the tile grid

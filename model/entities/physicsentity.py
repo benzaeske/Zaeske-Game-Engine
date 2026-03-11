@@ -4,7 +4,7 @@ from uuid import UUID
 from pygame import Surface, Vector2
 
 from model.entities.entity import Entity
-from model.utils.vectorutils import limit_magnitude, safe_normalize
+from model.modelutils import limit_magnitude, safe_normalize
 from model.world.modelcontext import ModelContext
 
 
