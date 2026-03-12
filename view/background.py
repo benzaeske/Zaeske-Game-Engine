@@ -24,8 +24,8 @@ class Background:
         self._display_h: int = display_h  # The maximum height of the current display
 
         # Number of padding cells needed to surround the surface
-        self._pad_cells_x: int = int(self._display_w / 2) // self._tile_size
-        self._pad_cells_y: int = int(self._display_h / 2) // self._tile_size
+        self._pad_cells_x: int = (int(self._display_w / 2) // self._tile_size) + 1
+        self._pad_cells_y: int = (int(self._display_h / 2) // self._tile_size) + 1
         self._pad_width: int = self._pad_cells_x * self._tile_size
         self._pad_height: int = self._pad_cells_y * self._tile_size
         self._height_with_padding: int = self._background_height + (2 * self._pad_height)

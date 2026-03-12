@@ -16,6 +16,7 @@ class FishConfig:
             max_speed: float,
             max_acceleration: float,
             boid_config: BoidConfig,
+            hatch_radius: float,
             shoal: bool,
             shoal_radius: float | None = None,
             shoal_k: float | None = None,
@@ -26,6 +27,7 @@ class FishConfig:
         self.max_speed: float = max_speed
         self.max_acceleration: float = max_acceleration
         self.boid_config: BoidConfig = boid_config
+        self.hatch_radius: float = hatch_radius
         self.shoal: bool = shoal
         if shoal:
             if shoal_radius is None:

@@ -17,18 +17,18 @@ class School(EntityManager):
         self._sprite: Surface = self._get_sprite()
         self._amount: int = amount
         self._fish: set[Fish] = set()
-        # Fish should stay bounded within a 32x32 grid-cell region relative to the player
-        self._fish_bound_w: float = 128.0 * 32
-        self._fish_bound_h: float = 128.0 * 32
+        # Fish should stay bounded within a 48x48 grid-cell region relative to the player
+        self._fish_bound_w: float = 128.0 * 48
+        self._fish_bound_h: float = 128.0 * 48
         self._fish_boundary: Rect = Rect((0, 0), (self._fish_bound_w, self._fish_bound_h))
         self._fish_boundary.center = context.player.get_position()
         self._hatch_region = self.generate_hatch_region()
-        # Hatch fish when the school is instantiated
-        self.hatch(context)
         # The school's shoaling location should be bounded within a 48x48 grid-cell region relative to the player
         self._shoal_boundary: Rect = Rect((0, 0), (128.0 * 48, 128.0 * 48))
         self._shoal_boundary.center = context.player.get_position()
         self._shoal_location: Vector2 | None = self.get_random_shoal_location() if self._fish_config.shoal else None
+        # Hatch fish once when the school is instantiated
+        self.hatch(context)
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         self._fish_boundary.center = context.player.get_position()
@@ -119,11 +119,11 @@ class School(EntityManager):
         """
         Generate a random hatch region within the boundary of this school
         """
-        hatch_region_size: float = 256.0
+        hatch_region_size: float = self._fish_config.hatch_radius
         hatch_region: Rect = Rect(
             (
-                random.uniform(self._fish_boundary.left + hatch_region_size, self._fish_boundary.right - hatch_region_size),
-                random.uniform(self._fish_boundary.top + hatch_region_size, self._fish_boundary.bottom - hatch_region_size)
+                random.uniform(self._fish_boundary.left, self._fish_boundary.right - hatch_region_size),
+                random.uniform(self._fish_boundary.top, self._fish_boundary.bottom - hatch_region_size)
             ),
             (
                 hatch_region_size,

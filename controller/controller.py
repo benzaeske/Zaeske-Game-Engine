@@ -8,7 +8,13 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
+from model.entities.boidconfig import BoidConfig
+from model.entities.enemyconfig import EnemyConfig
+from model.entities.fishconfig import FishConfig, FishType
+from model.entities.jellyfishconfig import JellyfishType, JellyfishConfig
 from model.entitymanagers.entitymanager import EntityManager
+from model.entitymanagers.jellyfishswarm import JellyfishSwarm
+from model.entitymanagers.school import School
 from model.player.player import Player
 from model.player.turtle import Turtle
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
@@ -55,7 +61,7 @@ class GameController:
 
     def start_game(self):
         self._game_start_time = time.time()
-        # TODO State machine for different display loops
+        self._create_entity_managers()
         while True:
             self.do_game_loop()
 
@@ -123,6 +129,101 @@ class GameController:
         for grid_cell in grid_cells:
             for entity in grid_cell.get_entities_by_manager_ids(self._model.get_entity_repository().get_manager_ids(entity_type)):
                 entity.draw(self._view.get_screen(), self._player.get_camera().get_window())
+
+    def _create_entity_managers(self) -> None:
+        """
+        Statically creates entity managers for all entities in the game world. This will eventually be replaced with a
+        more dynamic method that adds/removes entity managers throughout the game based on various factors such as
+        player position, game time, world state etc
+        """
+        jelly_spawn_cd: float = 5.0
+        jelly_spawn_amount: int = 4
+        jelly_config: JellyfishConfig = JellyfishConfig(
+            JellyfishType.RED,
+            96.0,
+            96.0,
+            EnemyConfig(
+                128.0,
+                90.0,
+                96.0,
+                96.0,
+                100,
+                10,
+                1,
+                96.0,
+                2.0
+            ),
+            2,
+            192.0,
+            3.0
+        )
+        self._model.add_entity_manager(JellyfishSwarm(jelly_spawn_cd, jelly_spawn_amount, jelly_config))
+        red_fish: FishConfig = FishConfig(
+            FishType.RED,
+            40.0,
+            40.0,
+            175.0,
+            30.0,
+            BoidConfig(
+                128.0,
+                52.0,
+                1,
+                1.0,
+                1.8,
+                1.0
+            ),
+            256.0,
+            True,
+            128.0,
+            1.2
+        )
+        num_red_schools: int = 5
+        for _ in range(num_red_schools):
+            self._model.add_entity_manager(School(red_fish, 16, self._model.get_model_context()))
+
+        yellow_fish: FishConfig = FishConfig(
+            FishType.YELLOW,
+            32.0,
+            32.0,
+            200.0,
+            40.0,
+            BoidConfig(
+                192.0,
+                48.0,
+                2,
+                1,
+                1.8,
+                1.0
+            ),
+            512.0,
+            False
+        )
+        num_yellow_schools: int = 2
+        for _ in range(num_yellow_schools):
+            self._model.add_entity_manager(School(yellow_fish, 64, self._model.get_model_context()))
+
+        green_fish: FishConfig = FishConfig(
+            FishType.GREEN,
+            54.0,
+            54.0,
+            128.0,
+            32.0,
+            BoidConfig(
+                192.0,
+                64.0,
+                2,
+                1.0,
+                1.8,
+                1.0
+            ),
+            384.0,
+            True,
+            192.0,
+            1.2
+        )
+        num_green_schools: int = 4
+        for _ in range(num_green_schools):
+            self._model.add_entity_manager(School(green_fish, 16, self._model.get_model_context()))
 
     def draw_fps_menu(self) -> None:
         self._view.print_info_to_screen(
