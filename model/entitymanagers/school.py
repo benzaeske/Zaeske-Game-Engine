@@ -1,53 +1,57 @@
 import copy
 import random
 
-from pygame import Vector2, Surface, Rect, image, transform
+from pygame import Vector2, Surface, Rect
 
-from model.entities.boid import Boid
 from model.entities.entity import Entity
+from model.entities.fish import Fish
 from model.entities.fishconfig import FishConfig, FishType
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
-from model.modelutils import limit_magnitude
+from model.modelutils import limit_magnitude, load_sprite
 
 
 class School(EntityManager):
-    def __init__(self, fish_config: FishConfig, amount: int, hatch_region: Rect) -> None:
+    def __init__(self, fish_config: FishConfig, amount: int, context: ModelContext) -> None:
         super().__init__()
         self._fish_config: FishConfig = fish_config
         self._sprite: Surface = self._get_sprite()
-        self._fish: set[Boid] = set()
         self._amount: int = amount
-        self._hatch_region: Rect = hatch_region
-        self._bound_w: float = 128.0 * 32 # Fish should stay bounded within a 32x32 grid-cell region relative to the player
-        self._bound_w_adj: float = self._bound_w / 2
-        self._bound_h: float = 128.0 * 32 # Fish should stay bounded within a 32x32 grid-cell region relative to the player
-        self._bound_h_adj: float = self._bound_h / 2
-        self._did_spawn: bool = False
+        self._fish: set[Fish] = set()
+        # Fish should stay bounded within a 32x32 grid-cell region relative to the player
+        self._fish_bound_w: float = 128.0 * 32
+        self._fish_bound_h: float = 128.0 * 32
+        self._fish_boundary: Rect = Rect((0, 0), (self._fish_bound_w, self._fish_bound_h))
+        self._fish_boundary.center = context.player.get_position()
+        self._hatch_region = self.generate_hatch_region()
+        # Hatch fish when the school is instantiated
+        self.hatch(context)
+        # The school's shoaling location should be bounded within a 48x48 grid-cell region relative to the player
+        self._shoal_boundary: Rect = Rect((0, 0), (128.0 * 48, 128.0 * 48))
+        self._shoal_boundary.center = context.player.get_position()
+        self._shoal_location: Vector2 | None = self.get_random_shoal_location() if self._fish_config.shoal else None
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
-        if not self._did_spawn:
-            # Only hatch fish once at the beginning
-            self.hatch(context)
-            self._did_spawn = True
+        self._fish_boundary.center = context.player.get_position()
+        self._shoal_boundary.center = context.player.get_position()
+        if self._fish_config.shoal:
+            # Move the shoal location if it is outside the shoaling boundary
+            if not self._shoal_boundary.collidepoint(self._shoal_location):
+                self._shoal_location = self.get_random_shoal_location()
         for fish in self._fish:
             fish.frame_actions(context, dt)
 
     def movement(self, context: ModelContext, dt: float) -> None:
         # Pre-calculated constants used for position wrapping performed in the inner loop
-        min_x: float = context.player.get_position().x - self._bound_w_adj
-        min_y: float = context.player.get_position().y - self._bound_h_adj
-        max_x: float = context.player.get_position().x + self._bound_w_adj
-        max_y: float = context.player.get_position().y + self._bound_h_adj
-        w_minus_min_x: float = self._bound_w - min_x
-        h_minus_min_y: float = self._bound_h - min_y
+        w_minus_min_x: float = self._fish_bound_w - self._fish_boundary.left
+        h_minus_min_y: float = self._fish_bound_h - self._fish_boundary.top
         for fish in self._fish:
             old_pos: Vector2 = copy.deepcopy(fish.get_position())
             fish.move(context, dt)
             # Wrap each fish's position to keep it inside a bounding box centered on the player's position
-            if fish.get_x() < min_x or fish.get_x() > max_x:
-                self.wrap_x_around_bounding_box(fish, min_x, self._bound_w, w_minus_min_x)
-            if fish.get_y() < min_y or fish.get_y() > max_y:
-                self.wrap_y_around_bounding_box(fish, min_y, self._bound_h, h_minus_min_y)
+            if fish.get_x() < self._fish_boundary.left or fish.get_x() > self._fish_boundary.right:
+                self.wrap_x_around_bounding_box(fish, self._fish_boundary.left, self._fish_bound_w, w_minus_min_x)
+            if fish.get_y() < self._fish_boundary.top or fish.get_y() > self._fish_boundary.bottom:
+                self.wrap_y_around_bounding_box(fish, self._fish_boundary.top, self._fish_bound_h, h_minus_min_y)
             # Update grid cell if necessary
             context.grid_space.process_moved_entity(old_pos, fish)
 
@@ -78,31 +82,16 @@ class School(EntityManager):
         Hatch all the fish according to this school's amount property, fish config and hatch region
         """
         for _ in range(self._amount):
-            new_fish: Boid = Boid(
+            new_fish: Fish = Fish(
                 self._sprite,
                 self.get_manager_id(),
-                self._fish_config.max_speed,
-                self._fish_config.max_acceleration,
-                self._fish_config.boid_config
+                self._fish_config,
+                self._shoal_location
             )
             new_fish.set_position(self._get_initial_position())
             new_fish.set_velocity(self._get_initial_velocity())
             self._fish.add(new_fish)
             context.grid_space.add_entity(new_fish)
-
-    def _get_sprite(self) -> Surface:
-        match self._fish_config.fish_type:
-            case FishType.RED:
-                return self.load_sprite("images/red_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
-            case FishType.YELLOW:
-                return self.load_sprite("images/yellow_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
-            case FishType.GREEN:
-                return self.load_sprite("images/green_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
-
-    @staticmethod
-    def load_sprite(image_location: str, w, h) -> Surface:
-        surface: Surface = image.load(image_location).convert_alpha()
-        return transform.scale(surface, (w, h))
 
     def _get_initial_position(self) -> Vector2:
         """
@@ -125,6 +114,38 @@ class School(EntityManager):
         )
         limit_magnitude(initial_velocity, max_speed)
         return initial_velocity
+
+    def generate_hatch_region(self) -> Rect:
+        """
+        Generate a random hatch region within the boundary of this school
+        """
+        hatch_region_size: float = 256.0
+        hatch_region: Rect = Rect(
+            (
+                random.uniform(self._fish_boundary.left + hatch_region_size, self._fish_boundary.right - hatch_region_size),
+                random.uniform(self._fish_boundary.top + hatch_region_size, self._fish_boundary.bottom - hatch_region_size)
+            ),
+            (
+                hatch_region_size,
+                hatch_region_size
+            )
+        )
+        return hatch_region
+
+    def get_random_shoal_location(self) -> Vector2:
+        return Vector2(
+            random.uniform(self._shoal_boundary.left, self._shoal_boundary.right),
+            random.uniform(self._shoal_boundary.top, self._shoal_boundary.bottom)
+        )
+
+    def _get_sprite(self) -> Surface:
+        match self._fish_config.fish_type:
+            case FishType.RED:
+                return load_sprite("images/red_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
+            case FishType.YELLOW:
+                return load_sprite("images/yellow_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
+            case FishType.GREEN:
+                return load_sprite("images/green_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
 
     def get_fish_type(self) -> FishType:
         return self._fish_config.fish_type

@@ -25,7 +25,6 @@ class Boid(PhysicsEntity):
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         self.flock(context)
-        self.flock_to_target()
 
     def flock(self, context: ModelContext) -> None:
         """
@@ -57,19 +56,6 @@ class Boid(PhysicsEntity):
             sum_cohere /= float(count_n)
             sum_cohere -= self.get_position()
             self.target(sum_cohere, self._boid_config.cohere_k)
-
-    def flock_to_target(self) -> None:
-        """
-        Boids in a group can optionally target a location in addition to flocking together. This is set by changing the
-        BoidConfig.target_location
-        """
-        if self._boid_config.target_location is not None:
-            d: float = self.get_position().distance_to(self._boid_config.target_location)
-            diff = self._boid_config.target_location - self.get_position()
-            if d > self._boid_config.target_radius:
-                self.target(diff, self._boid_config.target_k)
-            else:
-                self.target(diff, -self._boid_config.target_k)
 
     def avoid_walls(self, context: ModelContext) -> None:
         """
