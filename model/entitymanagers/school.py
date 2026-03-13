@@ -3,7 +3,6 @@ import random
 
 from pygame import Vector2, Surface, Rect
 
-from model.entities.entity import Entity
 from model.entities.fish import Fish
 from model.entities.fishconfig import FishConfig, FishType
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
@@ -17,65 +16,35 @@ class School(EntityManager):
         self._sprite: Surface = self._get_sprite()
         self._amount: int = amount
         self._fish: set[Fish] = set()
-        # Fish should stay bounded within a 48x48 grid-cell region relative to the player
-        self._fish_bound_w: float = 128.0 * 48
-        self._fish_bound_h: float = 128.0 * 48
-        self._fish_boundary: Rect = Rect((0, 0), (self._fish_bound_w, self._fish_bound_h))
-        self._fish_boundary.center = context.player.get_position()
-        self._hatch_region = self.generate_hatch_region()
-        # The school's shoaling location should be bounded within a 48x48 grid-cell region relative to the player
-        self._shoal_boundary: Rect = Rect((0, 0), (128.0 * 48, 128.0 * 48))
-        self._shoal_boundary.center = context.player.get_position()
-        self._shoal_location: Vector2 | None = self.get_random_shoal_location() if self._fish_config.shoal else None
-        # Hatch fish once when the school is instantiated
+        # The school has a boundary within a certain range of the player
+        self._boundary_w: float = 128.0 * 32
+        self._boundary_h: float = 128.0 * 32
+        self._boundary: Rect = Rect((0, 0), (self._boundary_w, self._boundary_h))
+        self._boundary.center = context.player.get_position()
+        self._shoal: Rect | None = Rect((0, 0), (self._fish_config.shoal_radius * 2, self._fish_config.shoal_radius * 2)) if self._fish_config.shoal else None
+        self._shoal.center = self.get_random_shoal_location()
+        # Hatch fish once at the beginning
         self.hatch(context)
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
-        self._fish_boundary.center = context.player.get_position()
-        self._shoal_boundary.center = context.player.get_position()
+        self._boundary.center = context.player.get_position()
         if self._fish_config.shoal:
-            # Move the shoal location if it is outside the shoaling boundary
-            if not self._shoal_boundary.collidepoint(self._shoal_location):
-                self._shoal_location = self.get_random_shoal_location()
+            # Move the shoal location if it is outside the school's boundary
+            if not self._boundary.collidepoint(self._shoal.center):
+                self._randomize_shoal_location()
         for fish in self._fish:
             fish.frame_actions(context, dt)
 
     def movement(self, context: ModelContext, dt: float) -> None:
-        # Pre-calculated constants used for position wrapping performed in the inner loop
-        w_minus_min_x: float = self._fish_bound_w - self._fish_boundary.left
-        h_minus_min_y: float = self._fish_bound_h - self._fish_boundary.top
         for fish in self._fish:
             old_pos: Vector2 = copy.deepcopy(fish.get_position())
             fish.move(context, dt)
-            # Wrap each fish's position to keep it inside a bounding box centered on the player's position
-            if fish.get_x() < self._fish_boundary.left or fish.get_x() > self._fish_boundary.right:
-                self.wrap_x_around_bounding_box(fish, self._fish_boundary.left, self._fish_bound_w, w_minus_min_x)
-            if fish.get_y() < self._fish_boundary.top or fish.get_y() > self._fish_boundary.bottom:
-                self.wrap_y_around_bounding_box(fish, self._fish_boundary.top, self._fish_bound_h, h_minus_min_y)
+            # Teleport fish back inside their shoal if they go outside the school's boundary and the shoal is not in camera range
+            if (not self._boundary.collidepoint(fish.get_position()) and
+                    not context.player.get_camera().get_window().colliderect(self._shoal)):
+                fish.set_position(self._get_random_position_inside_shoal())
             # Update grid cell if necessary
             context.grid_space.process_moved_entity(old_pos, fish)
-
-    @staticmethod
-    def wrap_x_around_bounding_box(entity: Entity, min_x: float, width: float, w_minus_min_x: float) -> None:
-        """
-        Wraps the given Entity's x coordinate based on a rectangular boundary defined by the input parameters.
-        :param entity: The entity whose position is to be wrapped.
-        :param min_x: The left edge of the bounding box.
-        :param width: The width of the bounding box.
-        :param w_minus_min_x: A precalculated constant: width - min_x
-        """
-        entity.set_x(min_x + ((entity.get_x() + w_minus_min_x) % width))
-
-    @staticmethod
-    def wrap_y_around_bounding_box(entity: Entity, min_y: float, height: float, h_minus_min_y: float) -> None:
-        """
-        Wraps the given Entity's y coordinate based on a rectangular boundary defined by the input parameters.
-        :param entity: The entity whose position is to be wrapped.
-        :param min_y: The bottom edge of the bounding box.
-        :param height: The height of the bounding box.
-        :param h_minus_min_y: A precalculated constant: height - min_y
-        """
-        entity.set_y(min_y + ((entity.get_y() + h_minus_min_y) % height))
 
     def hatch(self, context: ModelContext) -> None:
         """
@@ -86,20 +55,20 @@ class School(EntityManager):
                 self._sprite,
                 self.get_manager_id(),
                 self._fish_config,
-                self._shoal_location
+                self._shoal
             )
-            new_fish.set_position(self._get_initial_position())
+            new_fish.set_position(self._get_random_position_inside_shoal())
             new_fish.set_velocity(self._get_initial_velocity())
             self._fish.add(new_fish)
             context.grid_space.add_entity(new_fish)
 
-    def _get_initial_position(self) -> Vector2:
+    def _get_random_position_inside_shoal(self) -> Vector2:
         """
-        Get an initial random position within the rectangular hatch region specified for this school
+        Get an initial random position within the school's shoal
         """
         return Vector2(
-            random.uniform(self._hatch_region.x, self._hatch_region.x + self._hatch_region.width),
-            random.uniform(self._hatch_region.y, self._hatch_region.y + self._hatch_region.height),
+            random.uniform(self._shoal.left, self._shoal.right),
+            random.uniform(self._shoal.top, self._shoal.bottom),
         )
 
     def _get_initial_velocity(self) -> Vector2:
@@ -115,28 +84,15 @@ class School(EntityManager):
         limit_magnitude(initial_velocity, max_speed)
         return initial_velocity
 
-    def generate_hatch_region(self) -> Rect:
-        """
-        Generate a random hatch region within the boundary of this school
-        """
-        hatch_region_size: float = self._fish_config.hatch_radius
-        hatch_region: Rect = Rect(
-            (
-                random.uniform(self._fish_boundary.left, self._fish_boundary.right - hatch_region_size),
-                random.uniform(self._fish_boundary.top, self._fish_boundary.bottom - hatch_region_size)
-            ),
-            (
-                hatch_region_size,
-                hatch_region_size
-            )
-        )
-        return hatch_region
-
     def get_random_shoal_location(self) -> Vector2:
         return Vector2(
-            random.uniform(self._shoal_boundary.left, self._shoal_boundary.right),
-            random.uniform(self._shoal_boundary.top, self._shoal_boundary.bottom)
+            random.uniform(self._boundary.left, self._boundary.right),
+            random.uniform(self._boundary.top, self._boundary.bottom)
         )
+
+    def _randomize_shoal_location(self):
+        self._shoal.centerx = random.uniform(self._boundary.left, self._boundary.right)
+        self._shoal.centery = random.uniform(self._boundary.top, self._boundary.bottom)
 
     def _get_sprite(self) -> Surface:
         match self._fish_config.fish_type:

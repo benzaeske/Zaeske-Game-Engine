@@ -144,7 +144,7 @@ class GameController:
             96.0,
             EnemyConfig(
                 128.0,
-                90.0,
+                128.0,
                 96.0,
                 96.0,
                 100,
@@ -157,68 +157,71 @@ class GameController:
             192.0,
             3.0
         )
-        self._model.add_entity_manager(JellyfishSwarm(jelly_spawn_cd, jelly_spawn_amount, jelly_config))
+        #self._model.add_entity_manager(JellyfishSwarm(jelly_spawn_cd, jelly_spawn_amount, jelly_config))
+
         red_fish: FishConfig = FishConfig(
             FishType.RED,
-            40.0,
-            40.0,
-            175.0,
-            30.0,
+            32.0,
+            32.0,
+            160.0,
+            48.0,
             BoidConfig(
                 128.0,
-                52.0,
+                48.0,
                 1,
                 1.0,
-                1.8,
+                2.0,
                 1.0
             ),
-            256.0,
+            512.0,
             True,
             128.0,
             1.2
         )
-        num_red_schools: int = 5
+        num_red_schools: int = 4
         for _ in range(num_red_schools):
             self._model.add_entity_manager(School(red_fish, 16, self._model.get_model_context()))
 
         yellow_fish: FishConfig = FishConfig(
             FishType.YELLOW,
-            32.0,
-            32.0,
-            200.0,
-            40.0,
+            26.0,
+            26.0,
+            224.0,
+            100.0,
             BoidConfig(
-                192.0,
-                48.0,
-                2,
+                128.0,
+                44.0,
                 1,
-                1.8,
+                1,
+                2.0,
                 1.0
             ),
             512.0,
-            False
+            True,
+            384.0,
+            1.2
         )
-        num_yellow_schools: int = 2
+        num_yellow_schools: int = 4
         for _ in range(num_yellow_schools):
-            self._model.add_entity_manager(School(yellow_fish, 64, self._model.get_model_context()))
+            self._model.add_entity_manager(School(yellow_fish, 16, self._model.get_model_context()))
 
         green_fish: FishConfig = FishConfig(
             FishType.GREEN,
-            54.0,
-            54.0,
+            36.0,
+            36.0,
             128.0,
             32.0,
             BoidConfig(
-                192.0,
-                64.0,
-                2,
+                128.0,
+                52.0,
+                1,
                 1.0,
-                1.8,
+                2.0,
                 1.0
             ),
-            384.0,
+            512.0,
             True,
-            192.0,
+            64.0,
             1.2
         )
         num_green_schools: int = 4
