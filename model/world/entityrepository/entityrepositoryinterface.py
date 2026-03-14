@@ -6,7 +6,7 @@ from uuid import UUID
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 
 if TYPE_CHECKING:
-    from model.entitymanagers.entitymanager import EntityManager
+    from model.entities.entitymanagers.entitymanager import EntityManager
 
 
 class EntityRepositoryInterface(ABC):

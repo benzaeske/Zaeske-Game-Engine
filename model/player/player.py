@@ -4,7 +4,7 @@ import pygame
 from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
-from model.entities.fishconfig import FishType
+from model.entities.fish.fishconfig import FishType
 from model.modelutils import limit_magnitude
 from model.player.camera import Camera
 from model.player.playerinterface import PlayerInterface

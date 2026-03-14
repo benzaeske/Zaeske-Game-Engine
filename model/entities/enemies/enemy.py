@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pygame import Surface, Rect, Vector2
 
-from model.entities.enemyconfig import EnemyConfig
+from model.entities.enemies.enemyconfig import EnemyConfig
 from model.entities.physicsentity import PhysicsEntity
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.modelcontext import ModelContext

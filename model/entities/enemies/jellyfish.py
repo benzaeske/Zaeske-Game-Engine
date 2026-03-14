@@ -2,8 +2,8 @@ from uuid import UUID
 
 from pygame import Surface, Vector2
 
-from model.entities.enemy import Enemy
-from model.entities.jellyfishconfig import JellyfishConfig
+from model.entities.enemies.enemy import Enemy
+from model.entities.enemies.jellyfishconfig import JellyfishConfig
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.modelcontext import ModelContext
 

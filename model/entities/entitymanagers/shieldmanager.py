@@ -2,8 +2,8 @@ import copy
 
 from pygame import Rect, Vector2
 
-from model.entities.shield import Shield
-from model.entitymanagers.entitymanager import EntityManager, ModelContext
+from model.entities.items.shield_v1 import Shield_v1
+from model.entities.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 
@@ -16,7 +16,7 @@ class ShieldConfig:
 class ShieldManager(EntityManager):
     def __init__(self, config: ShieldConfig):
         super().__init__()
-        self._shield = Shield(self.get_manager_id(), config.shield_radius)
+        self._shield = Shield_v1(self.get_manager_id(), config.shield_radius)
         self._shield_cell_detection_range = config.shield_cell_detection_range
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:

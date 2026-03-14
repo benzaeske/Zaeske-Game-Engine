@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pygame import Surface, Vector2, Rect, transform
 
-from model.entities.boidconfig import BoidConfig
+from model.entities.fish.boidconfig import BoidConfig
 from model.entities.physicsentity import PhysicsEntity
 from model.world.modelcontext import ModelContext
 

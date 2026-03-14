@@ -1,8 +1,8 @@
 from pygame import Surface
 
-from model.entities.jellyfish import Jellyfish
-from model.entities.jellyfishconfig import JellyfishConfig, JellyfishType
-from model.entitymanagers.enemymanager import EnemyManager
+from model.entities.enemies.jellyfish import Jellyfish
+from model.entities.enemies.jellyfishconfig import JellyfishConfig, JellyfishType
+from model.entities.enemies.enemymanager import EnemyManager
 from model.modelutils import load_sprite
 
 

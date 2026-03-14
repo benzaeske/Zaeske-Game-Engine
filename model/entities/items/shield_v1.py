@@ -6,7 +6,7 @@ from model.entities.entity import Entity
 from model.world.modelcontext import ModelContext
 
 
-class Shield(Entity):
+class Shield_v1(Entity):
     def __init__(self, manager_id: UUID, shield_radius: float):
         self._shield_radius: float = shield_radius
         self._shield_radius_squared: float = self._shield_radius * self._shield_radius

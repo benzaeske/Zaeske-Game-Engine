@@ -4,8 +4,8 @@ from abc import abstractmethod, ABC
 
 from pygame import Vector2, Rect
 
-from model.entities.enemy import Enemy
-from model.entitymanagers.entitymanager import EntityManager, ModelContext
+from model.entities.enemies.enemy import Enemy
+from model.entities.entitymanagers.entitymanager import EntityManager, ModelContext
 
 
 class EnemyManager[T: Enemy](EntityManager, ABC):

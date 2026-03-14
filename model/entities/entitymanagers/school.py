@@ -4,8 +4,8 @@ import random
 from pygame import Vector2, Surface, Rect
 
 from model.entities.fish import Fish
-from model.entities.fishconfig import FishConfig, FishType
-from model.entitymanagers.entitymanager import EntityManager, ModelContext
+from model.entities.fish.fishconfig import FishConfig, FishType
+from model.entities.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.modelutils import limit_magnitude, load_sprite
 
 

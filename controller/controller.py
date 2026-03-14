@@ -8,13 +8,13 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.boidconfig import BoidConfig
-from model.entities.enemyconfig import EnemyConfig
-from model.entities.fishconfig import FishConfig, FishType
-from model.entities.jellyfishconfig import JellyfishType, JellyfishConfig
-from model.entitymanagers.entitymanager import EntityManager
-from model.entitymanagers.jellyfishswarm import JellyfishSwarm
-from model.entitymanagers.school import School
+from model.entities.fish.boidconfig import BoidConfig
+from model.entities.enemies.enemyconfig import EnemyConfig
+from model.entities.fish.fishconfig import FishConfig, FishType
+from model.entities.enemies.jellyfishconfig import JellyfishType, JellyfishConfig
+from model.entities.entitymanagers.entitymanager import EntityManager
+from model.entities.entitymanagers.jellyfishswarm import JellyfishSwarm
+from model.entities.entitymanagers.school import School
 from model.player.player import Player
 from model.player.turtle import Turtle
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex

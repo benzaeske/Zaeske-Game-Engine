@@ -2,8 +2,8 @@ from uuid import UUID
 
 from pygame import Surface, Rect
 
-from model.entities.boid import Boid
-from model.entities.fishconfig import FishConfig
+from model.entities.fish.boid import Boid
+from model.entities.fish.fishconfig import FishConfig
 from model.world.modelcontext import ModelContext
 
 

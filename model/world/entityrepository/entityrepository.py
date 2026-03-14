@@ -1,10 +1,9 @@
 from uuid import UUID
 
-from model.entities.fishconfig import FishType
-from model.entitymanagers.enemymanager import EnemyManager
-from model.entitymanagers.entitymanager import EntityManager
-from model.entitymanagers.jellyfishswarm import JellyfishSwarm
-from model.entitymanagers.school import School
+from model.entities.fish.fishconfig import FishType
+from model.entities.enemies.enemymanager import EnemyManager
+from model.entities.entitymanagers.entitymanager import EntityManager
+from model.entities.entitymanagers.school import School
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
 from model.world.modelcontext import ModelContext
