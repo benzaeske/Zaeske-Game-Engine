@@ -157,7 +157,7 @@ class GameController:
             192.0,
             3.0
         )
-        #self._model.add_entity_manager(JellyfishSwarm(jelly_spawn_cd, jelly_spawn_amount, jelly_config))
+        self._model.add_entity_manager(JellyfishSwarm(jelly_spawn_cd, jelly_spawn_amount, jelly_config))
 
         red_fish: FishConfig = FishConfig(
             FishType.RED,
