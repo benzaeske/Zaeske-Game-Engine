@@ -1,9 +1,8 @@
-import math
-from typing import Tuple
-
 import pygame
 from pygame import Surface, Font
 
+from model.entity.entity import Entity
+from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.player.camera import Camera
 from view.background import Background
 
@@ -17,13 +16,14 @@ class WindowOptions:
         if self.screen_width is None and self.screen_height is None:
             self.full_screen: bool = True
 
-class View:
+class View(EntityManagerObserver):
     """
     The View is responsible for drawing everything on the screen using pygame functions, but should know nothing about the size or shape of the model it is drawing.\n
     Pygame uses an inverted y-axis which is why coordinates are being converted when coming from the model.
     """
 
     def __init__(self, window_options: WindowOptions) -> None:
+        super().__init__()
         self._options: WindowOptions = window_options
         # Screen sizing
         display_info = pygame.display.Info()
@@ -68,37 +68,12 @@ class View:
     def draw_background(self, camera: Camera) -> None:
         self._background.draw(self._screen, camera)
 
-    def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
-        self._screen.blit(surface, dest, area)
-
-    def print_fps_to_screen(self, fps: float, player_x: int, player_y: int) -> None:
-        fps_surface: Surface = self._font.render(
-            str(math.floor(fps)), True, (255, 255, 255)
-        )
-        self._screen.blit(fps_surface, fps_surface.get_rect(x=0, y=0))
-
-    def print_location_to_screen(self, player_x: int, player_y: int) -> None:
-        x_surface: Surface = self._font.render(
-            "x: " + str(player_x), True, (255, 255, 255)
-        )
-        self._screen.blit(x_surface, x_surface.get_rect(x=0, y=fps_surface.get_height()))
-        y_surface: Surface = self._font.render(
-            "y: " + str(player_y), True, (255, 255, 255)
-        )
-        self._screen.blit(
-            y_surface,
-            y_surface.get_rect(
-                x=0, y=fps_surface.get_height() + x_surface.get_height()
-            ),
-        )
-
-    def print_score_to_screen(self, score: int | None) -> None:
-        if score is None:
-            score = 0
-        score_surface: Surface = self._font.render("Score: " + str(score), True, (255, 255, 255))
-        self._screen.blit(score_surface, score_surface.get_rect(x=0, y=0))
-
-
     @staticmethod
     def update_screen() -> None:
         pygame.display.update()
+
+    def notify_entity_created(self, entity: Entity):
+        pass
+
+    def notify_entity_deleted(self, entity: Entity):
+        pass

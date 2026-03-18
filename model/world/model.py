@@ -3,6 +3,7 @@ from uuid import UUID
 from pygame.key import ScancodeWrapper
 
 from model.entity.entitymanager import EntityManager, ModelContext
+from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.player.player import Player
 from model.player.playerinterface import PlayerInterface
 from model.world.entityrepository.entityrepository import EntityRepository
@@ -33,6 +34,9 @@ class Model:
 
     def remove_entity_manager(self, manager_id: UUID) -> None:
         self._entity_repository.remove_entity_manager(manager_id)
+
+    def register_entity_manager_observer(self, observer: EntityManagerObserver) -> None:
+        self._entity_repository.register_entity_manager_observer(observer)
 
     def get_model_context(self) -> ModelContext:
         return self._model_context

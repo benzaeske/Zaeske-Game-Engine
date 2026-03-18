@@ -26,7 +26,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
             if enemy.get_hp() <= 0:
                 self._enemies.remove(enemy)
                 context.grid_space.remove_entity(enemy)
-        # TODO destroy enemies that leave a certain range of the player
+                self._notify_observers_entity_deleted(enemy)
         # Spawn new enemies
         if self.tick_spawn_timer(dt):
             self.spawn(context)
@@ -62,6 +62,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
             new_enemy.set_position(self._get_initial_position(context))
             self._enemies.add(new_enemy)
             context.grid_space.add_entity(new_enemy)
+            self._notify_observers_entity_created(new_enemy)
 
     @abstractmethod
     def get_new_enemy(self) -> T:

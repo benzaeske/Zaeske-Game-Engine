@@ -61,6 +61,7 @@ class School(EntityManager):
             new_fish.set_velocity(self._get_initial_velocity())
             self._fish.add(new_fish)
             context.grid_space.add_entity(new_fish)
+            self._notify_observers_entity_created(new_fish)
 
     def _get_random_position_inside_shoal(self) -> Vector2:
         """

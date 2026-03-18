@@ -15,10 +15,11 @@ class EntityRepository(EntityRepositoryInterface):
         super().__init__()
         self._entity_managers: dict[UUID, EntityManager] = {}
         self._entity_manager_indexes: dict[EntityManagerIndex, set[UUID]] = {index: set() for index in EntityManagerIndex}
-        self._observers: list[EntityManagerObserver] = []
+        self._manager_observers: list[EntityManagerObserver] = []
 
     def add_entity_manager(self, entity_manager: EntityManager) -> None:
         if entity_manager.get_manager_id() not in self._entity_managers:
+            entity_manager.add_observers(self._manager_observers)
             self._entity_managers[entity_manager.get_manager_id()] = entity_manager
             self.index_entity_manager(entity_manager)
 
@@ -53,5 +54,5 @@ class EntityRepository(EntityRepositoryInterface):
         for entity_manager in self._entity_managers.values():
             entity_manager.movement(context, dt)
 
-    def add_observer(self, observer: EntityManagerObserver) -> None:
-        self._observers.append(observer)
+    def register_entity_manager_observer(self, observer: EntityManagerObserver) -> None:
+        self._manager_observers.append(observer)

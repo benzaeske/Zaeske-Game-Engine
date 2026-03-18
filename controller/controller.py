@@ -44,6 +44,7 @@ class GameController:
             128.0,
             self._player
         )
+        self._model.register_entity_manager_observer(self._view)
         self._clock: Clock = pygame.time.Clock()
         self._fps: int = 60
         self._game_start_time: float = -1
@@ -77,7 +78,6 @@ class GameController:
             model_update_time = time.time() - model_update_time
             view_update_time = time.time()
             self.draw()
-
             self._view.update_screen()
             view_update_time = time.time() - view_update_time
             self.fps_logging(model_update_time, view_update_time)
@@ -227,16 +227,6 @@ class GameController:
         num_green_schools: int = 4
         for _ in range(num_green_schools):
             self._model.add_entity_manager(School(green_fish, 16, self._model.get_model_context()))
-
-    def draw_fps_menu(self) -> None:
-        self._view.print_info_to_screen(
-            self._clock.get_fps(),
-            int(self.model_v1.player.position.x),
-            int(self.model_v1.player.position.y),
-        )
-
-    def draw_score(self) -> None:
-        self._view.print_score_to_screen(self._score)
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self._dt > self._max_dt:

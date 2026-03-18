@@ -9,7 +9,7 @@ from model.world.modelcontext import ModelContext
 
 class EntityManager(ABC):
     """
-    Orchestrates frame actions and movement for one or many entity.
+    Orchestrates frame actions and movement for a collection of entities.
     """
     def __init__(self):
         self._manager_id: UUID = uuid.uuid4()
@@ -19,25 +19,33 @@ class EntityManager(ABC):
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         """
         Actions to perform each frame. Actions can alter the state of the contained entity within this manager, other
-        entity in the world space, or the player.
+        entities in the world space, or the player.
         """
+        pass
 
     @abstractmethod
     def movement(self, context: ModelContext, dt: float) -> None:
         """
-        Performs any necessary movement of tracked entity.
+        Performs any necessary movement of tracked entities.
         """
+        pass
 
     def get_manager_id(self) -> UUID:
         return self._manager_id
 
-    def add_observer(self, observer: EntityManagerObserver) -> None:
-        self._observers.append(observer)
+    def add_observers(self, observers: list[EntityManagerObserver]) -> None:
+        self._observers.extend(observers)
 
-    def notify_observers_entity_created(self, entity: Entity) -> None:
+    def _notify_observers_entity_created(self, entity: Entity) -> None:
+        """
+        Entity manager implementations are responsible for notifying observers when new entities are created
+        """
         for observer in self._observers:
             observer.notify_entity_created(entity)
 
-    def notify_observers_entity_deleted(self, entity: Entity) -> None:
+    def _notify_observers_entity_deleted(self, entity: Entity) -> None:
+        """
+        Entity manager implementations are responsible for notifying observers when existing entities are deleted
+        """
         for observer in self._observers:
             observer.notify_entity_deleted(entity)
