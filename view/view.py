@@ -1,10 +1,19 @@
-import pygame
-from pygame import Surface, Font
+from unittest import case
+from uuid import UUID
 
+import pygame
+from pygame import Surface
+
+from model.entity.enemies.jellyfish import Jellyfish
 from model.entity.entity import Entity
 from model.entity.entitymanagerobserver import EntityManagerObserver
+from model.entity.fish.fish import Fish
 from model.player.camera import Camera
 from view.background import Background
+from view.entity.entityview import EntityView
+from view.entity.fishview import FishView
+from view.entity.jellyfishview import JellyfishView
+from view.sprite.spritecatalog import SpriteCatalog
 
 
 class WindowOptions:
@@ -35,14 +44,14 @@ class View(EntityManagerObserver):
         # Get dimensions from created screen
         self._screen_width: int = self._screen.get_width()
         self._screen_height: int = self._screen.get_height()
-        # Font
-        self._font: Font = pygame.font.SysFont("Arial", 48)
         print(
             "Initialized view with pygame screen Surface dimensions: ",
             self._screen_width,
             self._screen_height,
         )
         self._background: Background = Background(self._display_width, self._display_height)
+        self._sprite_catalog: SpriteCatalog = SpriteCatalog()
+        self._entity_views: dict[UUID, EntityView] = {}
 
     def _initialize_screen(self) -> Surface:
         """
@@ -73,7 +82,19 @@ class View(EntityManagerObserver):
         pygame.display.update()
 
     def notify_entity_created(self, entity: Entity):
-        pass
+        if entity.get_id() not in self._entity_views:
+            self._entity_views[entity.get_id()] = self.get_entity_view(entity)
+        else:
+            raise RuntimeError(f"Entity with id: {entity.get_id()} is already being tracked in View")
+
+    def get_entity_view(self, entity: Entity) -> EntityView:
+        match entity:
+            case Fish():
+                return FishView(entity, self._sprite_catalog)
+            case Jellyfish():
+                return JellyfishView(entity, self._sprite_catalog)
+            case _:
+                raise NotImplementedError(f"No implementation of EntityView for entity class: {entity.__class__.__name__}")
 
     def notify_entity_deleted(self, entity: Entity):
-        pass
+        self._entity_views.pop(entity.get_id(), None)

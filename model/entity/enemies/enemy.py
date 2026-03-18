@@ -31,13 +31,13 @@ class Enemy(PhysicsEntity):
         self._damage: float = config.damage
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
-        self.move_towards_player(context)
-        self.avoid_close_neighbors(context)
+        self._move_towards_player(context)
+        self._avoid_close_neighbors(context)
 
-    def move_towards_player(self, context: ModelContext) -> None:
+    def _move_towards_player(self, context: ModelContext) -> None:
         self.target(context.player.get_position() - self.get_position(), 1.0)
 
-    def avoid_close_neighbors(self, context: ModelContext) -> None:
+    def _avoid_close_neighbors(self, context: ModelContext) -> None:
         sum_avoid_neighbors: Vector2 = Vector2(0.0, 0.0)
         count_avoid: int = 0
         for neighbor in context.grid_space.get_neighbors_for_entity(self, self._neighbor_cell_range,

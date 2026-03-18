@@ -25,9 +25,9 @@ class Jellyfish(Enemy):
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         super().frame_actions(context, dt)
-        self.avoid_fish(context)
+        self._avoid_fish(context)
 
-    def avoid_fish(self, context: ModelContext) -> None:
+    def _avoid_fish(self, context: ModelContext) -> None:
         sum_avoid_fish: Vector2 = Vector2(0.0, 0.0)
         count: int = 0
         for neighbor in context.grid_space.get_neighbors_for_entity(self, self._scared_cell_range,

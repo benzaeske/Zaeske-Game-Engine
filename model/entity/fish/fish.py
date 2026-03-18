@@ -17,9 +17,9 @@ class Fish(Boid):
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         super().frame_actions(context, dt)
         if self._shoal is not None:
-            self.shoal()
+            self._move_to_shoal()
 
-    def shoal(self) -> None:
+    def _move_to_shoal(self) -> None:
         """
         Fish in a group can optionally move to a shoaling location in addition to schooling together.
         """

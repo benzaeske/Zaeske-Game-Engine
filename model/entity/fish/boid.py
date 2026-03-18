@@ -24,9 +24,9 @@ class Boid(PhysicsEntity):
         self._boid_config: BoidConfig = boid_config
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
-        self.flock(context)
+        self._flock(context)
 
-    def flock(self, context: ModelContext) -> None:
+    def _flock(self, context: ModelContext) -> None:
         """
         Implementation of boids algorithm that follows the three rules of avoidance, alignment, and coherence.
         """
@@ -57,7 +57,7 @@ class Boid(PhysicsEntity):
             sum_cohere -= self.get_position()
             self.target(sum_cohere, self._boid_config.cohere_k)
 
-    def avoid_walls(self, context: ModelContext) -> None:
+    def _avoid_walls(self, context: ModelContext) -> None:
         """
         Rudimentary wall avoidance. Currently only avoids the floor and ceiling of the map... and not very well. Needs
         to be changed to use the PhysicsEntity.target function and work with any arbitrary walls defined in the grid
