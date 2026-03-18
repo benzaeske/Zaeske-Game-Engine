@@ -8,8 +8,18 @@ class SpriteSheet:
     Data for sprite animations. Stores a list of tuples that contain a duration and a Surface. The duration represents
     how long the associated Surface is shown in the animation.
     """
-    def __init__(self, sprite_data: list[Tuple[float, Surface]]):
+    def __init__(self, sprite_data: list[Tuple[float, Surface]], width: float, height: float) -> None:
+        """
+        :param sprite_data: Tuples containing duration and surfaces for the sprite animation. The surfaces provided in
+            sprite data are assumed to all have the same height and width as specified in the constructor.
+        :param width: The width of all surfaces passed in on sprite data
+        :param height: The height of all surfaces passed in on sprite data
+        """
         self._sprite_data: list[Tuple[float, Surface]] = sprite_data
+        self._width: float = width
+        self._height: float = height
+        self._width_adj: float = width / 2
+        self._height_adj: float = height / 2
 
     def get_frame_duration(self, frame: int) -> float:
         """
@@ -22,3 +32,15 @@ class SpriteSheet:
         Returns the surface at the given frame index.
         """
         return self._sprite_data[(frame % len(self._sprite_data))][1]
+
+    def get_width(self) -> float:
+        return self._width
+
+    def get_height(self) -> float:
+        return self._height
+
+    def get_width_adj(self) -> float:
+        return self._width_adj
+
+    def get_height_adj(self) -> float:
+        return self._height_adj

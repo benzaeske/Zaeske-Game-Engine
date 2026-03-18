@@ -29,30 +29,48 @@ class SpriteCatalog:
 
     def _load_entity_animations(self) -> None:
         self._entity_animations[EntityAnimation.RED_JELLYFISH] = SpriteSheet(
-            [(1.0, self.load_image("images/red_jelly.png", 96.0, 96.0))]
+            [(1.0, self.load_image("images/red_jelly.png", 96.0, 96.0))],
+            96.0,
+            96.0
         )
         self._entity_animations[EntityAnimation.RED_FISH] = SpriteSheet(
-            [(1.0, self.load_image("images/red_fish.png", 32.0, 32.0))]
+            [(1.0, self.load_image("images/red_fish.png", 32.0, 32.0))],
+            32.0,
+            32.0
         )
         self._entity_animations[EntityAnimation.YELLOW_FISH] = SpriteSheet(
-            [(1.0, self.load_image("images/yellow_fish.png", 26.0, 26.0))]
+            [(1.0, self.load_image("images/yellow_fish.png", 26.0, 26.0))],
+            26.0,
+            26.0
         )
         self._entity_animations[EntityAnimation.GREEN_FISH] = SpriteSheet(
-            [(1.0, self.load_image("images/green_fish.png", 36.0, 36.0))]
+            [(1.0, self.load_image("images/green_fish.png", 36.0, 36.0))],
+            36.0,
+            36.0
         )
 
     def _load_player_animations(self) -> None:
+        player_width: float = 128.0
+        player_height: float = 128.0
         self._player_animations[PlayerAnimation.SWIMMING_LEFT] = SpriteSheet(
-            [(1.0, self.load_image("images/baby_turtle_left.png", 128.0, 128.0))]
+            [(1.0, self.load_image("images/baby_turtle_left.png", player_width, player_height))],
+            player_width,
+            player_height
         )
         self._player_animations[PlayerAnimation.SWIMMING_RIGHT] = SpriteSheet(
-            [(1.0, self.load_image("images/baby_turtle_right.png", 128.0, 128.0))]
+            [(1.0, self.load_image("images/baby_turtle_right.png", player_width, player_height))],
+            player_width,
+            player_height
         )
         self._player_animations[PlayerAnimation.IDLE_LEFT] = SpriteSheet(
-            [(1.0, self.load_image("images/baby_turtle_left.png", 128.0, 128.0))]
+            [(1.0, self.load_image("images/baby_turtle_left.png", player_width, player_height))],
+            player_width,
+            player_height
         )
         self._player_animations[PlayerAnimation.IDLE_RIGHT] = SpriteSheet(
-            [(1.0, self.load_image("images/baby_turtle_right.png", 128.0, 128.0))]
+            [(1.0, self.load_image("images/baby_turtle_right.png", player_width, player_height))],
+            player_width,
+            player_height
         )
 
     @staticmethod
@@ -64,4 +82,4 @@ class SpriteCatalog:
         surface: Surface = image.load(image_location).convert_alpha()
         return transform.scale(
             surface, (width, height)
-        )
+        ).convert_alpha()
