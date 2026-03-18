@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pygame.key import ScancodeWrapper
 
-from model.entities.entitymanagers.entitymanager import EntityManager, ModelContext
+from model.entity.entitymanager import EntityManager, ModelContext
 from model.player.player import Player
 from model.player.playerinterface import PlayerInterface
 from model.world.entityrepository.entityrepository import EntityRepository

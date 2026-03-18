@@ -11,7 +11,7 @@ class Entity(ABC):
     """
     Base class for all entities. Entities maintain a position and know how to draw themselves on screen.
     """
-    def __init__(self, sprite: Surface, manager_id: UUID) -> None:
+    def __init__(self, manager_id: UUID, sprite: Surface | None = None) -> None:
         self._id: UUID = uuid4()
         self.manager_id: UUID = manager_id
         self._position: Vector2 = Vector2(0,0)
@@ -22,7 +22,7 @@ class Entity(ABC):
     @abstractmethod
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         """
-        Actions that an entity takes each frame. May alter the state of this entity, other entities, the player, or
+        Actions that an entity takes each frame. May alter the state of this entity, other entity, the player, or
         the world state.
         :param context: A ModelContext representing the current state of the world model
         :param dt: The time delta between frames
@@ -84,7 +84,7 @@ class Entity(ABC):
     def set_y(self, y: float) -> None:
         self._position.y = y
 
-    # Implement functions needed to make entities usable in a python set
+    # Implement functions needed to make entity usable in a python set
 
     def __eq__(self, other):
         if not isinstance(other, Entity):

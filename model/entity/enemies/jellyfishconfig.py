@@ -1,6 +1,6 @@
 from enum import Enum
 
-from model.entities.enemies.enemyconfig import EnemyConfig
+from model.entity.enemies.enemyconfig import EnemyConfig
 
 class JellyfishType(Enum):
     RED = 0

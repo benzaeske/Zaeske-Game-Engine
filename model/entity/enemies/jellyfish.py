@@ -2,8 +2,8 @@ from uuid import UUID
 
 from pygame import Surface, Vector2
 
-from model.entities.enemies.enemy import Enemy
-from model.entities.enemies.jellyfishconfig import JellyfishConfig
+from model.entity.enemies.enemy import Enemy
+from model.entity.enemies.jellyfishconfig import JellyfishConfig
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.modelcontext import ModelContext
 
@@ -14,11 +14,11 @@ class Jellyfish(Enemy):
     """
     def __init__(
             self,
-            sprite: Surface,
             manager_id: UUID,
             config: JellyfishConfig,
+            sprite: Surface,
     ) -> None:
-        super().__init__(sprite, manager_id, config.enemy_config)
+        super().__init__(manager_id, config.enemy_config, sprite)
         self._scared_cell_range: int = config.scared_cell_range
         self._scared_dist: float = config.scared_dist
         self._fear_k: float = config.fear_k

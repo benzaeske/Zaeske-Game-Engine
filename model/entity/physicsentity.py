@@ -3,23 +3,23 @@ from uuid import UUID
 
 from pygame import Surface, Vector2
 
-from model.entities.entity import Entity
+from model.entity.entity import Entity
 from model.modelutils import limit_magnitude, safe_normalize
 from model.world.modelcontext import ModelContext
 
 
 class PhysicsEntity(Entity, ABC):
     """
-    Abstract class for entities that move using velocity and acceleration
+    Abstract class for entity that move using velocity and acceleration
     """
     def __init__(
             self,
-            sprite: Surface,
             manager_id: UUID,
             max_speed: float,
-            max_acceleration: float
+            max_acceleration: float,
+            sprite: Surface | None = None,
     ) -> None:
-        super().__init__(sprite, manager_id)
+        super().__init__(manager_id, sprite)
         self._velocity: Vector2 = Vector2(0.0, 0.0)
         self._acceleration: Vector2 = Vector2(0.0, 0.0)
         self._max_speed: float = max_speed

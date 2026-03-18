@@ -8,13 +8,13 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.fish.boidconfig import BoidConfig
-from model.entities.enemies.enemyconfig import EnemyConfig
-from model.entities.fish.fishconfig import FishConfig, FishType
-from model.entities.enemies.jellyfishconfig import JellyfishType, JellyfishConfig
-from model.entities.entitymanagers.entitymanager import EntityManager
-from model.entities.entitymanagers.jellyfishswarm import JellyfishSwarm
-from model.entities.entitymanagers.school import School
+from model.entity.fish.boidconfig import BoidConfig
+from model.entity.enemies.enemyconfig import EnemyConfig
+from model.entity.fish.fishconfig import FishConfig, FishType
+from model.entity.enemies.jellyfishconfig import JellyfishType, JellyfishConfig
+from model.entity.entitymanager import EntityManager
+from model.entity.enemies.jellyfishswarm import JellyfishSwarm
+from model.entity.fish.school import School
 from model.player.player import Player
 from model.player.turtle import Turtle
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
@@ -122,9 +122,9 @@ class GameController:
 
     def draw_entities(self, grid_cells: list[GridCell], entity_type: EntityManagerIndex) -> None:
         """
-        Draws all entities of a given type found in the provided grid cells
-        :param grid_cells: The grid cells containing entities to draw.
-        :param entity_type: Only entities belonging to entity managers of this type will be drawn.
+        Draws all entity of a given type found in the provided grid cells
+        :param grid_cells: The grid cells containing entity to draw.
+        :param entity_type: Only entity belonging to entity managers of this type will be drawn.
         """
         for grid_cell in grid_cells:
             for entity in grid_cell.get_entities_by_manager_ids(self._model.get_entity_repository().get_manager_ids(entity_type)):
@@ -132,7 +132,7 @@ class GameController:
 
     def _create_entity_managers(self) -> None:
         """
-        Statically creates entity managers for all entities in the game world. This will eventually be replaced with a
+        Statically creates entity managers for all entity in the game world. This will eventually be replaced with a
         more dynamic method that adds/removes entity managers throughout the game based on various factors such as
         player position, game time, world state etc
         """

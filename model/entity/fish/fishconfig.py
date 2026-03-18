@@ -1,6 +1,6 @@
 from enum import Enum
 
-from model.entities.fish.boidconfig import BoidConfig
+from model.entity.fish.boidconfig import BoidConfig
 
 class FishType(Enum):
     RED = 0

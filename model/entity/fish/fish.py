@@ -2,14 +2,14 @@ from uuid import UUID
 
 from pygame import Surface, Rect
 
-from model.entities.fish.boid import Boid
-from model.entities.fish.fishconfig import FishConfig
+from model.entity.fish.boid import Boid
+from model.entity.fish.fishconfig import FishConfig
 from model.world.modelcontext import ModelContext
 
 
 class Fish(Boid):
-    def __init__(self, sprite: Surface, manager_id: UUID, fish_config: FishConfig, shoal: Rect | None = None) -> None:
-        super().__init__(sprite, manager_id, fish_config.max_speed, fish_config.max_acceleration, fish_config.boid_config)
+    def __init__(self, manager_id: UUID, fish_config: FishConfig, sprite: Surface, shoal: Rect | None = None) -> None:
+        super().__init__(manager_id, fish_config.max_speed, fish_config.max_acceleration, fish_config.boid_config, sprite)
         self._shoal: Rect | None = shoal
         self._shoal_radius: float = fish_config.shoal_radius
         self._shoal_k: float = fish_config.shoal_k

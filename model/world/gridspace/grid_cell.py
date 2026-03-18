@@ -1,7 +1,7 @@
 from typing import Tuple
 from uuid import UUID
 
-from model.entities.entity import Entity
+from model.entity.entity import Entity
 
 
 class GridCell:

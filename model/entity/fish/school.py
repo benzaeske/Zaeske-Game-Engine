@@ -3,9 +3,9 @@ import random
 
 from pygame import Vector2, Surface, Rect
 
-from model.entities.fish import Fish
-from model.entities.fish.fishconfig import FishConfig, FishType
-from model.entities.entitymanagers.entitymanager import EntityManager, ModelContext
+from model.entity.fish.fish import Fish
+from model.entity.fish.fishconfig import FishConfig, FishType
+from model.entity.entitymanager import EntityManager, ModelContext
 from model.modelutils import limit_magnitude, load_sprite
 
 
@@ -52,9 +52,9 @@ class School(EntityManager):
         """
         for _ in range(self._amount):
             new_fish: Fish = Fish(
-                self._sprite,
                 self.get_manager_id(),
                 self._fish_config,
+                self._sprite,
                 self._shoal
             )
             new_fish.set_position(self._get_random_position_inside_shoal())

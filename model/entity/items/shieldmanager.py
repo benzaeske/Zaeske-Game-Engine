@@ -2,8 +2,8 @@ import copy
 
 from pygame import Rect, Vector2
 
-from model.entities.items.shield_v1 import Shield_v1
-from model.entities.entitymanagers.entitymanager import EntityManager, ModelContext
+from model.entity.items.shield_v1 import Shield_v1
+from model.entity.entitymanager import EntityManager, ModelContext
 from model.utils.entityutils import calculate_shortest_distance_and_virtual_position
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 

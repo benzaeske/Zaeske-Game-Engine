@@ -3,8 +3,8 @@ from uuid import UUID
 
 from pygame import Surface, Vector2, Rect, transform
 
-from model.entities.fish.boidconfig import BoidConfig
-from model.entities.physicsentity import PhysicsEntity
+from model.entity.fish.boidconfig import BoidConfig
+from model.entity.physicsentity import PhysicsEntity
 from model.world.modelcontext import ModelContext
 
 
@@ -14,13 +14,13 @@ class Boid(PhysicsEntity):
     """
     def __init__(
             self,
-            sprite: Surface,
             manager_id: UUID,
             max_speed: float,
             max_acceleration: float,
             boid_config: BoidConfig,
+            sprite: Surface | None = None
     ) -> None:
-        super().__init__(sprite, manager_id, max_speed, max_acceleration)
+        super().__init__(manager_id, max_speed, max_acceleration, sprite)
         self._boid_config: BoidConfig = boid_config
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:

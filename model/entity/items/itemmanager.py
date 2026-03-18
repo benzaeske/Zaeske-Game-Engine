@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from model.entities.entitymanagers.entitymanager import EntityManager
-from model.entities.items.Item import Item
+from model.entity.entitymanager import EntityManager
+from model.entity.items.item import Item
 from model.world.modelcontext import ModelContext
 
 

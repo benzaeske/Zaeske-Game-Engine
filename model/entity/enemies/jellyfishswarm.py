@@ -1,8 +1,8 @@
 from pygame import Surface
 
-from model.entities.enemies.jellyfish import Jellyfish
-from model.entities.enemies.jellyfishconfig import JellyfishConfig, JellyfishType
-from model.entities.enemies.enemymanager import EnemyManager
+from model.entity.enemies.jellyfish import Jellyfish
+from model.entity.enemies.jellyfishconfig import JellyfishConfig, JellyfishType
+from model.entity.enemies.enemymanager import EnemyManager
 from model.modelutils import load_sprite
 
 
@@ -16,7 +16,7 @@ class JellyfishSwarm(EnemyManager[Jellyfish]):
         self._sprite: Surface = self._load_sprite()
 
     def get_new_enemy(self) -> Jellyfish:
-        return Jellyfish(self._sprite, self.get_manager_id(), self._jellyfish_config)
+        return Jellyfish(self.get_manager_id(), self._jellyfish_config, self._sprite)
 
     def _load_sprite(self) -> Surface:
         match self._jellyfish_config.jellyfish_type:

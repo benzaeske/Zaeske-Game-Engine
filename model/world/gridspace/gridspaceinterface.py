@@ -8,7 +8,7 @@ from pygame import Vector2
 from model.player.camera import Camera
 
 if TYPE_CHECKING:
-    from model.entities.entity import Entity
+    from model.entity.entity import Entity
     from model.world.gridspace.grid_cell import GridCell
 
 
@@ -53,11 +53,11 @@ class GridSpaceInterface(ABC):
     @abstractmethod
     def get_neighbors_for_entity(self, entity: Entity, cell_range: int, manager_ids: set[UUID] | None = None) -> list[Entity]:
         """
-        Returns all neighboring entities relative to the input entity's position. Neighbors are considered any entity
+        Returns all neighboring entity relative to the input entity's position. Neighbors are considered any entity
         in a grid cell within the square region bounded by the input cell_range.
         :param entity: The entity to get neighbors for
         :param cell_range: The range of grid cells to look for neighbors
-        :param manager_ids: Only entities belonging to these managers will be returned. If None, will use the manager
+        :param manager_ids: Only entity belonging to these managers will be returned. If None, will use the manager
             id of the input entity
         :return: A list of Entities
         """
@@ -66,12 +66,12 @@ class GridSpaceInterface(ABC):
     @abstractmethod
     def get_neighbors(self, p: Vector2, cell_range: int, manager_ids: set[UUID]) -> list[Entity]:
         """
-        Returns all neighboring entities relative to the input point. A neighboring entity is an entity that is
-        contained in a grid cell within the square region defined by the input cell_range. Only entities that
+        Returns all neighboring entity relative to the input point. A neighboring entity is an entity that is
+        contained in a grid cell within the square region defined by the input cell_range. Only entity that
         belong to the provided manager_ids are returned.
         :param p: The point in grid space that will be searched around to find neighbors
         :param cell_range: The range of grid cells to look for neighbors
-        :param manager_ids: Only entities belonging to these managers will be returned
+        :param manager_ids: Only entity belonging to these managers will be returned
         :return: A list of Entities
         """
         pass

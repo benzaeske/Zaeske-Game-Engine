@@ -1,11 +1,12 @@
 from uuid import UUID
 
-from model.entities.fish.fishconfig import FishType
-from model.entities.enemies.enemymanager import EnemyManager
-from model.entities.entitymanagers.entitymanager import EntityManager
-from model.entities.entitymanagers.school import School
+from model.entity.fish.fishconfig import FishType
+from model.entity.enemies.enemymanager import EnemyManager
+from model.entity.entitymanager import EntityManager
+from model.entity.fish.school import School
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
+from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.world.modelcontext import ModelContext
 
 
@@ -14,6 +15,7 @@ class EntityRepository(EntityRepositoryInterface):
         super().__init__()
         self._entity_managers: dict[UUID, EntityManager] = {}
         self._entity_manager_indexes: dict[EntityManagerIndex, set[UUID]] = {index: set() for index in EntityManagerIndex}
+        self._observers: list[EntityManagerObserver] = []
 
     def add_entity_manager(self, entity_manager: EntityManager) -> None:
         if entity_manager.get_manager_id() not in self._entity_managers:
@@ -50,3 +52,6 @@ class EntityRepository(EntityRepositoryInterface):
     def move_entities(self, context: ModelContext, dt: float) -> None:
         for entity_manager in self._entity_managers.values():
             entity_manager.movement(context, dt)
+
+    def add_observer(self, observer: EntityManagerObserver) -> None:
+        self._observers.append(observer)

@@ -4,7 +4,7 @@ import pygame
 from pygame import Surface, Vector2, Rect
 from pygame.key import ScancodeWrapper
 
-from model.entities.fish.fishconfig import FishType
+from model.entity.fish.fishconfig import FishType
 from model.modelutils import limit_magnitude
 from model.player.camera import Camera
 from model.player.playerinterface import PlayerInterface
@@ -67,7 +67,7 @@ class Player(PlayerInterface, ABC):
 
     def move_player(self, key_presses: ScancodeWrapper, dt: float) -> None:
         """
-        Moves the player according to the keys pressed. Movement is scaled with delta time like all other entities.
+        Moves the player according to the keys pressed. Movement is scaled with delta time like all other entity.
         Limits the camera position to be confined within positive x,y coordinates and under the provided world boundary.
         """
         velocity: Vector2 = Vector2(0.0, 0.0)

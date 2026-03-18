@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pygame import Surface, SRCALPHA, draw
 
-from model.entities.entity import Entity
+from model.entity.entity import Entity
 from model.world.modelcontext import ModelContext
 
 
