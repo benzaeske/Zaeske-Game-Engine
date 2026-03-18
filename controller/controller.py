@@ -108,13 +108,13 @@ class GameController:
         # Draw in a specified order:
         #  1. fish
         self.draw_entities(camera_grid_cells, EntityManagerIndex.FISH)
-        #  2. items
-        self.draw_entities(camera_grid_cells, EntityManagerIndex.ITEM)
+        #  2. pickups
+        self.draw_entities(camera_grid_cells, EntityManagerIndex.PICKUP)
         #  3. player
         self._player.draw(self._view.get_screen())
         #  4. enemies
         self.draw_entities(camera_grid_cells, EntityManagerIndex.ENEMY)
-        #  5. projectiles
+        #  5. projectiles (weapons etc)
         self.draw_entities(camera_grid_cells, EntityManagerIndex.PROJECTILE)
 
     def draw_background(self) -> None:

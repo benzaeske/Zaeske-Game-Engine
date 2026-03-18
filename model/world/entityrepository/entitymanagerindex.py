@@ -11,4 +11,4 @@ class EntityManagerIndex(Enum):
     GREEN_FISH = 3,
     ENEMY = 4,
     PROJECTILE = 5,
-    ITEM = 6
+    PICKUP = 6
