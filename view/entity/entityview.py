@@ -18,12 +18,13 @@ class EntityView[T: Entity](ABC):
         self._sprite_catalog: SpriteCatalog = sprite_catalog
 
     @abstractmethod
-    def draw_entity(self, screen: Surface, camera: Camera) -> None:
+    def draw_entity(self, screen: Surface, camera: Camera, dt: float) -> None:
         """
         Uses the sprite catalog along with information stored on this class's associated entity in order to draw it
         onto the provided screen.
         :param screen: The View screen to draw on
         :param camera: The current state of the camera from the Model
+        :param dt: Delta time since the last frame in the current game loop
         """
         pass
 

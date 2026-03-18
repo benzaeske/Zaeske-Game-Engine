@@ -16,6 +16,7 @@ class SpriteSheet:
         :param height: The height of all surfaces passed in on sprite data
         """
         self._sprite_data: list[Tuple[float, Surface]] = sprite_data
+        self._num_animation_frames: int = len(self._sprite_data)
         self._width: float = width
         self._height: float = height
         self._width_adj: float = width / 2
@@ -26,6 +27,9 @@ class SpriteSheet:
         Returns the duration that the surface at the given frame index should be shown for.
         """
         return self._sprite_data[frame % len(self._sprite_data)][0]
+
+    def get_num_frames(self) -> int:
+        return self._num_animation_frames
 
     def get_sprite(self, frame: int) -> Surface:
         """

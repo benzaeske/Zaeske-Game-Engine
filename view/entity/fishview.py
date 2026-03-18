@@ -16,11 +16,11 @@ class FishView(EntityView[Fish]):
         super().__init__(fish, sprite_catalog)
         self._sprite_sheet: SpriteSheet = self.get_sprite_sheet()
 
-    def draw_entity(self, screen: Surface, camera: Camera) -> None:
-        # Rotate the fish according to its velocity then blit it to the screen
+    def draw_entity(self, screen: Surface, camera: Camera, dt: float) -> None:
+        # Rotate the fish according to its velocity then blit it to the screen.
         screen.blit(
             transform.rotate(
-                self._sprite_sheet.get_sprite(0),
+                self._sprite_sheet.get_sprite(0), # Not planning on having fish animation frames any time soon
                 math.degrees(math.atan2(self._entity.get_velocity().y, self._entity.get_velocity().x))
             ),
             self.to_camera_pos(camera.get_window(), self._sprite_sheet.get_width_adj(), self._sprite_sheet.get_height_adj())
