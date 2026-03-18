@@ -1,3 +1,5 @@
+from pygame import Surface, image, transform
+
 from view.sprite.entityanimation import EntityAnimation
 from view.sprite.playeranimation import PlayerAnimation
 from view.sprite.spritesheet import SpriteSheet
@@ -26,8 +28,40 @@ class SpriteCatalog:
         self._load_player_animations()
 
     def _load_entity_animations(self) -> None:
-        pass
+        self._entity_animations[EntityAnimation.RED_JELLYFISH] = SpriteSheet(
+            [(1.0, self.load_image("images/red_jelly.png", 96.0, 96.0))]
+        )
+        self._entity_animations[EntityAnimation.RED_FISH] = SpriteSheet(
+            [(1.0, self.load_image("images/red_fish.png", 32.0, 32.0))]
+        )
+        self._entity_animations[EntityAnimation.YELLOW_FISH] = SpriteSheet(
+            [(1.0, self.load_image("images/yellow_fish.png", 26.0, 26.0))]
+        )
+        self._entity_animations[EntityAnimation.GREEN_FISH] = SpriteSheet(
+            [(1.0, self.load_image("images/green_fish.png", 36.0, 36.0))]
+        )
 
     def _load_player_animations(self) -> None:
-        pass
+        self._player_animations[PlayerAnimation.SWIMMING_LEFT] = SpriteSheet(
+            [(1.0, self.load_image("images/baby_turtle_left.png", 128.0, 128.0))]
+        )
+        self._player_animations[PlayerAnimation.SWIMMING_RIGHT] = SpriteSheet(
+            [(1.0, self.load_image("images/baby_turtle_right.png", 128.0, 128.0))]
+        )
+        self._player_animations[PlayerAnimation.IDLE_LEFT] = SpriteSheet(
+            [(1.0, self.load_image("images/baby_turtle_left.png", 128.0, 128.0))]
+        )
+        self._player_animations[PlayerAnimation.IDLE_RIGHT] = SpriteSheet(
+            [(1.0, self.load_image("images/baby_turtle_right.png", 128.0, 128.0))]
+        )
 
+    @staticmethod
+    def load_image(image_location: str, width: float, height: float) -> Surface:
+        """
+        Loads a surface from the provided image location and scales it to the provided width and height. Uses convert_alpha
+        on the surface before returning it.
+        """
+        surface: Surface = image.load(image_location).convert_alpha()
+        return transform.scale(
+            surface, (width, height)
+        )
