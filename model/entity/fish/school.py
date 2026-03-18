@@ -1,19 +1,18 @@
 import copy
 import random
 
-from pygame import Vector2, Surface, Rect
+from pygame import Vector2, Rect
 
 from model.entity.fish.fish import Fish
 from model.entity.fish.fishconfig import FishConfig, FishType
 from model.entity.entitymanager import EntityManager, ModelContext
-from model.modelutils import limit_magnitude, load_sprite
+from model.modelutils import limit_magnitude
 
 
 class School(EntityManager):
     def __init__(self, fish_config: FishConfig, amount: int, context: ModelContext) -> None:
         super().__init__()
         self._fish_config: FishConfig = fish_config
-        self._sprite: Surface = self._get_sprite()
         self._amount: int = amount
         self._fish: set[Fish] = set()
         # The school has a boundary within a certain range of the player
@@ -23,8 +22,6 @@ class School(EntityManager):
         self._boundary.center = context.player.get_position()
         self._shoal: Rect | None = Rect((0, 0), (self._fish_config.shoal_radius * 2, self._fish_config.shoal_radius * 2)) if self._fish_config.shoal else None
         self._shoal.center = self.get_random_shoal_location()
-        # Hatch fish once at the beginning
-        self.hatch(context)
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         self._boundary.center = context.player.get_position()
@@ -54,7 +51,6 @@ class School(EntityManager):
             new_fish: Fish = Fish(
                 self.get_manager_id(),
                 self._fish_config,
-                self._sprite,
                 self._shoal
             )
             new_fish.set_position(self._get_random_position_inside_shoal())
@@ -94,15 +90,6 @@ class School(EntityManager):
     def _randomize_shoal_location(self):
         self._shoal.centerx = random.uniform(self._boundary.left, self._boundary.right)
         self._shoal.centery = random.uniform(self._boundary.top, self._boundary.bottom)
-
-    def _get_sprite(self) -> Surface:
-        match self._fish_config.fish_type:
-            case FishType.RED:
-                return load_sprite("images/red_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
-            case FishType.YELLOW:
-                return load_sprite("images/yellow_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
-            case FishType.GREEN:
-                return load_sprite("images/green_fish.png", self._fish_config.sprite_w, self._fish_config.sprite_h)
 
     def get_fish_type(self) -> FishType:
         return self._fish_config.fish_type

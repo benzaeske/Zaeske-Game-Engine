@@ -128,7 +128,7 @@ class GameController:
         """
         for grid_cell in grid_cells:
             for entity in grid_cell.get_entities_by_manager_ids(self._model.get_entity_repository().get_manager_ids(entity_type)):
-                entity.draw(self._view.get_screen(), self._player.get_camera().get_window())
+                self._view.draw_entity(entity.get_id(), self._player.get_camera(), self._dt)
 
     def _create_entity_managers(self) -> None:
         """
@@ -137,7 +137,7 @@ class GameController:
         player position, game time, world state etc
         """
         jelly_spawn_cd: float = 5.0
-        jelly_spawn_amount: int = 4
+        jelly_spawn_amount: int = 50
         jelly_config: JellyfishConfig = JellyfishConfig(
             JellyfishType.RED,
             96.0,
@@ -180,7 +180,9 @@ class GameController:
         )
         num_red_schools: int = 4
         for _ in range(num_red_schools):
-            self._model.add_entity_manager(School(red_fish, 16, self._model.get_model_context()))
+            school: School = School(red_fish, 16, self._model.get_model_context())
+            self._model.add_entity_manager(school)
+            school.hatch(self._model.get_model_context())
 
         yellow_fish: FishConfig = FishConfig(
             FishType.YELLOW,
@@ -203,7 +205,9 @@ class GameController:
         )
         num_yellow_schools: int = 4
         for _ in range(num_yellow_schools):
-            self._model.add_entity_manager(School(yellow_fish, 16, self._model.get_model_context()))
+            school: School = School(yellow_fish, 16, self._model.get_model_context())
+            self._model.add_entity_manager(school)
+            school.hatch(self._model.get_model_context())
 
         green_fish: FishConfig = FishConfig(
             FishType.GREEN,
@@ -226,7 +230,9 @@ class GameController:
         )
         num_green_schools: int = 4
         for _ in range(num_green_schools):
-            self._model.add_entity_manager(School(green_fish, 16, self._model.get_model_context()))
+            school: School = School(green_fish, 16, self._model.get_model_context())
+            self._model.add_entity_manager(school)
+            school.hatch(self._model.get_model_context())
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self._dt > self._max_dt:

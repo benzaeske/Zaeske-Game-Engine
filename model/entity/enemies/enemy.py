@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pygame import Surface, Rect, Vector2
+from pygame import Rect, Vector2
 
 from model.entity.enemies.enemyconfig import EnemyConfig
 from model.entity.physicsentity import PhysicsEntity
@@ -16,10 +16,9 @@ class Enemy(PhysicsEntity):
     def __init__(
             self,
             manager_id: UUID,
-            config: EnemyConfig,
-            sprite: Surface | None = None
+            config: EnemyConfig
     ) -> None:
-        super().__init__(manager_id, config.max_speed, config.max_acceleration, sprite)
+        super().__init__(manager_id, config.max_speed, config.max_acceleration)
         # The hitbox is how big the entity actually is when performing hit detection.
         # Can be different from sprite dimensions
         self._hitbox: Rect = Rect(0, 0, config.hitbox_width, config.hitbox_height)

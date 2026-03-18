@@ -77,17 +77,26 @@ class View(EntityManagerObserver):
     def draw_background(self, camera: Camera) -> None:
         self._background.draw(self._screen, camera)
 
+    def draw_entity(self, entity_id: UUID , camera: Camera, dt: float) -> None:
+        if entity_id in self._entity_views:
+            self._entity_views.get(entity_id).draw_entity(self.get_screen(), camera, dt)
+        else:
+            raise RuntimeError(f"Entity with id: {entity_id} is not being tracked in View")
+
     @staticmethod
     def update_screen() -> None:
         pygame.display.update()
 
     def notify_entity_created(self, entity: Entity):
         if entity.get_id() not in self._entity_views:
-            self._entity_views[entity.get_id()] = self.get_entity_view(entity)
+            self._entity_views[entity.get_id()] = self._initialize_entity_view(entity)
         else:
             raise RuntimeError(f"Entity with id: {entity.get_id()} is already being tracked in View")
 
-    def get_entity_view(self, entity: Entity) -> EntityView:
+    def _initialize_entity_view(self, entity: Entity) -> EntityView:
+        """
+        Creates an EntityView for the provided Entity.
+        """
         match entity:
             case Fish():
                 return FishView(entity, self._sprite_catalog)

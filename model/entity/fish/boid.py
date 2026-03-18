@@ -1,7 +1,6 @@
-import math
 from uuid import UUID
 
-from pygame import Surface, Vector2, Rect, transform
+from pygame import Vector2
 
 from model.entity.fish.boidconfig import BoidConfig
 from model.entity.physicsentity import PhysicsEntity
@@ -17,10 +16,9 @@ class Boid(PhysicsEntity):
             manager_id: UUID,
             max_speed: float,
             max_acceleration: float,
-            boid_config: BoidConfig,
-            sprite: Surface | None = None
+            boid_config: BoidConfig
     ) -> None:
-        super().__init__(manager_id, max_speed, max_acceleration, sprite)
+        super().__init__(manager_id, max_speed, max_acceleration)
         self._boid_config: BoidConfig = boid_config
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
@@ -69,8 +67,3 @@ class Boid(PhysicsEntity):
             self.apply_acceleration(Vector2(0.0, self.get_max_speed() / 2))
         if self.get_y() > context.get_world_h() - avoid_edge_dist and self.get_velocity().y > 0:
             self.apply_acceleration(Vector2(0.0, -(self.get_max_speed() / 2)))
-
-    def draw(self, screen: Surface, camera: Rect) -> None:
-        # Rotate the boid according to its velocity then blit it to the screen
-        rotated_surface: Surface = transform.rotate(self._sprite, math.degrees(math.atan2(self._velocity.y, self._velocity.x)))
-        screen.blit(rotated_surface, self.to_camera_pos(camera))

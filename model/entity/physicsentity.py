@@ -1,7 +1,7 @@
 from abc import ABC
 from uuid import UUID
 
-from pygame import Surface, Vector2
+from pygame import Vector2
 
 from model.entity.entity import Entity
 from model.modelutils import limit_magnitude, safe_normalize
@@ -17,9 +17,8 @@ class PhysicsEntity(Entity, ABC):
             manager_id: UUID,
             max_speed: float,
             max_acceleration: float,
-            sprite: Surface | None = None,
     ) -> None:
-        super().__init__(manager_id, sprite)
+        super().__init__(manager_id)
         self._velocity: Vector2 = Vector2(0.0, 0.0)
         self._acceleration: Vector2 = Vector2(0.0, 0.0)
         self._max_speed: float = max_speed
