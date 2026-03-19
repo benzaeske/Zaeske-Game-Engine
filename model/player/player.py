@@ -16,17 +16,16 @@ from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 class Player(PlayerInterface, ABC):
     def __init__(
         self,
-        camera_width: float,
-        camera_height: float,
+        camera: Camera,
         hitbox_width: float,
         hitbox_height: float,
         max_speed: float,
         max_health: float
     ) -> None:
         super().__init__()
+        self._camera: Camera = camera
         self._position: Vector2 = Vector2(0.0, 0.0)
         self._hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
-        self._camera: Camera = Camera(camera_width, camera_height)
         self._max_speed: float = max_speed
         self._max_health: float = max_health
         self._current_health: float = self._max_health

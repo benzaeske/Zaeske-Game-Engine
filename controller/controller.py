@@ -1,7 +1,6 @@
 import sys
 import time
 from typing import Tuple
-from uuid import UUID
 
 import pygame
 from pygame.event import Event
@@ -12,7 +11,6 @@ from model.entity.fish.boidconfig import BoidConfig
 from model.entity.enemies.enemyconfig import EnemyConfig
 from model.entity.fish.fishconfig import FishConfig, FishType
 from model.entity.enemies.jellyfishconfig import JellyfishType, JellyfishConfig
-from model.entity.entitymanager import EntityManager
 from model.entity.enemies.jellyfishswarm import JellyfishSwarm
 from model.entity.fish.school import School
 from model.player.player import Player
@@ -27,8 +25,10 @@ class ControllerOptions:
     def __init__(
         self,
         window_options: WindowOptions,
+        grid_cell_size: float
     ) -> None:
         self.window_options: WindowOptions = window_options
+        self.grid_cell_size: float = grid_cell_size
 
 
 class GameController:
@@ -37,28 +37,29 @@ class GameController:
         options: ControllerOptions,
     ) -> None:
         pygame.init()
-        self._options: ControllerOptions = options
-        self._view: View = View(self._options.window_options)
-        self._player: Player = Turtle(self._view.get_screen_width(), self._view.get_screen_height())
-        self._model: Model = Model(
-            128.0,
-            self._player
-        )
+        ############################
+        # Initialize View and Model:
+        ############################
+        # The View holds all logic related to drawing entities and rendering on screen
+        self._view: View = View(options.window_options)
+        # The Model holds the simulated world and is responsible for performing updates each frame
+        self._model: Model = Model(options.grid_cell_size)
         self._model.register_entity_manager_observer(self._view)
+        # Initialize the player and register on View and Model
+        self._player: Player = Turtle(self._view.get_camera())
+        self._view.register_player(self._player)
+        self._model.register_player(self._player)
+        ####################################
+        # Variables for tracking game state:
+        ####################################
         self._clock: Clock = pygame.time.Clock()
         self._fps: int = 60
         self._game_start_time: float = -1
         self._dt: float = 0.0
-        # Used to trigger logging when dt exceeds the max value required for 60fps
-        self._max_dt: float = 0.017
-        # Tracking player inputs
         self._mouse_pos: Tuple[int, int] = (0, 0)
         self._key_presses: ScancodeWrapper = ScancodeWrapper(())
-        # All input 'events' such as keypresses etc.
-        # Pygame allows us to get the list of events once and then clears the event queue so we need to store them each frame
         self._current_frame_input_events: list[Event] = []
         self._paused: bool = False
-        self._score: int = 0
 
     def start_game(self):
         self._game_start_time = time.time()
@@ -78,7 +79,6 @@ class GameController:
             model_update_time = time.time() - model_update_time
             view_update_time = time.time()
             self.draw()
-            self._view.update_screen()
             view_update_time = time.time() - view_update_time
             self.fps_logging(model_update_time, view_update_time)
         self._dt = self._clock.tick(self._fps) / 1000
@@ -111,20 +111,24 @@ class GameController:
         #  2. pickups
         self.draw_entities(camera_grid_cells, EntityManagerIndex.PICKUP)
         #  3. player
-        self._player.draw(self._view.get_screen())
+        self.draw_player()
         #  4. enemies
         self.draw_entities(camera_grid_cells, EntityManagerIndex.ENEMY)
         #  5. projectiles (weapons etc)
         self.draw_entities(camera_grid_cells, EntityManagerIndex.PROJECTILE)
+        self._view.update_screen()
 
     def draw_background(self) -> None:
         self._view.draw_background(self._player.get_camera())
 
+    def draw_player(self) -> None:
+        self._player.draw(self._view.get_screen())
+
     def draw_entities(self, grid_cells: list[GridCell], entity_type: EntityManagerIndex) -> None:
         """
-        Draws all entity of a given type found in the provided grid cells
-        :param grid_cells: The grid cells containing entity to draw.
-        :param entity_type: Only entity belonging to entity managers of this type will be drawn.
+        Draws all entities of a given type found in the provided grid cells
+        :param grid_cells: The grid cells containing entities to draw.
+        :param entity_type: Only entities belonging to entity managers of this type will be drawn.
         """
         for grid_cell in grid_cells:
             for entity in grid_cell.get_entities_by_manager_ids(self._model.get_entity_repository().get_manager_ids(entity_type)):
@@ -132,7 +136,7 @@ class GameController:
 
     def _create_entity_managers(self) -> None:
         """
-        Statically creates entity managers for all entity in the game world. This will eventually be replaced with a
+        Statically creates entity managers for all entities in the game world. This will eventually be replaced with a
         more dynamic method that adds/removes entity managers throughout the game based on various factors such as
         player position, game time, world state etc
         """
@@ -235,7 +239,7 @@ class GameController:
             school.hatch(self._model.get_model_context())
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
-        if self._dt > self._max_dt:
+        if self._dt > 0.017:
             print(
                 "Frame dt was too slow to meet",
                 self._fps,
@@ -247,12 +251,3 @@ class GameController:
                 view_t,
                 "\n",
             )
-
-    def increment_score(self, n: int | None) -> None:
-        self._score += n
-
-    def add_entity_manager(self, entity_manager: EntityManager) -> None:
-        self._model.add_entity_manager(entity_manager)
-
-    def remove_entity_manager(self, manager_id: UUID) -> None:
-        self._model.remove_entity_manager(manager_id)

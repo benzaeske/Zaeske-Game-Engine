@@ -1,4 +1,4 @@
-from unittest import case
+from typing import Optional
 from uuid import UUID
 
 import pygame
@@ -9,10 +9,12 @@ from model.entity.entity import Entity
 from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.entity.fish.fish import Fish
 from model.player.camera import Camera
+from model.player.player import Player
 from view.background import Background
 from view.entity.entityview import EntityView
 from view.entity.fishview import FishView
 from view.entity.jellyfishview import JellyfishView
+from view.player.playerview import PlayerView
 from view.sprite.spritecatalog import SpriteCatalog
 
 
@@ -34,14 +36,13 @@ class View(EntityManagerObserver):
     def __init__(self, window_options: WindowOptions) -> None:
         super().__init__()
         self._options: WindowOptions = window_options
-        # Screen sizing
-        display_info = pygame.display.Info()
-        # Width of the display being used. Detected by pygame's built in display Info class
-        self._display_width: int = display_info.current_w
-        self._display_height: int = display_info.current_h
-        # The screen that will be used to blit each frame
+        # Get available display properties from pygame
+        self._display_width: int = pygame.display.Info().current_w
+        self._display_height: int = pygame.display.Info().current_h
+        # Each frame is constructed by blitting Surfaces onto the screen and then calling pygame.display.update() which
+        # takes the current state of the screen and displays it. Pygame provides the surface to use as the screen.
         self._screen: Surface = self._initialize_screen()
-        # Get dimensions from created screen
+        # Get dimensions from created screen for easy access
         self._screen_width: int = self._screen.get_width()
         self._screen_height: int = self._screen.get_height()
         print(
@@ -52,10 +53,11 @@ class View(EntityManagerObserver):
         self._background: Background = Background(self._display_width, self._display_height)
         self._sprite_catalog: SpriteCatalog = SpriteCatalog()
         self._entity_views: dict[UUID, EntityView] = {}
+        self._player_view: Optional[PlayerView] = None
 
     def _initialize_screen(self) -> Surface:
         """
-        Get the screen that will be used for displaying the game
+        Get a screen surface from pygame that is as close to the View's window options as possible.
         """
         if self._options.full_screen:
             return pygame.display.set_mode((self._display_width, self._display_height), pygame.FULLSCREEN)
@@ -65,8 +67,14 @@ class View(EntityManagerObserver):
             height: int = self._options.screen_height if self._options.screen_height is not None and self._options.screen_height < self._display_height else self._display_height
             return pygame.display.set_mode((width, height))
 
-    def get_screen(self) -> Surface:
-        return self._screen
+    def get_camera(self) -> Camera:
+        """
+        Returns a camera object with dimensions equal to the current game screen size.
+        """
+        return Camera(self._screen_width, self._screen_height)
+
+    def register_player(self, player: Player) -> None:
+        self._player_view = PlayerView(player, self._sprite_catalog)
 
     def get_screen_width(self) -> int:
         return self._screen_width
@@ -83,8 +91,14 @@ class View(EntityManagerObserver):
         else:
             raise RuntimeError(f"Entity with id: {entity_id} is not being tracked in View")
 
+    def draw_player(self, dt: float) -> None:
+        self._player_view.draw(self._screen, dt)
+
     @staticmethod
     def update_screen() -> None:
+        """
+        Updates the pygame display based on what has been blitted onto the screen since the last call to this function.
+        """
         pygame.display.update()
 
     def notify_entity_created(self, entity: Entity):
@@ -95,7 +109,7 @@ class View(EntityManagerObserver):
 
     def _initialize_entity_view(self, entity: Entity) -> EntityView:
         """
-        Creates an EntityView for the provided Entity.
+        Helper function to create an EntityView for the provided Entity.
         """
         match entity:
             case Fish():

@@ -22,6 +22,8 @@ class EntityRepository(EntityRepositoryInterface):
             entity_manager.add_observers(self._manager_observers)
             self._entity_managers[entity_manager.get_manager_id()] = entity_manager
             self.index_entity_manager(entity_manager)
+        else:
+            raise RuntimeError(f"Entity manager {entity_manager.get_manager_id()} already registered")
 
     def index_entity_manager(self, entity_manager: EntityManager) -> None:
         if isinstance(entity_manager, EnemyManager):
@@ -55,4 +57,8 @@ class EntityRepository(EntityRepositoryInterface):
             entity_manager.movement(context, dt)
 
     def register_entity_manager_observer(self, observer: EntityManagerObserver) -> None:
+        """
+        Adds the provided class to the list of entity manager observers on this entity repository. Any entity managers
+        created will send notifications to the observer. See EntityManagerObserver for more details.
+        """
         self._manager_observers.append(observer)

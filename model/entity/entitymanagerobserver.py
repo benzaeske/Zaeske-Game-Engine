@@ -13,14 +13,14 @@ class EntityManagerObserver(ABC):
     @abstractmethod
     def notify_entity_created(self, entity: Entity):
         """
-        Actions to perform when an entity is created by an entity manager.
+        Performs actions on the observer when an entity is created by an entity manager.
         """
         pass
 
     @abstractmethod
     def notify_entity_deleted(self, entity: Entity):
         """
-        Actions to perform when an entity is deleted by an entity manager.
+        Performs actions on the observer when an entity is deleted by an entity manager.
         """
         pass
 
