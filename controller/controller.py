@@ -141,14 +141,14 @@ class GameController:
         player position, game time, world state etc
         """
         jelly_spawn_cd: float = 5.0
-        jelly_spawn_amount: int = 50
+        jelly_spawn_amount: int = 4
         jelly_config: JellyfishConfig = JellyfishConfig(
             JellyfishType.RED,
             96.0,
             96.0,
             EnemyConfig(
                 128.0,
-                128.0,
+                256.0,
                 96.0,
                 96.0,
                 100,

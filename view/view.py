@@ -87,12 +87,18 @@ class View(EntityManagerObserver):
 
     def draw_entity(self, entity_id: UUID , camera: Camera, dt: float) -> None:
         if entity_id in self._entity_views:
-            self._entity_views.get(entity_id).draw_entity(self.get_screen(), camera, dt)
+            self._entity_views.get(entity_id).draw_entity(self._screen, camera, dt)
         else:
             raise RuntimeError(f"Entity with id: {entity_id} is not being tracked in View")
 
     def draw_player(self, dt: float) -> None:
         self._player_view.draw(self._screen, dt)
+
+    def get_screen(self) -> Surface:
+        """
+        temp method until player view is implemented
+        """
+        return self._screen
 
     @staticmethod
     def update_screen() -> None:

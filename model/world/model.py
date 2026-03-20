@@ -24,6 +24,7 @@ class Model:
         Tracks the provided player on the model.
         """
         self._player = player
+        self._model_context.player = player
 
     def update(self, key_presses: ScancodeWrapper, dt: float) -> None:
         """

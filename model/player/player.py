@@ -25,8 +25,10 @@ class Player(PlayerInterface, ABC):
         super().__init__()
         self._camera: Camera = camera
         self._position: Vector2 = Vector2(0.0, 0.0)
-        self._hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
+        self._velocity: Vector2 = Vector2(0.0, 0.0)
         self._max_speed: float = max_speed
+        self._acceleration: Vector2 = Vector2(0.0, 0.0)
+        self._hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
         self._max_health: float = max_health
         self._current_health: float = self._max_health
         self._fish_coherency: dict[FishType, int] = {}
@@ -64,7 +66,7 @@ class Player(PlayerInterface, ABC):
                 )
             )
 
-    def move_player(self, key_presses: ScancodeWrapper, dt: float) -> None:
+    def move_player_v1(self, key_presses: ScancodeWrapper, dt: float) -> None:
         """
         Moves the player according to the keys pressed. Movement is scaled with delta time like all other entity.
         Limits the camera position to be confined within positive x,y coordinates and under the provided world boundary.
@@ -83,12 +85,34 @@ class Player(PlayerInterface, ABC):
         self._position += velocity * dt
         self._hitbox.center = self._position
         self._camera.set_window_position(self._position)
+
+
+    def move_player(self, key_presses: ScancodeWrapper, dt: float) -> None:
+        self._acceleration = Vector2(0.0, 0.0)
+        # Calculate acceleration as the sum of key presses
+        if key_presses[pygame.K_LEFT]:
+            self._acceleration += Vector2(-self._max_speed, 0)
+        if key_presses[pygame.K_RIGHT]:
+            self._acceleration += Vector2(self._max_speed, 0)
+        if key_presses[pygame.K_UP]:
+            self._acceleration += Vector2(0, self._max_speed)
+        if key_presses[pygame.K_DOWN]:
+            self._acceleration += Vector2(0, -self._max_speed)
+        self._velocity += (self._acceleration * dt)
+        if self._acceleration.x == 0:
+            self._velocity.x += ((-self._velocity.x / 2) * dt)
+        if self._acceleration.y == 0:
+            self._velocity.y += ((-self._velocity.y / 2) * dt)
+        limit_magnitude(self._velocity, self._max_speed)
+        self._position += (self._velocity * dt)
         # Update facing direction for drawing
-        if velocity.x != 0:
-            if velocity.x > 0:
+        if self._velocity.x != 0:
+            if self._velocity.x > 0:
                 self._facing_direction = 1
             else:
                 self._facing_direction = 0
+        self._hitbox.center = self._position
+        self._camera.set_window_position(self._position)
 
     def get_position(self) -> Vector2:
         return self._position

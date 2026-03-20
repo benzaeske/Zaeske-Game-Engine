@@ -12,6 +12,7 @@ class PlayerView:
         self._player = player
         self._sprite_catalog = sprite_catalog
 
+
     def draw(self, screen: Surface, dt: float) -> None:
         """
         Draw the player on the provided screen.
