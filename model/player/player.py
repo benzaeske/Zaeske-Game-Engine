@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 import pygame
-from pygame import Surface, Vector2, Rect
+from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
 
 from model.entity.fish.fishconfig import FishType
@@ -123,7 +123,3 @@ class Player(PlayerInterface, ABC):
 
     def get_fish_coherency(self, fish_type: FishType) -> int:
         return self._fish_coherency.get(fish_type, 0)
-
-    @abstractmethod
-    def draw(self, screen: Surface) -> None:
-        pass

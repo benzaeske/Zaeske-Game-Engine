@@ -147,7 +147,7 @@ class GameController:
             96.0,
             96.0,
             EnemyConfig(
-                128.0,
+                192.0,
                 256.0,
                 96.0,
                 96.0,
