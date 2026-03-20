@@ -89,7 +89,7 @@ class GameController:
                 sys.exit()
         if self._key_presses[pygame.K_ESCAPE]:
             sys.exit()
-        if self._player.get_current_hp() <= 0.0:
+        if self._player.get_current_health() <= 0.0:
             sys.exit()
 
     def check_for_pause(self):
@@ -122,7 +122,7 @@ class GameController:
         self._view.draw_background(self._player.get_camera())
 
     def draw_player(self) -> None:
-        self._player.draw(self._view.get_screen())
+        self._view.draw_player(self._player.get_camera(), self._dt)
 
     def draw_entities(self, grid_cells: list[GridCell], entity_type: EntityManagerIndex) -> None:
         """

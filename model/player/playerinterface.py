@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from pygame import Vector2
+from pygame import Vector2, Rect
 
 from model.entity.fish.fishconfig import FishType
 from model.player.camera import Camera
@@ -21,16 +21,51 @@ class PlayerInterface(ABC):
         pass
 
     @abstractmethod
-    def get_camera(self) -> Camera:
+    def get_velocity(self) -> Vector2:
         """
-        :return: A pygame Rect representing the camera at its current position.
+        Gets the player's current velocity.
         """
         pass
 
     @abstractmethod
-    def update_hp(self, hp_diff: float) -> None:
+    def get_acceleration(self) -> Vector2:
         """
-        Adds the provided value to the player's hp.
+        Gets the player's current acceleration.
+        """
+        pass
+
+    @abstractmethod
+    def get_hitbox(self) -> Rect:
+        """
+        Gets the player's hitbox.
+        """
+        pass
+
+    @abstractmethod
+    def get_camera(self) -> Camera:
+        """
+        Gets the player's current camera object.
+        """
+        pass
+
+    @abstractmethod
+    def get_current_health(self) -> float:
+        """
+        Gets the player's current hp.
+        """
+        pass
+
+    @abstractmethod
+    def get_max_health(self) -> float:
+        """
+        Gets the player's maximum hp.
+        """
+        pass
+
+    @abstractmethod
+    def update_health(self, hp_diff: float) -> None:
+        """
+        Adds the provided value to the player's hp. Values can be negative.
         """
         pass
 

@@ -12,8 +12,8 @@ class SpriteSheet:
         """
         :param sprite_data: Tuples containing duration and surfaces for the sprite animation. The surfaces provided in
             sprite data are assumed to all have the same height and width as specified in the constructor.
-        :param width: The width of all surfaces passed in on sprite data
-        :param height: The height of all surfaces passed in on sprite data
+        :param width: The width of all surfaces in the animation
+        :param height: The height of all surfaces passed in the animation
         """
         self._sprite_data: list[Tuple[float, Surface]] = sprite_data
         self._num_animation_frames: int = len(self._sprite_data)

@@ -91,8 +91,8 @@ class View(EntityManagerObserver):
         else:
             raise RuntimeError(f"Entity with id: {entity_id} is not being tracked in View")
 
-    def draw_player(self, dt: float) -> None:
-        self._player_view.draw(self._screen, dt)
+    def draw_player(self, camera: Camera, dt: float) -> None:
+        self._player_view.draw(self._screen, camera, dt)
 
     def get_screen(self) -> Surface:
         """

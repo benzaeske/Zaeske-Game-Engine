@@ -23,7 +23,7 @@ class Player(PlayerInterface, ABC):
         max_health: float
     ) -> None:
         super().__init__()
-        self._camera: Camera = camera
+        self._camera: Camera = camera # TODO camera in controller not on player
         self._position: Vector2 = Vector2(0.0, 0.0)
         self._velocity: Vector2 = Vector2(0.0, 0.0)
         self._max_speed: float = max_speed
@@ -44,7 +44,7 @@ class Player(PlayerInterface, ABC):
         for enemy in grid_space.get_neighbors(self._position, cell_range,
                                               entity_repository.get_manager_ids(EntityManagerIndex.ENEMY)):
             if enemy.get_hitbox().colliderect(self._hitbox):
-                self.update_hp(-enemy.get_damage() * dt)
+                self.update_health(-enemy.get_damage() * dt)
 
     def process_fish_coherency(self, grid_space: GridSpaceInterface,
                                entity_repository: EntityRepositoryInterface) -> None:
@@ -65,27 +65,6 @@ class Player(PlayerInterface, ABC):
                     entity_repository.get_manager_ids(EntityManagerIndex.GREEN_FISH)
                 )
             )
-
-    def move_player_v1(self, key_presses: ScancodeWrapper, dt: float) -> None:
-        """
-        Moves the player according to the keys pressed. Movement is scaled with delta time like all other entity.
-        Limits the camera position to be confined within positive x,y coordinates and under the provided world boundary.
-        """
-        velocity: Vector2 = Vector2(0.0, 0.0)
-        # Calculate velocity as the sum of key presses
-        if key_presses[pygame.K_LEFT]:
-            velocity += Vector2(-self._max_speed, 0)
-        if key_presses[pygame.K_RIGHT]:
-            velocity += Vector2(self._max_speed, 0)
-        if key_presses[pygame.K_UP]:
-            velocity += Vector2(0, self._max_speed)
-        if key_presses[pygame.K_DOWN]:
-            velocity += Vector2(0, -self._max_speed)
-        limit_magnitude(velocity, self._max_speed)
-        self._position += velocity * dt
-        self._hitbox.center = self._position
-        self._camera.set_window_position(self._position)
-
 
     def move_player(self, key_presses: ScancodeWrapper, dt: float) -> None:
         self._acceleration = Vector2(0.0, 0.0)
@@ -117,13 +96,25 @@ class Player(PlayerInterface, ABC):
     def get_position(self) -> Vector2:
         return self._position
 
+    def get_velocity(self) -> Vector2:
+        return self._velocity
+
+    def get_acceleration(self) -> Vector2:
+        return self._acceleration
+
+    def get_hitbox(self) -> Rect:
+        return self._hitbox
+
     def get_camera(self) -> Camera:
         return self._camera
 
-    def get_current_hp(self) -> float:
+    def get_current_health(self) -> float:
         return self._current_health
 
-    def update_hp(self, hp_diff: float) -> None:
+    def get_max_health(self) -> float:
+        return self._max_health
+
+    def update_health(self, hp_diff: float) -> None:
         self._current_health += hp_diff
         if self._current_health > self._max_health:
             self._current_health = self._max_health
