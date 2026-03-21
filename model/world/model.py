@@ -30,9 +30,9 @@ class Model:
         """
         Updates the model for a single frame.
         """
-        self._player.update(self._grid_space, self._entity_repository, dt)
+        self._player.frame_actions(self._grid_space, self._entity_repository, dt)
         self._entity_repository.perform_frame_actions(self._model_context, dt)
-        self._player.move_player(key_presses, dt)
+        self._player.move(key_presses, dt)
         self._entity_repository.move_entities(self._model_context, dt)
 
     def add_entity_manager(self, entity_manager: EntityManager) -> None:

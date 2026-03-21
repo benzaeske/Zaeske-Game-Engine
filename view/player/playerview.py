@@ -92,4 +92,3 @@ class PlayerView:
             # Note: The 'bottom' attribute of a pygame rect is actually the top edge since they are drawn top down
             camera.get_window().bottom - self._player.get_hitbox().top - self._max_hp_surface.get_height(),
         )
-

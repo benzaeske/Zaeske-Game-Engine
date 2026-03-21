@@ -1,5 +1,3 @@
-from abc import ABC
-
 import pygame
 from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
@@ -13,13 +11,14 @@ from model.world.entityrepository.entityrepositoryinterface import EntityReposit
 from model.world.gridspace.grid_cell import GridCell
 from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 
-class Player(PlayerInterface, ABC):
+class Player(PlayerInterface):
     def __init__(
         self,
         camera: Camera,
         hitbox_width: float,
         hitbox_height: float,
         max_speed: float,
+        max_acceleration: float,
         max_health: float
     ) -> None:
         super().__init__()
@@ -28,15 +27,44 @@ class Player(PlayerInterface, ABC):
         self._velocity: Vector2 = Vector2(0.0, 0.0)
         self._max_speed: float = max_speed
         self._acceleration: Vector2 = Vector2(0.0, 0.0)
+        self._max_acceleration: float = max_acceleration
         self._hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
         self._max_health: float = max_health
         self._current_health: float = self._max_health
         self._fish_coherency: dict[FishType, int] = {}
         self._facing_direction: int = 0
 
-    def update(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface, dt: float) -> None:
+    def frame_actions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface, dt: float) -> None:
         self.process_enemy_collisions(grid_space, entity_repository, dt)
         self.process_fish_coherency(grid_space, entity_repository)
+
+    def move(self, key_presses: ScancodeWrapper, dt: float) -> None:
+        self._acceleration = Vector2(0.0, 0.0)
+        # Calculate acceleration as the sum of key presses
+        if key_presses[pygame.K_LEFT]:
+            self._acceleration += Vector2(-self._max_speed, 0)
+        if key_presses[pygame.K_RIGHT]:
+            self._acceleration += Vector2(self._max_speed, 0)
+        if key_presses[pygame.K_UP]:
+            self._acceleration += Vector2(0, self._max_speed)
+        if key_presses[pygame.K_DOWN]:
+            self._acceleration += Vector2(0, -self._max_speed)
+        limit_magnitude(self._acceleration, self._max_acceleration)
+        self._velocity += (self._acceleration * dt)
+        if self._acceleration.x == 0:
+            self._velocity.x += ((-self._velocity.x / 4) * dt)
+        if self._acceleration.y == 0:
+            self._velocity.y += ((-self._velocity.y / 4) * dt)
+        limit_magnitude(self._velocity, self._max_speed)
+        self._position += (self._velocity * dt)
+        # Update facing direction for drawing
+        if self._velocity.x != 0:
+            if self._velocity.x > 0:
+                self._facing_direction = 1
+            else:
+                self._facing_direction = 0
+        self._hitbox.center = self._position
+        self._camera.set_window_position(self._position)
 
     def process_enemy_collisions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface,
                                  dt: float) -> None:
@@ -65,33 +93,6 @@ class Player(PlayerInterface, ABC):
                     entity_repository.get_manager_ids(EntityManagerIndex.GREEN_FISH)
                 )
             )
-
-    def move_player(self, key_presses: ScancodeWrapper, dt: float) -> None:
-        self._acceleration = Vector2(0.0, 0.0)
-        # Calculate acceleration as the sum of key presses
-        if key_presses[pygame.K_LEFT]:
-            self._acceleration += Vector2(-self._max_speed, 0)
-        if key_presses[pygame.K_RIGHT]:
-            self._acceleration += Vector2(self._max_speed, 0)
-        if key_presses[pygame.K_UP]:
-            self._acceleration += Vector2(0, self._max_speed)
-        if key_presses[pygame.K_DOWN]:
-            self._acceleration += Vector2(0, -self._max_speed)
-        self._velocity += (self._acceleration * dt)
-        if self._acceleration.x == 0:
-            self._velocity.x += ((-self._velocity.x / 2) * dt)
-        if self._acceleration.y == 0:
-            self._velocity.y += ((-self._velocity.y / 2) * dt)
-        limit_magnitude(self._velocity, self._max_speed)
-        self._position += (self._velocity * dt)
-        # Update facing direction for drawing
-        if self._velocity.x != 0:
-            if self._velocity.x > 0:
-                self._facing_direction = 1
-            else:
-                self._facing_direction = 0
-        self._hitbox.center = self._position
-        self._camera.set_window_position(self._position)
 
     def get_position(self) -> Vector2:
         return self._position

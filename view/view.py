@@ -29,8 +29,8 @@ class WindowOptions:
 
 class View(EntityManagerObserver):
     """
-    The View is responsible for drawing everything on the screen using pygame functions, but should know nothing about the size or shape of the model it is drawing.\n
-    Pygame uses an inverted y-axis which is why coordinates are being converted when coming from the model.
+    The View is responsible for drawing everything on the screen using pygame functions. It should be noted that pygame
+    uses an inverted y-axis.
     """
 
     def __init__(self, window_options: WindowOptions) -> None:
