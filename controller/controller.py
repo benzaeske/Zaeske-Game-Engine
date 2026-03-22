@@ -14,6 +14,8 @@ from model.entity.enemies.jellyfishconfig import JellyfishType, JellyfishConfig
 from model.entity.enemies.jellyfishswarm import JellyfishSwarm
 from model.entity.fish.school import School
 from controller.camera import Camera
+from model.entity.items.itemmanager import ItemManager
+from model.entity.items.shield import Shield
 from model.player.player import Player
 from model.player.turtle import Turtle
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
@@ -114,16 +116,14 @@ class GameController:
         camera_grid_cells: list[GridCell] = (self._model.get_model_context().grid_space
                                              .get_grid_cells_in_camera_range(self._camera))
         # Draw in a specified order:
-        #  1. fish
+        #  Fish
         self.draw_entities(camera_grid_cells, EntityManagerIndex.FISH)
-        #  2. pickups
-        self.draw_entities(camera_grid_cells, EntityManagerIndex.PICKUP)
-        #  3. player
+        #  Player
         self.draw_player()
-        #  4. enemies
+        #  Enemies
         self.draw_entities(camera_grid_cells, EntityManagerIndex.ENEMY)
-        #  5. projectiles (weapons etc)
-        self.draw_entities(camera_grid_cells, EntityManagerIndex.PROJECTILE)
+        #  Items
+        self.draw_entities(camera_grid_cells, EntityManagerIndex.ITEM)
         self._view.update_screen()
 
     def draw_background(self) -> None:
@@ -246,6 +246,14 @@ class GameController:
             school: School = School(green_fish, 16, self._model.get_model_context())
             self._model.add_entity_manager(school)
             school.hatch(self._model.get_model_context())
+
+        item_manager: ItemManager = ItemManager()
+        self._model.add_entity_manager(item_manager)
+        item_manager.track_item(Shield(
+            item_manager.get_manager_id(),
+            128.0,
+            100.0
+        ))
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self._dt > 0.017:

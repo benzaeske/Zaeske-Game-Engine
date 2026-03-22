@@ -9,11 +9,13 @@ from model.entity.entity import Entity
 from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.entity.fish.fish import Fish
 from controller.camera import Camera
+from model.entity.items.shield import Shield
 from model.player.player import Player
 from view.background import Background
 from view.entity.entityview import EntityView
 from view.entity.fishview import FishView
 from view.entity.jellyfishview import JellyfishView
+from view.entity.shieldview import ShieldView
 from view.player.playerview import PlayerView
 from view.sprite.spritecatalog import SpriteCatalog
 
@@ -115,6 +117,8 @@ class View(EntityManagerObserver):
                 return FishView(entity, self._sprite_catalog)
             case Jellyfish():
                 return JellyfishView(entity, self._sprite_catalog)
+            case Shield():
+                return ShieldView(entity, self._sprite_catalog)
             case _:
                 raise NotImplementedError(f"No implementation of EntityView for entity class: {entity.__class__.__name__}")
 

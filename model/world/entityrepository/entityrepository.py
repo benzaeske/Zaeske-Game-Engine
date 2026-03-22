@@ -5,6 +5,7 @@ from model.entity.fish.fishconfig import FishType
 from model.entity.enemies.enemymanager import EnemyManager
 from model.entity.entitymanager import EntityManager
 from model.entity.fish.school import School
+from model.entity.items.itemmanager import ItemManager
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
 from model.entity.entitymanagerobserver import EntityManagerObserver
@@ -38,6 +39,8 @@ class EntityRepository(EntityRepositoryInterface):
                     self._entity_manager_indexes[EntityManagerIndex.YELLOW_FISH].add(entity_manager.get_manager_id())
                 case FishType.GREEN:
                     self._entity_manager_indexes[EntityManagerIndex.GREEN_FISH].add(entity_manager.get_manager_id())
+        elif isinstance(entity_manager, ItemManager):
+            self._entity_manager_indexes[EntityManagerIndex.ITEM].add(entity_manager.get_manager_id())
 
     def remove_entity_manager(self, manager_id: UUID) -> None:
         self._entity_managers.pop(manager_id, None)
