@@ -8,7 +8,7 @@ from model.entity.enemies.jellyfish import Jellyfish
 from model.entity.entity import Entity
 from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.entity.fish.fish import Fish
-from model.player.camera import Camera
+from controller.camera import Camera
 from model.player.player import Player
 from view.background import Background
 from view.entity.entityview import EntityView
@@ -66,12 +66,6 @@ class View(EntityManagerObserver):
             width: int = self._options.screen_width if self._options.screen_width is not None and self._options.screen_width < self._display_width else self._display_width
             height: int = self._options.screen_height if self._options.screen_height is not None and self._options.screen_height < self._display_height else self._display_height
             return pygame.display.set_mode((width, height))
-
-    def get_camera(self) -> Camera:
-        """
-        Returns a camera object with dimensions equal to the current game screen size.
-        """
-        return Camera(self._screen_width, self._screen_height)
 
     def register_player(self, player: Player) -> None:
         self._player_view = PlayerView(player, self._sprite_catalog)

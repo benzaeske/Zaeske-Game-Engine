@@ -6,7 +6,7 @@ import pygame
 from pygame import Surface, Vector2, Rect
 
 from model.entity.entity import Entity
-from model.player.camera import Camera
+from controller.camera import Camera
 from model.world.gridspace.grid_cell import GridCell
 from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 

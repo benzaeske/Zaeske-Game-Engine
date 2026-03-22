@@ -2,6 +2,7 @@ import uuid
 from abc import ABC, abstractmethod
 from uuid import UUID
 
+from controller.camerainterface import CameraInterface
 from model.entity.entity import Entity
 from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.world.modelcontext import ModelContext
@@ -16,7 +17,7 @@ class EntityManager(ABC):
         self._observers: list[EntityManagerObserver] = []
 
     @abstractmethod
-    def frame_actions(self, context: ModelContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         """
         Actions to perform each frame. Actions can alter the state of the contained entity within this manager, other
         entities in the world space, or the player.
@@ -24,7 +25,7 @@ class EntityManager(ABC):
         pass
 
     @abstractmethod
-    def movement(self, context: ModelContext, dt: float) -> None:
+    def movement(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         """
         Performs any necessary movement of tracked entities.
         """

@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pygame import Vector2
 
-from model.player.camera import Camera
+from controller.camera import Camera
 
 if TYPE_CHECKING:
     from model.entity.entity import Entity

@@ -4,7 +4,7 @@ from pygame import Surface, transform
 
 from model.entity.fish.fish import Fish
 from model.entity.fish.fishconfig import FishType
-from model.player.camera import Camera
+from controller.camera import Camera
 from view.entity.entityview import EntityView
 from view.sprite.entityanimation import EntityAnimation
 from view.sprite.spritecatalog import SpriteCatalog

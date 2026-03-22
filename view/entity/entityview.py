@@ -4,7 +4,7 @@ from typing import Tuple
 from pygame import Surface, Rect
 
 from model.entity.entity import Entity
-from model.player.camera import Camera
+from controller.camera import Camera
 from view.sprite.spritecatalog import SpriteCatalog
 
 

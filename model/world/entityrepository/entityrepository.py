@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from controller.camera import Camera
 from model.entity.fish.fishconfig import FishType
 from model.entity.enemies.enemymanager import EnemyManager
 from model.entity.entitymanager import EntityManager
@@ -48,13 +49,13 @@ class EntityRepository(EntityRepositoryInterface):
     def get_manager_ids(self, index: EntityManagerIndex) -> set[UUID]:
         return self._entity_manager_indexes.get(index, set())
 
-    def perform_frame_actions(self, context: ModelContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, camera: Camera, dt: float) -> None:
         for entity_manager in self._entity_managers.values():
-            entity_manager.frame_actions(context, dt)
+            entity_manager.frame_actions(context, camera, dt)
 
-    def move_entities(self, context: ModelContext, dt: float) -> None:
+    def move_entities(self, context: ModelContext, camera: Camera, dt: float) -> None:
         for entity_manager in self._entity_managers.values():
-            entity_manager.movement(context, dt)
+            entity_manager.movement(context, camera, dt)
 
     def register_entity_manager_observer(self, observer: EntityManagerObserver) -> None:
         """

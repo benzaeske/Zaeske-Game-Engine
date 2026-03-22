@@ -4,7 +4,7 @@ from typing import Tuple
 from perlin_numpy import generate_perlin_noise_2d
 from pygame import Surface, Rect
 
-from model.player.camera import Camera
+from controller.camera import Camera
 
 TILE_SIZE: int = 32
 GRID_WIDTH: int = 256

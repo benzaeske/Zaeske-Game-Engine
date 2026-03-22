@@ -4,6 +4,7 @@ from abc import abstractmethod, ABC
 
 from pygame import Vector2, Rect
 
+from controller.camerainterface import CameraInterface
 from model.entity.enemies.enemy import Enemy
 from model.entity.entitymanager import EntityManager, ModelContext
 
@@ -20,7 +21,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         self._spawn_amount: int = initial_spawn_amount
         self._spawn_state: int = 0 # Used to rotate where random enemy positions are sampled from
 
-    def frame_actions(self, context: ModelContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         # Destroy enemies that have no hp
         for enemy in self._enemies.copy():
             if enemy.get_hp() <= 0:
@@ -29,12 +30,12 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
                 self._notify_observers_entity_deleted(enemy)
         # Spawn new enemies
         if self.tick_spawn_timer(dt):
-            self.spawn(context)
+            self.spawn(context, camera)
         # Accelerate all enemies towards the player and avoid close neighbors
         for enemy in self._enemies:
             enemy.frame_actions(context, dt)
 
-    def movement(self, context: ModelContext, dt: float) -> None:
+    def movement(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         for enemy in self._enemies:
             old_pos: Vector2 = copy.deepcopy(enemy.get_position())
             enemy.move(context, dt)
@@ -52,14 +53,14 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
             return True
         return False
 
-    def spawn(self, context: ModelContext) -> None:
+    def spawn(self, context: ModelContext, camera: CameraInterface) -> None:
         """
         Creates new enemies according to this spawner's amount property. Adds new enemies to this group's list as well
         as to the grid space.
         """
         for _ in range(self._spawn_amount):
             new_enemy: T = self.get_new_enemy()
-            new_enemy.set_position(self._get_initial_position(context))
+            new_enemy.set_position(self._get_initial_position(camera))
             self._enemies.add(new_enemy)
             context.grid_space.add_entity(new_enemy)
             self._notify_observers_entity_created(new_enemy)
@@ -71,12 +72,12 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         """
         pass
 
-    def _get_initial_position(self, context: ModelContext) -> Vector2:
+    def _get_initial_position(self, camera: CameraInterface) -> Vector2:
         """
         Get a random x and y position just outside camera range. Rotate which side of the camera (left, right, top,
         or bottom) to sample from each time the method is called
         """
-        camera_window: Rect = context.player.get_camera().get_window()
+        camera_window: Rect = camera.get_window()
         spawn_range: float = 256.0
         pos: Vector2 = Vector2(0.0, 0.0)
         match self._spawn_state:

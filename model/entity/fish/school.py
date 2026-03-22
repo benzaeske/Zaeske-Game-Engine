@@ -3,6 +3,7 @@ import random
 
 from pygame import Vector2, Rect
 
+from controller.camerainterface import CameraInterface
 from model.entity.fish.fish import Fish
 from model.entity.fish.fishconfig import FishConfig, FishType
 from model.entity.entitymanager import EntityManager, ModelContext
@@ -23,7 +24,7 @@ class School(EntityManager):
         self._shoal: Rect | None = Rect((0, 0), (self._fish_config.shoal_radius * 2, self._fish_config.shoal_radius * 2)) if self._fish_config.shoal else None
         self._shoal.center = self.get_random_shoal_location()
 
-    def frame_actions(self, context: ModelContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         self._boundary.center = context.player.get_position()
         if self._fish_config.shoal:
             # Move the shoal location if it is outside the school's boundary
@@ -32,13 +33,12 @@ class School(EntityManager):
         for fish in self._fish:
             fish.frame_actions(context, dt)
 
-    def movement(self, context: ModelContext, dt: float) -> None:
+    def movement(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         for fish in self._fish:
             old_pos: Vector2 = copy.deepcopy(fish.get_position())
             fish.move(context, dt)
             # Teleport fish back inside their shoal if they go outside the school's boundary and the shoal is not in camera range
-            if (not self._boundary.collidepoint(fish.get_position()) and
-                    not context.player.get_camera().get_window().colliderect(self._shoal)):
+            if not self._boundary.collidepoint(fish.get_position()) and not camera.get_window().colliderect(self._shoal):
                 fish.set_position(self._get_random_position_inside_shoal())
             # Update grid cell if necessary
             context.grid_space.process_moved_entity(old_pos, fish)

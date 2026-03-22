@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from pygame import Vector2, Rect
 
 from model.entity.fish.fishconfig import FishType
-from model.player.camera import Camera
+from controller.camera import Camera
 
 
 class PlayerInterface(ABC):
@@ -38,13 +38,6 @@ class PlayerInterface(ABC):
     def get_hitbox(self) -> Rect:
         """
         Gets the player's hitbox.
-        """
-        pass
-
-    @abstractmethod
-    def get_camera(self) -> Camera:
-        """
-        Gets the player's current camera object.
         """
         pass
 

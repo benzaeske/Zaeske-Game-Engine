@@ -2,7 +2,7 @@ from typing import Tuple
 
 from pygame import Surface
 
-from model.player.camera import Camera
+from controller.camera import Camera
 from model.player.playerinterface import PlayerInterface
 from view.sprite.playeranimation import PlayerAnimation
 from view.sprite.spritecatalog import SpriteCatalog

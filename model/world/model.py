@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pygame.key import ScancodeWrapper
 
+from controller.camera import Camera
 from model.entity.entitymanager import EntityManager, ModelContext
 from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.player.player import Player
@@ -26,14 +27,14 @@ class Model:
         self._player = player
         self._model_context.player = player
 
-    def update(self, key_presses: ScancodeWrapper, dt: float) -> None:
+    def update(self, key_presses: ScancodeWrapper, camera: Camera, dt: float) -> None:
         """
         Updates the model for a single frame.
         """
         self._player.frame_actions(self._grid_space, self._entity_repository, dt)
-        self._entity_repository.perform_frame_actions(self._model_context, dt)
+        self._entity_repository.frame_actions(self._model_context, camera, dt)
         self._player.move(key_presses, dt)
-        self._entity_repository.move_entities(self._model_context, dt)
+        self._entity_repository.move_entities(self._model_context, camera, dt)
 
     def add_entity_manager(self, entity_manager: EntityManager) -> None:
         self._entity_repository.add_entity_manager(entity_manager)

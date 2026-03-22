@@ -4,8 +4,8 @@ from pygame.key import ScancodeWrapper
 
 from model.entity.fish.fishconfig import FishType
 from model.modelutils import limit_magnitude
-from model.player.camera import Camera
 from model.player.playerinterface import PlayerInterface
+from model.player.playermovementlistener import PlayerMovementListener
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
 from model.world.gridspace.grid_cell import GridCell
@@ -14,7 +14,6 @@ from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 class Player(PlayerInterface):
     def __init__(
         self,
-        camera: Camera,
         hitbox_width: float,
         hitbox_height: float,
         max_speed: float,
@@ -22,7 +21,6 @@ class Player(PlayerInterface):
         max_health: float
     ) -> None:
         super().__init__()
-        self._camera: Camera = camera # TODO camera in controller not on player
         self._position: Vector2 = Vector2(0.0, 0.0)
         self._velocity: Vector2 = Vector2(0.0, 0.0)
         self._max_speed: float = max_speed
@@ -32,7 +30,7 @@ class Player(PlayerInterface):
         self._max_health: float = max_health
         self._current_health: float = self._max_health
         self._fish_coherency: dict[FishType, int] = {}
-        self._facing_direction: int = 0
+        self._movement_listeners: list[PlayerMovementListener] = []
 
     def frame_actions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface, dt: float) -> None:
         self.process_enemy_collisions(grid_space, entity_repository, dt)
@@ -57,14 +55,8 @@ class Player(PlayerInterface):
             self._velocity.y += ((-self._velocity.y / 4) * dt)
         limit_magnitude(self._velocity, self._max_speed)
         self._position += (self._velocity * dt)
-        # Update facing direction for drawing
-        if self._velocity.x != 0:
-            if self._velocity.x > 0:
-                self._facing_direction = 1
-            else:
-                self._facing_direction = 0
         self._hitbox.center = self._position
-        self._camera.set_window_position(self._position)
+        self.notify_movement_listeners()
 
     def process_enemy_collisions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface,
                                  dt: float) -> None:
@@ -106,9 +98,6 @@ class Player(PlayerInterface):
     def get_hitbox(self) -> Rect:
         return self._hitbox
 
-    def get_camera(self) -> Camera:
-        return self._camera
-
     def get_current_health(self) -> float:
         return self._current_health
 
@@ -124,3 +113,10 @@ class Player(PlayerInterface):
 
     def get_fish_coherency(self, fish_type: FishType) -> int:
         return self._fish_coherency.get(fish_type, 0)
+
+    def add_movement_listener(self, movement_listener: PlayerMovementListener) -> None:
+        self._movement_listeners.append(movement_listener)
+
+    def notify_movement_listeners(self) -> None:
+        for movement_listener in self._movement_listeners:
+            movement_listener.on_player_movement(self.get_position())

@@ -13,6 +13,7 @@ from model.entity.fish.fishconfig import FishConfig, FishType
 from model.entity.enemies.jellyfishconfig import JellyfishType, JellyfishConfig
 from model.entity.enemies.jellyfishswarm import JellyfishSwarm
 from model.entity.fish.school import School
+from controller.camera import Camera
 from model.player.player import Player
 from model.player.turtle import Turtle
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
@@ -46,9 +47,12 @@ class GameController:
         self._model: Model = Model(options.grid_cell_size)
         self._model.register_entity_manager_observer(self._view)
         # Initialize the player and register on View and Model
-        self._player: Player = Turtle(self._view.get_camera())
+        self._player: Player = Turtle()
         self._view.register_player(self._player)
         self._model.register_player(self._player)
+        # Initialize the camera
+        self._camera: Camera = Camera(self._view.get_screen_width(), self._view.get_screen_height())
+        self._player.add_movement_listener(self._camera)
         ####################################
         # Variables for tracking game state:
         ####################################
@@ -99,12 +103,12 @@ class GameController:
                     self._paused = not self._paused
 
     def update_model(self) -> None:
-        self._model.update(self._key_presses, self._dt)
+        self._model.update(self._key_presses, self._camera, self._dt)
 
     def draw(self) -> None:
         self.draw_background()
         camera_grid_cells: list[GridCell] = (self._model.get_grid_space()
-                                             .get_grid_cells_in_camera_range(self._player.get_camera()))
+                                             .get_grid_cells_in_camera_range(self._camera))
         # Draw in a specified order:
         #  1. fish
         self.draw_entities(camera_grid_cells, EntityManagerIndex.FISH)
@@ -119,10 +123,10 @@ class GameController:
         self._view.update_screen()
 
     def draw_background(self) -> None:
-        self._view.draw_background(self._player.get_camera())
+        self._view.draw_background(self._camera)
 
     def draw_player(self) -> None:
-        self._view.draw_player(self._player.get_camera(), self._dt)
+        self._view.draw_player(self._camera, self._dt)
 
     def draw_entities(self, grid_cells: list[GridCell], entity_type: EntityManagerIndex) -> None:
         """
@@ -132,7 +136,7 @@ class GameController:
         """
         for grid_cell in grid_cells:
             for entity in grid_cell.get_entities_by_manager_ids(self._model.get_entity_repository().get_manager_ids(entity_type)):
-                self._view.draw_entity(entity.get_id(), self._player.get_camera(), self._dt)
+                self._view.draw_entity(entity.get_id(), self._camera, self._dt)
 
     def _create_entity_managers(self) -> None:
         """
@@ -182,7 +186,7 @@ class GameController:
             128.0,
             1.2
         )
-        num_red_schools: int = 4
+        num_red_schools: int = 2
         for _ in range(num_red_schools):
             school: School = School(red_fish, 16, self._model.get_model_context())
             self._model.add_entity_manager(school)
@@ -207,7 +211,7 @@ class GameController:
             384.0,
             1.2
         )
-        num_yellow_schools: int = 4
+        num_yellow_schools: int = 2
         for _ in range(num_yellow_schools):
             school: School = School(yellow_fish, 16, self._model.get_model_context())
             self._model.add_entity_manager(school)
@@ -232,7 +236,7 @@ class GameController:
             64.0,
             1.2
         )
-        num_green_schools: int = 4
+        num_green_schools: int = 2
         for _ in range(num_green_schools):
             school: School = School(green_fish, 16, self._model.get_model_context())
             self._model.add_entity_manager(school)

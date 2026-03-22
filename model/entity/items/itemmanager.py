@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from controller.camerainterface import CameraInterface
 from model.entity.entitymanager import EntityManager
 from model.entity.items.item import Item
 from model.world.modelcontext import ModelContext
@@ -10,11 +11,11 @@ class ItemManager(EntityManager):
         super().__init__()
         self._items: dict[UUID, Item] = {}
 
-    def frame_actions(self, context: ModelContext, dt: float) -> None:
+    def frame_actions(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         for item in self._items.values():
             item.frame_actions(context, dt)
 
-    def movement(self, context: ModelContext, dt: float) -> None:
+    def movement(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         for item in self._items.values():
             item.move(context, dt)
 
