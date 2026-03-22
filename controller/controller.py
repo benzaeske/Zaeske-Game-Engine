@@ -33,6 +33,10 @@ class ControllerOptions:
 
 
 class GameController:
+    """
+    Top level orchestration class for managing logic loops for the game and menus. Contains a model for simulating the
+    game world and entities, and a view class for drawing onto the screen.
+    """
     def __init__(
         self,
         options: ControllerOptions,
@@ -107,7 +111,7 @@ class GameController:
 
     def draw(self) -> None:
         self.draw_background()
-        camera_grid_cells: list[GridCell] = (self._model.get_grid_space()
+        camera_grid_cells: list[GridCell] = (self._model.get_model_context().grid_space
                                              .get_grid_cells_in_camera_range(self._camera))
         # Draw in a specified order:
         #  1. fish
@@ -135,7 +139,8 @@ class GameController:
         :param entity_type: Only entities belonging to entity managers of this type will be drawn.
         """
         for grid_cell in grid_cells:
-            for entity in grid_cell.get_entities_by_manager_ids(self._model.get_entity_repository().get_manager_ids(entity_type)):
+            for entity in grid_cell.get_entities_by_manager_ids(self._model.get_model_context().entity_repository
+                                                                        .get_manager_ids(entity_type)):
                 self._view.draw_entity(entity.get_id(), self._camera, self._dt)
 
     def _create_entity_managers(self) -> None:

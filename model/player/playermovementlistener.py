@@ -4,6 +4,10 @@ from pygame import Vector2
 
 
 class PlayerMovementListener(ABC):
+    """
+    Listener pattern for classes that need to define some set of functionality when the player moves. Must be registered
+    to the current active Player using Player.add_movement_listener
+    """
     def __init__(self):
         pass
 

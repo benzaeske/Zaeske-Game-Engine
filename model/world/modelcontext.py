@@ -5,7 +5,8 @@ from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 
 class ModelContext:
     """
-    Provides controlled access into the current state of the world model.
+    Provides controlled access into the current state of the world model. Other classes that need to interact with the
+    model should do so through this context.
     """
     def __init__(
             self,

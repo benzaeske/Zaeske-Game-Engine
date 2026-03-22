@@ -32,7 +32,6 @@ class View(EntityManagerObserver):
     The View is responsible for drawing everything on the screen using pygame functions. It should be noted that pygame
     uses an inverted y-axis.
     """
-
     def __init__(self, window_options: WindowOptions) -> None:
         super().__init__()
         self._options: WindowOptions = window_options

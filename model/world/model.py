@@ -8,12 +8,13 @@ from model.entity.entitymanager import EntityManager, ModelContext
 from model.entity.entitymanagerobserver import EntityManagerObserver
 from model.player.player import Player
 from model.world.entityrepository.entityrepository import EntityRepository
-from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
 from model.world.gridspace.gridspace import GridSpace
-from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 
 
 class Model:
+    """
+    The model is responsible for simulating the game world space and entities within it.
+    """
     def __init__(self, grid_cell_size: float):
         self._grid_space: GridSpace = GridSpace(grid_cell_size)
         self._entity_repository: EntityRepository = EntityRepository()
@@ -51,9 +52,3 @@ class Model:
 
     def get_model_context(self) -> ModelContext:
         return self._model_context
-
-    def get_grid_space(self) -> GridSpaceInterface:
-        return self._grid_space
-
-    def get_entity_repository(self) -> EntityRepositoryInterface:
-        return self._entity_repository
