@@ -1,3 +1,4 @@
+import copy
 from abc import ABC, abstractmethod
 from uuid import UUID, uuid4
 
@@ -41,7 +42,7 @@ class Entity(ABC):
         return self.manager_id
 
     def get_position(self) -> Vector2:
-        return self._position
+        return copy.deepcopy(self._position)
 
     def set_position(self, p: Vector2) -> None:
         self._position = p
@@ -49,14 +50,8 @@ class Entity(ABC):
     def get_x(self) -> float:
         return self._position.x
 
-    def set_x(self, x: float) -> None:
-        self._position.x = x
-
     def get_y(self) -> float:
         return self._position.y
-
-    def set_y(self, y: float) -> None:
-        self._position.y = y
 
     # Implement functions needed to make entity usable in a python set
 

@@ -123,4 +123,6 @@ class View(EntityManagerObserver):
                 raise NotImplementedError(f"No implementation of EntityView for entity class: {entity.__class__.__name__}")
 
     def notify_entity_deleted(self, entity: Entity):
+        if isinstance(entity, Shield):
+            print("removing shield for some reason")
         self._entity_views.pop(entity.get_id(), None)

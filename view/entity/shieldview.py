@@ -20,7 +20,7 @@ class ShieldView(EntityView[Shield]):
             )
             draw.circle(
                 shield_sprite,
-                (255, 255, 0, 27 + (charge_level * 10)), # Alpha channel determines opacity
+                (255, 255, 0, 27 + (charge_level * 5)), # Alpha channel determines opacity
                 (self._entity.get_shield_radius(), self._entity.get_shield_radius()),
                 self._entity.get_shield_radius()
             )
@@ -29,9 +29,8 @@ class ShieldView(EntityView[Shield]):
         return shield_sprites
 
     def draw_entity(self, screen: Surface, camera: Camera, dt: float) -> None:
-        print("drawing shield")
-        screen.blit(
-            self._shield_sprites.get(self._entity.get_current_shield_charge()),
-            self.to_camera_pos(camera.get_window(), self._entity.get_shield_radius(), self._entity.get_shield_radius())
-        )
-
+        if self._entity.get_current_shield_charge() > 0:
+            screen.blit(
+                self._shield_sprites.get(self._entity.get_current_shield_charge()),
+                self.to_camera_pos(camera.get_window(), self._entity.get_shield_radius(), self._entity.get_shield_radius())
+            )

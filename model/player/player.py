@@ -1,3 +1,5 @@
+import copy
+
 import pygame
 from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
@@ -55,7 +57,7 @@ class Player(PlayerInterface):
             self._velocity.y += ((-self._velocity.y / 4) * dt)
         limit_magnitude(self._velocity, self._max_speed)
         self._position += (self._velocity * dt)
-        self._hitbox.center = self._position
+        self._hitbox.center = self.get_position()
         self.notify_movement_listeners()
 
     def process_enemy_collisions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface,
@@ -85,18 +87,22 @@ class Player(PlayerInterface):
                     entity_repository.get_manager_ids(EntityManagerIndex.GREEN_FISH)
                 )
             )
+        else:
+            self._fish_coherency[FishType.RED] = 0
+            self._fish_coherency[FishType.YELLOW] = 0
+            self._fish_coherency[FishType.GREEN] = 0
 
     def get_position(self) -> Vector2:
-        return self._position
+        return copy.deepcopy(self._position)
 
     def get_velocity(self) -> Vector2:
-        return self._velocity
+        return copy.deepcopy(self._velocity)
 
     def get_acceleration(self) -> Vector2:
-        return self._acceleration
+        return copy.deepcopy(self._acceleration)
 
     def get_hitbox(self) -> Rect:
-        return self._hitbox
+        return copy.deepcopy(self._hitbox)
 
     def get_current_health(self) -> float:
         return self._current_health

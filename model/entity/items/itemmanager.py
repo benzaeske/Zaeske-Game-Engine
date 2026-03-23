@@ -11,7 +11,7 @@ from model.world.modelcontext import ModelContext
 
 class ItemManager(EntityManager):
     """
-    Manages active player item entities.
+    Manages item entities.
     """
     def __init__(self):
         super().__init__()
@@ -27,8 +27,10 @@ class ItemManager(EntityManager):
             item.move(context, dt)
             context.grid_space.process_moved_entity(old_pos, item)
 
-    def track_item(self, item: Entity) -> None:
+    def track_item(self, item: Entity, context: ModelContext) -> None:
         self._items[item.get_id()] = item
+        self._notify_observers_entity_created(item)
+        context.grid_space.add_entity(item)
 
     def remove_item(self, item_id: UUID) -> None:
-        self._items.pop(item_id, None)
+        self._notify_observers_entity_deleted(self._items.pop(item_id, None))

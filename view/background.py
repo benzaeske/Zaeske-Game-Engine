@@ -6,9 +6,9 @@ from pygame import Surface, Rect
 
 from controller.camera import Camera
 
-TILE_SIZE: int = 32
-GRID_WIDTH: int = 256
-GRID_HEIGHT: int = 256
+TILE_SIZE: int = 128
+GRID_WIDTH: int = 64
+GRID_HEIGHT: int = 64
 NOISE_RESOLUTION: Tuple[int, int] = (8, 8)
 
 class Background:

@@ -1,12 +1,14 @@
 import sys
 import time
 from typing import Tuple
+from uuid import UUID
 
 import pygame
 from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
+from model.entity.entity import Entity
 from model.entity.fish.boidconfig import BoidConfig
 from model.entity.enemies.enemyconfig import EnemyConfig
 from model.entity.fish.fishconfig import FishConfig, FishType
@@ -138,9 +140,9 @@ class GameController:
         :param grid_cells: The grid cells containing entities to draw.
         :param entity_type: Only entities belonging to entity managers of this type will be drawn.
         """
+        manager_ids: set[UUID] = self._model.get_model_context().entity_repository.get_manager_ids(entity_type)
         for grid_cell in grid_cells:
-            for entity in grid_cell.get_entities_by_manager_ids(self._model.get_model_context().entity_repository
-                                                                        .get_manager_ids(entity_type)):
+            for entity in grid_cell.get_entities_by_manager_ids(manager_ids):
                 self._view.draw_entity(entity.get_id(), self._camera, self._dt)
 
     def _create_entity_managers(self) -> None:
@@ -249,11 +251,10 @@ class GameController:
 
         item_manager: ItemManager = ItemManager()
         self._model.add_entity_manager(item_manager)
-        item_manager.track_item(Shield(
-            item_manager.get_manager_id(),
-            128.0,
-            100.0
-        ))
+        item_manager.track_item(
+            Shield(item_manager.get_manager_id(), 128.0, 100.0),
+            self._model.get_model_context(),
+        )
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self._dt > 0.017:

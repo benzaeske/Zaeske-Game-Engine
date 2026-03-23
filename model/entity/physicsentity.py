@@ -1,3 +1,4 @@
+import copy
 from abc import ABC
 from uuid import UUID
 
@@ -43,13 +44,13 @@ class PhysicsEntity(Entity, ABC):
         self._acceleration += target_dir
 
     def get_velocity(self) -> Vector2:
-        return self._velocity
+        return copy.deepcopy(self._velocity)
 
     def set_velocity(self, v: Vector2) -> None:
         self._velocity = v
 
     def get_acceleration(self) -> Vector2:
-        return self._acceleration
+        return copy.deepcopy(self._acceleration)
 
     def apply_acceleration(self, a: Vector2) -> None:
         """
