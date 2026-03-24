@@ -45,7 +45,7 @@ class Shield(Entity):
 
     def process_enemy_collisions(self, context: ModelContext) -> None:
         collided_with_enemies: bool = False
-        for enemy in context.grid_space.get_neighbors(self._position, 1,
+        for enemy in context.grid_space.get_neighbors(self._position, 2,
                                                       context.entity_repository.get_manager_ids(EntityManagerIndex.ENEMY)):
             hitbox: Rect = enemy.get_hitbox()
             # Find the closest point on the enemy's hitbox to the center of the circular shield
@@ -69,4 +69,3 @@ class Shield(Entity):
 
     def get_shield_radius(self) -> float:
         return self._shield_radius
-

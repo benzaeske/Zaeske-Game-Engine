@@ -38,7 +38,7 @@ class EntityView[T: Entity](ABC):
             y-coordinate system
         """
         return (
-            self._entity.get_x() - camera.left - sprite_w_adj,
+            self._entity.get_position().x - camera.left - sprite_w_adj,
             # Note: The 'bottom' attribute of a pygame rect is actually the top edge since they are drawn top down
-            camera.bottom - self._entity.get_y() - sprite_h_adj,
+            camera.bottom - self._entity.get_position().y - sprite_h_adj,
         )
