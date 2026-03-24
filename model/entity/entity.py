@@ -1,5 +1,5 @@
-import copy
 from abc import ABC, abstractmethod
+from copy import copy
 from uuid import UUID, uuid4
 
 from pygame import Vector2
@@ -42,7 +42,10 @@ class Entity(ABC):
         return self.manager_id
 
     def get_position(self) -> Vector2:
-        return copy.deepcopy(self._position)
+        """
+        Read only. Returns a shallow copy of this entity's position
+        """
+        return copy(self._position)
 
     def set_position(self, p: Vector2) -> None:
         self._position = p

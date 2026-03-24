@@ -35,7 +35,7 @@ class School(EntityManager):
 
     def movement(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         for fish in self._fish:
-            old_pos: Vector2 = copy.deepcopy(fish.get_position())
+            old_pos: Vector2 = fish.get_position()
             fish.move(context, dt)
             # Teleport fish back inside their shoal if they go outside the school's boundary and the shoal is not in camera range
             if not self._boundary.collidepoint(fish.get_position()) and not camera.get_window().colliderect(self._shoal):

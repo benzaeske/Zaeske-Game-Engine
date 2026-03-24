@@ -37,7 +37,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
 
     def movement(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         for enemy in self._enemies:
-            old_pos: Vector2 = copy.deepcopy(enemy.get_position())
+            old_pos: Vector2 = enemy.get_position()
             enemy.move(context, dt)
             context.grid_space.process_moved_entity(old_pos, enemy)
 

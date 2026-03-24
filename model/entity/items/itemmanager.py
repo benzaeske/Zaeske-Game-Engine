@@ -23,7 +23,7 @@ class ItemManager(EntityManager):
 
     def movement(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         for item in self._items.values():
-            old_pos: Vector2 = copy.deepcopy(item.get_position())
+            old_pos: Vector2 = item.get_position()
             item.move(context, dt)
             context.grid_space.process_moved_entity(old_pos, item)
 

@@ -83,7 +83,7 @@ class Background:
 
     def draw(self, screen: Surface, camera: Camera) -> None:
         # Wrap the camera's position onto the background surface
-        camera_window: Rect = copy.deepcopy(camera.get_window())
+        camera_window: Rect = camera.get_window()
         camera_window.center = (
             ((camera_window.centerx % self._background_width) + self._background_width) % self._background_width,
             ((camera_window.centery % self._background_height) + self._background_height) % self._background_height

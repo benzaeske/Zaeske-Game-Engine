@@ -1,4 +1,4 @@
-import copy
+from copy import copy
 from uuid import UUID
 
 from pygame import Rect, Vector2
@@ -63,7 +63,10 @@ class Enemy(PhysicsEntity):
         self._hitbox.center = self.get_position()
 
     def get_hitbox(self) -> Rect:
-        return copy.deepcopy(self._hitbox)
+        """
+        Read only. Returns a shallow copy of the current rectangular hitbox.
+        """
+        return copy(self._hitbox)
 
     def get_hp(self) -> float:
         return self._hp

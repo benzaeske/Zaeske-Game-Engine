@@ -1,5 +1,5 @@
-import copy
 from abc import ABC
+from copy import copy
 from uuid import UUID
 
 from pygame import Vector2
@@ -44,13 +44,19 @@ class PhysicsEntity(Entity, ABC):
         self._acceleration += target_dir
 
     def get_velocity(self) -> Vector2:
-        return copy.deepcopy(self._velocity)
+        """
+        Read only. Returns a shallow copy of this entity's current velocity.
+        """
+        return copy(self._velocity)
 
     def set_velocity(self, v: Vector2) -> None:
         self._velocity = v
 
     def get_acceleration(self) -> Vector2:
-        return copy.deepcopy(self._acceleration)
+        """
+        Read only. Returns a shallow copy of this entity's current acceleration.
+        """
+        return copy(self._acceleration)
 
     def apply_acceleration(self, a: Vector2) -> None:
         """
