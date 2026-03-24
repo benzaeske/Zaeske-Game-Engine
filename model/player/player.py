@@ -37,6 +37,8 @@ class Player(PlayerInterface):
     def frame_actions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface, dt: float) -> None:
         self.process_enemy_collisions(grid_space, entity_repository, dt)
         self.process_fish_coherency(grid_space, entity_repository)
+        # Temporary until the healing is incorporated into an item
+        self.update_health(self._fish_coherency[FishType.GREEN] * dt)
 
     def move(self, key_presses: ScancodeWrapper, dt: float) -> None:
         self._acceleration = Vector2(0.0, 0.0)

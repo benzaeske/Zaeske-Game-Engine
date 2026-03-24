@@ -151,6 +151,17 @@ class GameController:
         more dynamic method that adds/removes entity managers throughout the game based on various factors such as
         player position, game time, world state etc
         """
+
+        # ORDER MATTERS!
+
+        # Item manager first
+        item_manager: ItemManager = ItemManager()
+        self._model.add_entity_manager(item_manager)
+        item_manager.track_item(
+            Shield(item_manager.get_manager_id(), 128.0, 100.0),
+            self._model.get_model_context(),
+        )
+
         jelly_spawn_cd: float = 5.0
         jelly_spawn_amount: int = 4
         jelly_config: JellyfishConfig = JellyfishConfig(
@@ -248,13 +259,6 @@ class GameController:
             school: School = School(green_fish, 16, self._model.get_model_context())
             self._model.add_entity_manager(school)
             school.hatch(self._model.get_model_context())
-
-        item_manager: ItemManager = ItemManager()
-        self._model.add_entity_manager(item_manager)
-        item_manager.track_item(
-            Shield(item_manager.get_manager_id(), 128.0, 100.0),
-            self._model.get_model_context(),
-        )
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
         if self._dt > 0.017:

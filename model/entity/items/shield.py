@@ -1,4 +1,3 @@
-import copy
 from uuid import UUID
 
 from pygame import Rect
@@ -13,7 +12,7 @@ from model.world.modelcontext import ModelContext
 class Shield(Entity):
     def __init__(self, manager_id: UUID, shield_radius: float, shield_damage: float) -> None:
         super().__init__(manager_id)
-        self._shield_charge: int = 5
+        self._shield_charge: int = 0
         self._max_shield_charge: int = 10
         self._shield_charge_timer: float = 0.0
         self._shield_charge_delay: float = 0.5
@@ -57,9 +56,9 @@ class Shield(Entity):
             if self.get_position().distance_squared_to(closest_point) <= self._shield_radius_squared:
                 enemy.update_hp(-self._shield_damage)
                 collided_with_enemies = True
+        # Only decrement shield charge once per frame even if multiple enemies collided
         if collided_with_enemies:
-            pass
-            #self.decrement_shield_charge()
+            self.decrement_shield_charge()
 
     def get_current_shield_charge(self) -> int:
         return self._shield_charge
