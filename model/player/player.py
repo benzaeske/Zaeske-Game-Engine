@@ -1,179 +1,130 @@
-from abc import ABC, abstractmethod
-from typing import Tuple
+import copy
 
 import pygame
-from pygame import Surface, Vector2, Rect
+from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
 
-from model.utils.vectorutils import limit_magnitude
+from model.entity.fish.fishconfig import FishType
+from model.modelutils import limit_magnitude
+from model.player.playerinterface import PlayerInterface
+from model.player.playermovementlistener import PlayerMovementListener
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
+from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
+from model.world.gridspace.grid_cell import GridCell
+from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 
-
-class Player(ABC):
-
+class Player(PlayerInterface):
     def __init__(
         self,
         hitbox_width: float,
         hitbox_height: float,
-        surface_width: float,
-        surface_height: float,
-        camera_width: float,
-        camera_height: float,
-        world_boundary: Tuple[float, float],
-        start_pos: Vector2 = Vector2(0.0, 0.0),
-        max_speed: float = 1.0,
+        max_speed: float,
+        max_acceleration: float,
+        max_health: float
     ) -> None:
-        self.hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
-        self.hitbox.center = (int(start_pos.x), int(start_pos.y))
-        self.surface_width: float = surface_width
-        self.surface_height: float = surface_height
-        self.camera_width: float = camera_width
-        self.camera_height: float = camera_height
-        self.camera_w_adjust: float = camera_width / 2
-        self.camera_h_adjust: float = camera_height / 2
-        self.world_boundary: Tuple[float, float] = world_boundary
-        self.position: Vector2 = start_pos
-        self.facing_direction: int = 1
-        self.max_speed: float = max_speed
-        self.max_health: float = 100.0
-        self.health: float = self.max_health
-        self.max_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
-        self.max_hp_surface.fill((0, 0, 0))
-        self.current_hp_surface: Surface = pygame.Surface((self.hitbox.width, 10.0))
-        self.current_hp_surface.fill((222, 0, 0))
-        self.max_shield: int = 10
-        self.shield: int = 0
-        self.shield_hitbox = Rect(0, 0, self.hitbox.width * 2, self.hitbox.height * 2)
-        self.shield_hitbox.center = self.hitbox.center
-        self.shield_charge_delay: float = 2.0
-        self.current_shield_charge_cooldown: float = 2.0
-        self.shield_surface: Surface = Surface((self.hitbox.width * 2, self.hitbox.height * 2)).convert_alpha()
-        self.shield_alpha_scaling: int = 10
-        self.shield_surface.fill((0, 200, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)))
+        super().__init__()
+        self._position: Vector2 = Vector2(0.0, 0.0)
+        self._velocity: Vector2 = Vector2(0.0, 0.0)
+        self._max_speed: float = max_speed
+        self._acceleration: Vector2 = Vector2(0.0, 0.0)
+        self._max_acceleration: float = max_acceleration
+        self._hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
+        self._max_health: float = max_health
+        self._current_health: float = self._max_health
+        self._fish_coherency: dict[FishType, int] = {}
+        self._movement_listeners: list[PlayerMovementListener] = []
 
-    def move_player(
-        self,
-        key_presses: ScancodeWrapper,
-        dt: float,
-    ) -> None:
-        """
-        Moves the player according to the keys pressed. Movement is scaled with delta time like all other entities.
-        Limits the camera position to be confined within positive x,y coordinates and under the provided world boundary.
-        """
-        velocity: Vector2 = Vector2(0.0, 0.0)
-        # Calculate velocity as the sum of key presses
+    def frame_actions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface, dt: float) -> None:
+        self.process_enemy_collisions(grid_space, entity_repository, dt)
+        self.process_fish_coherency(grid_space, entity_repository)
+        # Temporary until the healing is incorporated into an item
+        self.update_health(self._fish_coherency[FishType.GREEN] * dt)
+
+    def move(self, key_presses: ScancodeWrapper, dt: float) -> None:
+        self._acceleration = Vector2(0.0, 0.0)
+        # Calculate acceleration as the sum of key presses
         if key_presses[pygame.K_LEFT]:
-            velocity += Vector2(-self.max_speed, 0)
+            self._acceleration += Vector2(-self._max_speed, 0)
         if key_presses[pygame.K_RIGHT]:
-            velocity += Vector2(self.max_speed, 0)
+            self._acceleration += Vector2(self._max_speed, 0)
         if key_presses[pygame.K_UP]:
-            velocity += Vector2(0, self.max_speed)
+            self._acceleration += Vector2(0, self._max_speed)
         if key_presses[pygame.K_DOWN]:
-            velocity += Vector2(0, -self.max_speed)
-        limit_magnitude(velocity, self.max_speed)
-        self.position += velocity * dt
-        # Don't let the camera go outside the world boundary
-        if self.position.x - self.camera_w_adjust < 0:
-            self.position.x = self.camera_w_adjust
-        if self.position.x + self.camera_w_adjust >= self.world_boundary[0]:
-            self.position.x = self.world_boundary[0] - self.camera_w_adjust - 1
-        if self.position.y - self.camera_h_adjust < 0:
-            self.position.y = self.camera_h_adjust
-        if self.position.y + self.camera_h_adjust >= self.world_boundary[1]:
-            self.position.y = self.world_boundary[1] - self.camera_h_adjust - 1
-        # Update Hitboxes
-        self.hitbox.center = (int(self.position.x), int(self.position.y))
-        self.shield_hitbox.center = self.hitbox.center
-        # Update facing direction for drawing
-        if velocity.x != 0:
-            if velocity.x > 0:
-                self.facing_direction = 1
-            else:
-                self.facing_direction = -1
+            self._acceleration += Vector2(0, -self._max_speed)
+        limit_magnitude(self._acceleration, self._max_acceleration)
+        self._velocity += (self._acceleration * dt)
+        if self._acceleration.x == 0:
+            self._velocity.x += ((-self._velocity.x / 4) * dt)
+        if self._acceleration.y == 0:
+            self._velocity.y += ((-self._velocity.y / 4) * dt)
+        limit_magnitude(self._velocity, self._max_speed)
+        self._position += (self._velocity * dt)
+        self._hitbox.center = self.get_position()
+        self.notify_movement_listeners()
 
-    def update_hp(self, change: float) -> None:
-        self.health += change
-        if self.health > self.max_health:
-            self.health = self.max_health
-        elif self.health < 0:
-            self.health = 0
+    def process_enemy_collisions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface,
+                                 dt: float) -> None:
+        cell_range: int = 1
+        for enemy in grid_space.get_neighbors(self._position, cell_range,
+                                              entity_repository.get_manager_ids(EntityManagerIndex.ENEMY)):
+            if enemy.get_hitbox().colliderect(self._hitbox):
+                self.update_health(-enemy.get_damage() * dt)
 
-    def charge_shield(self, dt) -> None:
-        if self.shield < self.max_shield:
-            self.current_shield_charge_cooldown -= dt
-            if self.current_shield_charge_cooldown <= 0:
-                self.current_shield_charge_cooldown = self.shield_charge_delay
-                self.shield += 1
-                self.update_shield_alpha()
-
-    def update_shield_alpha(self) -> None:
-        self.shield_surface.fill(
-            (0, 200, 0, self.shield_alpha_scaling + (self.shield * self.shield_alpha_scaling)))
-
-    def get_camera_adjusted_position(self) -> Tuple[float, float]:
-        """
-        Returns the coordinates to center the player surface on the screen
-        """
-        return (
-            self.camera_w_adjust - self.surface_width / 2,
-            self.camera_h_adjust - self.surface_height / 2,
-        )
-
-    def get_camera_adjusted_hp_pos(self) -> Tuple[float, float]:
-        """
-        Returns the coordinates to center the hp bar on the player's hitbox
-        """
-        return (
-            self.camera_w_adjust - self.hitbox.width / 2,
-            self.camera_h_adjust + self.hitbox.height / 2
-        )
-
-    def get_camera_adjusted_shield_pos(self) -> Tuple[float, float]:
-        return (
-            self.camera_w_adjust - self.shield_surface.get_width() / 2,
-            self.camera_h_adjust - self.shield_surface.get_height() / 2
-        )
-
-    @abstractmethod
-    def get_surface(self):
-        pass
-
-
-class Turtle(Player):
-    def __init__(
-        self,
-        camera_width: float,
-        camera_height: float,
-        world_boundary: Tuple[float, float],
-    ) -> None:
-        hitbox_width: float = 100.0
-        hitbox_height: float = 100.0
-        surface_width: float = 128.0
-        surface_height: float = 128.0
-        turtle_speed: float = 256.0
-        self.surface_left: Surface = pygame.image.load("images/turtle-side-left.png")
-        self.surface_left = self.surface_left.convert_alpha()
-        self.surface_left = pygame.transform.scale(
-            self.surface_left, (surface_width, surface_height)
-        )
-        self.surface_right: Surface = pygame.image.load("images/turtle-side-right.png")
-        self.surface_right = self.surface_right.convert_alpha()
-        self.surface_right = pygame.transform.scale(
-            self.surface_right, (surface_width, surface_height)
-        )
-        super().__init__(
-            hitbox_width,
-            hitbox_height,
-            surface_width,
-            surface_height,
-            camera_width,
-            camera_height,
-            world_boundary,
-            Vector2(world_boundary[0] / 2, world_boundary[1] / 2),
-            turtle_speed,
-        )
-
-    def get_surface(self):
-        if self.facing_direction > 0:
-            return self.surface_right
+    def process_fish_coherency(self, grid_space: GridSpaceInterface,
+                               entity_repository: EntityRepositoryInterface) -> None:
+        p_grid_cell: GridCell = grid_space.get_grid_cell(self._position)
+        if p_grid_cell is not None:
+            self._fish_coherency[FishType.RED] = len(
+                p_grid_cell.get_entities_by_manager_ids(
+                    entity_repository.get_manager_ids(EntityManagerIndex.RED_FISH)
+                )
+            )
+            self._fish_coherency[FishType.YELLOW] = len(
+                p_grid_cell.get_entities_by_manager_ids(
+                    entity_repository.get_manager_ids(EntityManagerIndex.YELLOW_FISH)
+                )
+            )
+            self._fish_coherency[FishType.GREEN] = len(
+                p_grid_cell.get_entities_by_manager_ids(
+                    entity_repository.get_manager_ids(EntityManagerIndex.GREEN_FISH)
+                )
+            )
         else:
-            return self.surface_left
+            self._fish_coherency[FishType.RED] = 0
+            self._fish_coherency[FishType.YELLOW] = 0
+            self._fish_coherency[FishType.GREEN] = 0
+
+    def get_position(self) -> Vector2:
+        return copy.deepcopy(self._position)
+
+    def get_velocity(self) -> Vector2:
+        return copy.deepcopy(self._velocity)
+
+    def get_acceleration(self) -> Vector2:
+        return copy.deepcopy(self._acceleration)
+
+    def get_hitbox(self) -> Rect:
+        return copy.deepcopy(self._hitbox)
+
+    def get_current_health(self) -> float:
+        return self._current_health
+
+    def get_max_health(self) -> float:
+        return self._max_health
+
+    def update_health(self, hp_diff: float) -> None:
+        self._current_health += hp_diff
+        if self._current_health > self._max_health:
+            self._current_health = self._max_health
+        if self._current_health < 0:
+            self._current_health = 0
+
+    def get_fish_coherency(self, fish_type: FishType) -> int:
+        return self._fish_coherency.get(fish_type, 0)
+
+    def add_movement_listener(self, movement_listener: PlayerMovementListener) -> None:
+        self._movement_listeners.append(movement_listener)
+
+    def notify_movement_listeners(self) -> None:
+        for movement_listener in self._movement_listeners:
+            movement_listener.on_player_movement(self.get_position())

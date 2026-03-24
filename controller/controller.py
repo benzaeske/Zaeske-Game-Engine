@@ -1,173 +1,272 @@
 import sys
 import time
 from typing import Tuple
+from uuid import UUID
 
 import pygame
-from pygame import Vector2, Surface, Rect
+from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.jellyfish.jellyfishspawner import JellyfishSpawner
-from model.entities.school.school import School
-from model.player.player import Turtle
-from model.world.world import SpatialPartitioningModel
-from view.view import View
+from model.entity.entity import Entity
+from model.entity.fish.boidconfig import BoidConfig
+from model.entity.enemies.enemyconfig import EnemyConfig
+from model.entity.fish.fishconfig import FishConfig, FishType
+from model.entity.enemies.jellyfishconfig import JellyfishType, JellyfishConfig
+from model.entity.enemies.jellyfishswarm import JellyfishSwarm
+from model.entity.fish.school import School
+from controller.camera import Camera
+from model.entity.items.itemmanager import ItemManager
+from model.entity.items.shield import Shield
+from model.player.player import Player
+from model.player.turtle import Turtle
+from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
+from model.world.gridspace.grid_cell import GridCell
+from model.world.model import Model
+from view.view import View, WindowOptions
 
 
 class ControllerOptions:
-    """
-    :param world_width: The size of the world model. This must be divisible by the grid cell size
-    :param world_height: The size of the world model. This must be divisible by the grid cell size
-    :param grid_cell_size: The map will be divided into grids of this size. In order for schooling to work properly, this must be at least as large as the smallest coherence radius of the fish being
-    """
-
     def __init__(
         self,
-        world_width: float,
-        world_height: float,
-        grid_cell_size: float,
+        window_options: WindowOptions,
+        grid_cell_size: float
     ) -> None:
-        self.world_width: float = world_width
-        self.world_height: float = world_height
+        self.window_options: WindowOptions = window_options
         self.grid_cell_size: float = grid_cell_size
 
 
 class GameController:
     """
-    Orchestration class for running the current state of the game. Contains a model which is the simulated world, a view that is responsible for drawing on the screen,
-    and a 'player' that is essentially a camera that can be moved around the world using WASD and has dimensions equal to the screen size used.\n
-    The model tracks coordinates using a standard 2-dimensional x, y plane with (0,0) being the bottom left of the map.
-    The view is currently implemented using pygame which draws to the screen on an inverted y-axis, so coordinates must be converted when coming from the model\n
-    The world model can be any arbitrary size as long as it is bigger than the screen size. The entire world model is updated each frame, but only the grid cells within the player's 'camera' range are drawn each frame
+    Top level orchestration class for managing logic loops for the game and menus. Contains a model for simulating the
+    game world and entities, and a view class for drawing onto the screen.
     """
-
     def __init__(
         self,
         options: ControllerOptions,
     ) -> None:
         pygame.init()
-        self.view: View = View()
-        self.model: SpatialPartitioningModel = SpatialPartitioningModel(
-            options.world_width,
-            options.world_height,
-            options.grid_cell_size,
-            Turtle(
-                self.view.screen_width,
-                self.view.screen_height,
-                (options.world_width, options.world_height),
-            ),
-        )
-        self.clock: Clock = pygame.time.Clock()
-        self.fps: int = 60
-        self.game_start: float = -1
-        self.dt: float = 0.0
-        # Used to trigger logging when dt exceeds the max value required for 60fps
-        self.max_dt: float = 0.017
-        # Tracking player inputs
-        self.mouse_pos: Tuple[int, int] = (0, 0)
-        self.key_presses: ScancodeWrapper = ScancodeWrapper(())
+        ############################
+        # Initialize View and Model:
+        ############################
+        # The View holds all logic related to drawing entities and rendering on screen
+        self._view: View = View(options.window_options)
+        # The Model holds the simulated world and is responsible for performing updates each frame
+        self._model: Model = Model(options.grid_cell_size)
+        self._model.register_entity_manager_observer(self._view)
+        # Initialize the player and register on View and Model
+        self._player: Player = Turtle()
+        self._view.register_player(self._player)
+        self._model.register_player(self._player)
+        # Initialize the camera
+        self._camera: Camera = Camera(self._view.get_screen_width(), self._view.get_screen_height())
+        self._player.add_movement_listener(self._camera)
+        ####################################
+        # Variables for tracking game state:
+        ####################################
+        self._clock: Clock = pygame.time.Clock()
+        self._fps: int = 60
+        self._game_start_time: float = -1
+        self._dt: float = 0.0
+        self._mouse_pos: Tuple[int, int] = (0, 0)
+        self._key_presses: ScancodeWrapper = ScancodeWrapper(())
+        self._current_frame_input_events: list[Event] = []
+        self._paused: bool = False
 
     def start_game(self):
-        self.game_start = time.time()
-        self.model.hatch_schools()
+        self._game_start_time = time.time()
+        self._create_entity_managers()
         while True:
             self.do_game_loop()
 
     def do_game_loop(self) -> None:
-        self.key_presses = pygame.key.get_pressed()
-        self.mouse_pos = pygame.mouse.get_pos()
+        self._key_presses = pygame.key.get_pressed()
+        self._mouse_pos = pygame.mouse.get_pos()
+        self._current_frame_input_events = pygame.event.get()
         self.check_for_terminate()
-        model_update_time = time.time()
-        self.update_model()
-        model_update_time = time.time() - model_update_time
-        view_update_time = time.time()
-        self.draw_background()
-        #self.draw_fps_menu()
-        self.draw_game_entities()
-        self.draw_player()
-        self.view.update_screen()
-        view_update_time = time.time() - view_update_time
-        self.fps_logging(model_update_time, view_update_time)
-        self.dt = self.clock.tick(self.fps) / 1000
+        self.check_for_pause()
+        if not self._paused:
+            model_update_time = time.time()
+            self.update_model()
+            model_update_time = time.time() - model_update_time
+            view_update_time = time.time()
+            self.draw()
+            view_update_time = time.time() - view_update_time
+            self.fps_logging(model_update_time, view_update_time)
+        self._dt = self._clock.tick(self._fps) / 1000
 
     def check_for_terminate(self):
-        for event in pygame.event.get():
+        for event in self._current_frame_input_events:
             if event.type == pygame.QUIT:
                 sys.exit()
-        if self.key_presses[pygame.K_ESCAPE]:
+        if self._key_presses[pygame.K_ESCAPE]:
             sys.exit()
-        if self.model.player.health <= 0:
+        if self._player.get_current_health() <= 0.0:
             sys.exit()
+
+    def check_for_pause(self):
+        for event in self._current_frame_input_events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self._paused = not self._paused
 
     def update_model(self) -> None:
-        self.model.update_model(self.dt, self.key_presses)
+        self._model.update(self._key_presses, self._camera, self._dt)
+
+    def draw(self) -> None:
+        self.draw_background()
+        camera_grid_cells: list[GridCell] = (self._model.get_model_context().grid_space
+                                             .get_grid_cells_in_camera_range(self._camera))
+        # Draw in a specified order:
+        #  Fish
+        self.draw_entities(camera_grid_cells, EntityManagerIndex.FISH)
+        #  Player
+        self.draw_player()
+        #  Enemies
+        self.draw_entities(camera_grid_cells, EntityManagerIndex.ENEMY)
+        #  Items
+        self.draw_entities(camera_grid_cells, EntityManagerIndex.ITEM)
+        self._view.update_screen()
 
     def draw_background(self) -> None:
-        for grid_cell in self.model.get_grid_cells_in_camera_range():
-            self.view.draw_surface(
-                grid_cell.background_surface,
-                self.convert_model_pos_to_view_pos(
-                    grid_cell.center_pos, grid_cell.background_surface
-                ),
-            )
-
-    def draw_fps_menu(self) -> None:
-        self.view.print_info_to_screen(
-            self.clock.get_fps(),
-            int(self.model.player.position.x),
-            int(self.model.player.position.y),
-        )
-
-    def draw_game_entities(self) -> None:
-        for fish in self.model.fish.values():
-            fish_surface = fish.get_surface()
-            self.view.draw_surface(fish_surface, self.convert_model_pos_to_view_pos(fish.position, fish_surface))
-        for jelly in self.model.jellyfish.values():
-            jelly_surface = jelly.get_surface()
-            self.view.draw_surface(jelly_surface, self.convert_model_pos_to_view_pos(jelly.position, jelly_surface))
+        self._view.draw_background(self._camera)
 
     def draw_player(self) -> None:
-        self.view.draw_surface(
-            self.model.player.get_surface(),
-            self.model.player.get_camera_adjusted_position()
+        self._view.draw_player(self._camera, self._dt)
+
+    def draw_entities(self, grid_cells: list[GridCell], entity_type: EntityManagerIndex) -> None:
+        """
+        Draws all entities of a given type found in the provided grid cells
+        :param grid_cells: The grid cells containing entities to draw.
+        :param entity_type: Only entities belonging to entity managers of this type will be drawn.
+        """
+        manager_ids: set[UUID] = self._model.get_model_context().entity_repository.get_manager_ids(entity_type)
+        for grid_cell in grid_cells:
+            for entity in grid_cell.get_entities_by_manager_ids(manager_ids):
+                self._view.draw_entity(entity.get_id(), self._camera, self._dt)
+
+    def _create_entity_managers(self) -> None:
+        """
+        Statically creates entity managers for all entities in the game world. This will eventually be replaced with a
+        more dynamic method that adds/removes entity managers throughout the game based on various factors such as
+        player position, game time, world state etc
+        """
+
+        # ORDER MATTERS!
+
+        # Item manager first
+        item_manager: ItemManager = ItemManager()
+        self._model.add_entity_manager(item_manager)
+        item_manager.track_item(
+            Shield(item_manager.get_manager_id(), 128.0, 100.0),
+            self._model.get_model_context(),
         )
-        hp_bar_location = self.model.player.get_camera_adjusted_hp_pos()
-        self.view.draw_surface(self.model.player.max_hp_surface, hp_bar_location)
-        ratio: float = self.model.player.health / self.model.player.max_health
-        self.view.draw_surface(
-            self.model.player.current_hp_surface,
-            hp_bar_location,
-            (0, 0, ratio * self.model.player.current_hp_surface.get_width(), self.model.player.current_hp_surface.get_height()))
-        if self.model.player.shield > 0:
-            self.view.draw_surface(self.model.player.shield_surface, self.model.player.get_camera_adjusted_shield_pos())
 
-    def convert_model_pos_to_view_pos(
-        self, model_pos: Vector2, blit_surface: Surface
-    ) -> Tuple[float, float]:
-        camera_pos = self.model.player.position
-        camera_w = self.model.player.camera_width
-        camera_h = self.model.player.camera_height
-        # Find the center of my object in pygame view space (inverted y-axis). 0,0 is top left corner
-        view_center_x = model_pos.x - (camera_pos.x - camera_w / 2)
-        view_center_y = (camera_pos.y + camera_h / 2) - model_pos.y
-        # Adjust to the top left corner of the object
-        view_x = view_center_x - blit_surface.get_width() / 2
-        view_y = view_center_y - blit_surface.get_height() / 2
-        return view_x, view_y
+        jelly_spawn_cd: float = 5.0
+        jelly_spawn_amount: int = 4
+        jelly_config: JellyfishConfig = JellyfishConfig(
+            JellyfishType.RED,
+            96.0,
+            96.0,
+            EnemyConfig(
+                192.0,
+                256.0,
+                96.0,
+                96.0,
+                100,
+                10,
+                1,
+                96.0,
+                2.0
+            ),
+            2,
+            192.0,
+            3.0
+        )
+        self._model.add_entity_manager(JellyfishSwarm(jelly_spawn_cd, jelly_spawn_amount, jelly_config))
 
-    def add_school(self, school: School) -> None:
-        self.model.add_school(school)
+        red_fish: FishConfig = FishConfig(
+            FishType.RED,
+            32.0,
+            32.0,
+            160.0,
+            48.0,
+            BoidConfig(
+                128.0,
+                48.0,
+                1,
+                1.0,
+                2.0,
+                1.0
+            ),
+            512.0,
+            True,
+            128.0,
+            1.2
+        )
+        num_red_schools: int = 2
+        for _ in range(num_red_schools):
+            school: School = School(red_fish, 16, self._model.get_model_context())
+            self._model.add_entity_manager(school)
+            school.hatch(self._model.get_model_context())
 
-    def set_jellyfish_spawner(self, spawner: JellyfishSpawner) -> None:
-        self.model.set_jellyfish_spawner(spawner)
+        yellow_fish: FishConfig = FishConfig(
+            FishType.YELLOW,
+            26.0,
+            26.0,
+            224.0,
+            100.0,
+            BoidConfig(
+                128.0,
+                44.0,
+                1,
+                1,
+                2.0,
+                1.0
+            ),
+            512.0,
+            True,
+            384.0,
+            1.2
+        )
+        num_yellow_schools: int = 2
+        for _ in range(num_yellow_schools):
+            school: School = School(yellow_fish, 16, self._model.get_model_context())
+            self._model.add_entity_manager(school)
+            school.hatch(self._model.get_model_context())
+
+        green_fish: FishConfig = FishConfig(
+            FishType.GREEN,
+            36.0,
+            36.0,
+            128.0,
+            32.0,
+            BoidConfig(
+                128.0,
+                52.0,
+                1,
+                1.0,
+                2.0,
+                1.0
+            ),
+            512.0,
+            True,
+            64.0,
+            1.2
+        )
+        num_green_schools: int = 2
+        for _ in range(num_green_schools):
+            school: School = School(green_fish, 16, self._model.get_model_context())
+            self._model.add_entity_manager(school)
+            school.hatch(self._model.get_model_context())
 
     def fps_logging(self, model_t: float, view_t: float) -> None:
-        if self.dt > self.max_dt:
+        if self._dt > 0.017:
             print(
                 "Frame dt was too slow to meet",
-                self.fps,
+                self._fps,
                 "fps. dt:",
-                self.dt,
+                self._dt,
                 "\nModel update time ms:",
                 model_t,
                 "\nView update time ms:",

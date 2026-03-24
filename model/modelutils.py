@@ -1,5 +1,15 @@
-from pygame import Vector2
+from pygame import Surface, Vector2, image, transform
 
+
+def load_sprite(image_location: str, width: float, height: float) -> Surface:
+    """
+    Loads a surface from the provided image location and scales it to the provided width and height. Uses convert_alpha
+    on the surface before returning it.
+    """
+    surface: Surface = image.load(image_location).convert_alpha()
+    return transform.scale(
+        surface, (width, height)
+    )
 
 def limit_magnitude(vec: Vector2, limit: float) -> None:
     """

@@ -1,87 +1,128 @@
-import math
-from typing import Tuple
+from typing import Optional
+from uuid import UUID
 
 import pygame
-from pygame import Surface, Rect
+from pygame import Surface
+
+from model.entity.enemies.jellyfish import Jellyfish
+from model.entity.entity import Entity
+from model.entity.entitymanagerobserver import EntityManagerObserver
+from model.entity.fish.fish import Fish
+from controller.camera import Camera
+from model.entity.items.shield import Shield
+from model.player.player import Player
+from view.background import Background
+from view.entity.entityview import EntityView
+from view.entity.fishview import FishView
+from view.entity.jellyfishview import JellyfishView
+from view.entity.shieldview import ShieldView
+from view.player.playerview import PlayerView
+from view.sprite.spritecatalog import SpriteCatalog
 
 
-class View:
+class WindowOptions:
+    def __init__(self, screen_width: int = None, screen_height: int = None, full_screen: bool = False) -> None:
+        self.screen_width: int = screen_width
+        self.screen_height: int = screen_height
+        self.full_screen: bool = full_screen
+        # If nothing is passed in, default to full screen
+        if self.screen_width is None and self.screen_height is None:
+            self.full_screen: bool = True
+
+class View(EntityManagerObserver):
     """
-    The View is responsible for drawing everything on the screen using pygame functions, but should know nothing about the size or shape of the model it is drawing.\n
-    Pygame uses an inverted y-axis which is why coordinates are being converted when coming from the model.
+    The View is responsible for drawing everything on the screen using pygame functions. It should be noted that pygame
+    uses an inverted y-axis.
     """
-
-    def __init__(
-        self,
-        background_color: Tuple[int, int, int] = (0, 0, 0),
-    ):
-        # Screen sizing
-        display_info = pygame.display.Info()
-        # Display width/height currently matches world width/height and setting manually.
-        # This will eventually change to only display part of the world and run at full screen
-        self._display_width: int = display_info.current_w
-        self._display_height: int = display_info.current_h
-        self.screen: Surface = self._get_screen()
-        # Get dimensions from created screen
-        self.screen_width: int = self.screen.get_width()
-        self.screen_height: int = self.screen.get_height()
-
-        # Background variables
-        self.background_color: Tuple[int, int, int] = background_color
-        self.background: Surface = self._get_background()
-
-        # Font
-        #self.font: Font = pygame.font.SysFont("Arial", 48)
-
+    def __init__(self, window_options: WindowOptions) -> None:
+        super().__init__()
+        self._options: WindowOptions = window_options
+        # Get available display properties from pygame
+        self._display_width: int = pygame.display.Info().current_w
+        self._display_height: int = pygame.display.Info().current_h
+        # Each frame is constructed by blitting Surfaces onto the screen and then calling pygame.display.update() which
+        # takes the current state of the screen and displays it. Pygame provides the surface to use as the screen.
+        self._screen: Surface = self._initialize_screen()
+        # Get dimensions from created screen for easy access
+        self._screen_width: int = self._screen.get_width()
+        self._screen_height: int = self._screen.get_height()
         print(
             "Initialized view with pygame screen Surface dimensions: ",
-            self.screen_width,
-            self.screen_height,
+            self._screen_width,
+            self._screen_height,
         )
-        print(
-            "The actual display size used in the request was: ",
-            self._display_width,
-            self._display_height,
-        )
+        self._background: Background = Background(self._display_width, self._display_height)
+        self._sprite_catalog: SpriteCatalog = SpriteCatalog()
+        self._entity_views: dict[UUID, EntityView] = {}
+        self._player_view: Optional[PlayerView] = None
 
-    def _get_screen(self) -> Surface:
+    def _initialize_screen(self) -> Surface:
         """
-        Get a full screen matching display width and height
+        Get a screen surface from pygame that is as close to the View's window options as possible.
         """
-        return pygame.display.set_mode(
-            (self._display_width, self._display_height), pygame.FULLSCREEN
-        )
+        if self._options.full_screen:
+            return pygame.display.set_mode((self._display_width, self._display_height), pygame.FULLSCREEN)
+        else:
+            # Don't let the width/height exceed the maximum dimensions of the current display
+            width: int = self._options.screen_width if self._options.screen_width is not None and self._options.screen_width < self._display_width else self._display_width
+            height: int = self._options.screen_height if self._options.screen_height is not None and self._options.screen_height < self._display_height else self._display_height
+            return pygame.display.set_mode((width, height))
 
-    def _get_background(self) -> Surface:
-        background = pygame.Surface((self.screen_width, self.screen_height))
-        background.fill(self.background_color)
-        return background
+    def register_player(self, player: Player) -> None:
+        self._player_view = PlayerView(player, self._sprite_catalog)
 
-    def draw_background(self, destination: Tuple[int, int] = (0, 0)) -> None:
-        self.screen.blit(self.background, destination)
+    def get_screen_width(self) -> int:
+        return self._screen_width
 
-    def draw_surface(self, surface: Surface, dest: Tuple[float, float], area: Tuple[float, float, float, float] | None = None) -> None:
-        self.screen.blit(surface, dest, area)
+    def get_screen_height(self) -> int:
+        return self._screen_height
 
-    def print_info_to_screen(self, fps: float, player_x: int, player_y: int) -> None:
-        fps_surface: Surface = self.font.render(
-            str(math.floor(fps)), True, (255, 255, 255)
-        )
-        self.screen.blit(fps_surface, fps_surface.get_rect(x=0, y=0))
-        x_surface: Surface = self.font.render(
-            "x: " + str(player_x), True, (255, 255, 255)
-        )
-        self.screen.blit(x_surface, x_surface.get_rect(x=0, y=fps_surface.get_height()))
-        y_surface: Surface = self.font.render(
-            "y: " + str(player_y), True, (255, 255, 255)
-        )
-        self.screen.blit(
-            y_surface,
-            y_surface.get_rect(
-                x=0, y=fps_surface.get_height() + x_surface.get_height()
-            ),
-        )
+    def draw_background(self, camera: Camera) -> None:
+        self._background.draw(self._screen, camera)
+
+    def draw_entity(self, entity_id: UUID , camera: Camera, dt: float) -> None:
+        if entity_id in self._entity_views:
+            self._entity_views.get(entity_id).draw_entity(self._screen, camera, dt)
+        else:
+            raise RuntimeError(f"Entity with id: {entity_id} is not being tracked in View")
+
+    def draw_player(self, camera: Camera, dt: float) -> None:
+        self._player_view.draw(self._screen, camera, dt)
+
+    def get_screen(self) -> Surface:
+        """
+        temp method until player view is implemented
+        """
+        return self._screen
 
     @staticmethod
     def update_screen() -> None:
+        """
+        Updates the pygame display based on what has been blitted onto the screen since the last call to this function.
+        """
         pygame.display.update()
+
+    def notify_entity_created(self, entity: Entity):
+        if entity.get_id() not in self._entity_views:
+            self._entity_views[entity.get_id()] = self._initialize_entity_view(entity)
+        else:
+            raise RuntimeError(f"Entity with id: {entity.get_id()} is already being tracked in View")
+
+    def _initialize_entity_view(self, entity: Entity) -> EntityView:
+        """
+        Helper function to create an EntityView for the provided Entity.
+        """
+        match entity:
+            case Fish():
+                return FishView(entity, self._sprite_catalog)
+            case Jellyfish():
+                return JellyfishView(entity, self._sprite_catalog)
+            case Shield():
+                return ShieldView(entity, self._sprite_catalog)
+            case _:
+                raise NotImplementedError(f"No implementation of EntityView for entity class: {entity.__class__.__name__}")
+
+    def notify_entity_deleted(self, entity: Entity):
+        if isinstance(entity, Shield):
+            print("removing shield for some reason")
+        self._entity_views.pop(entity.get_id(), None)
