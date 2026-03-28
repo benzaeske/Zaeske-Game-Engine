@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from model.entity.entity import Entity
+from model.entities.entity import Entity
 
 
 class EntityManagerObserver(ABC):

@@ -8,7 +8,7 @@ from pygame import Vector2
 from controller.camera import Camera
 
 if TYPE_CHECKING:
-    from model.entity.entity import Entity
+    from model.entities.entity import Entity
     from model.world.gridspace.grid_cell import GridCell
 
 

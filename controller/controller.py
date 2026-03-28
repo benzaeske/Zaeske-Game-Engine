@@ -8,16 +8,15 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entity.entity import Entity
-from model.entity.fish.boidconfig import BoidConfig
-from model.entity.enemies.enemyconfig import EnemyConfig
-from model.entity.fish.fishconfig import FishConfig, FishType
-from model.entity.enemies.jellyfishconfig import JellyfishType, JellyfishConfig
-from model.entity.enemies.jellyfishswarm import JellyfishSwarm
-from model.entity.fish.school import School
+from model.entities.fish.boidconfigv1 import BoidConfigV1
+from model.entities.enemies.enemyconfigv1 import EnemyConfigV1
+from model.entities.fish.fishconfigv1 import FishConfigV1, FishType
+from model.entities.enemies.jellyfishconfigv1 import JellyfishType, JellyfishConfigV1
+from model.entities.enemies.jellyfishswarm import JellyfishSwarm
+from model.entitymanagers.fish.school import School
 from controller.camera import Camera
-from model.entity.items.itemmanager import ItemManager
-from model.entity.items.shield import Shield
+from model.entitymanagers.items.itemmanager import ItemManager
+from model.entities.items.shield import Shield
 from model.player.player import Player
 from model.player.turtle import Turtle
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
@@ -164,11 +163,11 @@ class GameController:
 
         jelly_spawn_cd: float = 5.0
         jelly_spawn_amount: int = 4
-        jelly_config: JellyfishConfig = JellyfishConfig(
+        jelly_config: JellyfishConfigV1 = JellyfishConfigV1(
             JellyfishType.RED,
             96.0,
             96.0,
-            EnemyConfig(
+            EnemyConfigV1(
                 192.0,
                 256.0,
                 96.0,
@@ -185,13 +184,11 @@ class GameController:
         )
         self._model.add_entity_manager(JellyfishSwarm(jelly_spawn_cd, jelly_spawn_amount, jelly_config))
 
-        red_fish: FishConfig = FishConfig(
+        red_fish: FishConfigV1 = FishConfigV1(
             FishType.RED,
-            32.0,
-            32.0,
             160.0,
             48.0,
-            BoidConfig(
+            BoidConfigV1(
                 128.0,
                 48.0,
                 1,
@@ -199,7 +196,6 @@ class GameController:
                 2.0,
                 1.0
             ),
-            512.0,
             True,
             128.0,
             1.2
@@ -210,13 +206,11 @@ class GameController:
             self._model.add_entity_manager(school)
             school.hatch(self._model.get_model_context())
 
-        yellow_fish: FishConfig = FishConfig(
+        yellow_fish: FishConfigV1 = FishConfigV1(
             FishType.YELLOW,
-            26.0,
-            26.0,
             224.0,
             100.0,
-            BoidConfig(
+            BoidConfigV1(
                 128.0,
                 44.0,
                 1,
@@ -224,7 +218,6 @@ class GameController:
                 2.0,
                 1.0
             ),
-            512.0,
             True,
             384.0,
             1.2
@@ -235,13 +228,11 @@ class GameController:
             self._model.add_entity_manager(school)
             school.hatch(self._model.get_model_context())
 
-        green_fish: FishConfig = FishConfig(
+        green_fish: FishConfigV1 = FishConfigV1(
             FishType.GREEN,
-            36.0,
-            36.0,
             128.0,
             32.0,
-            BoidConfig(
+            BoidConfigV1(
                 128.0,
                 52.0,
                 1,
@@ -249,7 +240,6 @@ class GameController:
                 2.0,
                 1.0
             ),
-            512.0,
             True,
             64.0,
             1.2

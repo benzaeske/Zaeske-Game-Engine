@@ -1,6 +1,6 @@
 from pygame import Surface
 
-from model.entity.enemies.jellyfish import Jellyfish
+from model.entities.enemies.jellyfish import Jellyfish
 from controller.camera import Camera
 from view.entity.entityview import EntityView
 from view.sprite.entityanimation import EntityAnimation

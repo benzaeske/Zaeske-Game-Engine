@@ -1,19 +1,18 @@
-import copy
 import random
 
 from pygame import Vector2, Rect
 
 from controller.camerainterface import CameraInterface
-from model.entity.fish.fish import Fish
-from model.entity.fish.fishconfig import FishConfig, FishType
-from model.entity.entitymanager import EntityManager, ModelContext
+from model.entities.fish.fish import Fish
+from model.entities.fish.fishconfigv1 import FishConfigV1, FishType
+from model.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.modelutils import limit_magnitude
 
 
 class School(EntityManager):
-    def __init__(self, fish_config: FishConfig, amount: int, context: ModelContext) -> None:
+    def __init__(self, fish_config: FishConfigV1, amount: int, context: ModelContext) -> None:
         super().__init__()
-        self._fish_config: FishConfig = fish_config
+        self._fish_config: FishConfigV1 = fish_config
         self._amount: int = amount
         self._fish: set[Fish] = set()
         # The school has a boundary within a certain range of the player

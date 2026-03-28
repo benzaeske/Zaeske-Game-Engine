@@ -1,12 +1,11 @@
-import copy
 import random
 from abc import abstractmethod, ABC
 
 from pygame import Vector2, Rect
 
 from controller.camerainterface import CameraInterface
-from model.entity.enemies.enemy import Enemy
-from model.entity.entitymanager import EntityManager, ModelContext
+from model.entities.enemies.enemy import Enemy
+from model.entitymanagers.entitymanager import EntityManager, ModelContext
 
 
 class EnemyManager[T: Enemy](EntityManager, ABC):
@@ -19,7 +18,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         self._cooldown: float = initial_cooldown
         self._spawn_timer: float = 0.0
         self._spawn_amount: int = initial_spawn_amount
-        self._spawn_state: int = 3 # Used to rotate where random enemy positions are sampled from
+        self._spawn_state: int = 0 # Used to rotate where random enemy positions are sampled from
 
     def frame_actions(self, context: ModelContext, camera: CameraInterface, dt: float) -> None:
         # Destroy enemies that have no hp
@@ -70,6 +69,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         """
         Factory method to create a new Enemy. Initial position/velocity/acceleration should not be set here
         """
+        # TODO no longer needed. Enemy manager creates entities using configs
         pass
 
     def _get_initial_position(self, camera: CameraInterface) -> Vector2:
@@ -97,7 +97,7 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
                 # Left
                 pos.x = random.uniform(camera_window.left, camera_window.left - spawn_range)
                 pos.y = random.uniform(camera_window.top, camera_window.bottom)
-        #self._update_spawn_state()
+        self._update_spawn_state()
         return pos
 
     def _update_spawn_state(self):

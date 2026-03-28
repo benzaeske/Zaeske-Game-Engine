@@ -5,9 +5,9 @@ from uuid import UUID
 import pygame
 from pygame import Surface, Vector2, Rect
 
-from model.entity.entity import Entity
+from model.entities.entity import Entity
 from controller.camera import Camera
-from model.entity.items.shield import Shield
+from model.entities.items.shield import Shield
 from model.world.gridspace.grid_cell import GridCell
 from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 

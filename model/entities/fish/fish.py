@@ -2,13 +2,13 @@ from uuid import UUID
 
 from pygame import Rect
 
-from model.entity.fish.boid import Boid
-from model.entity.fish.fishconfig import FishConfig, FishType
+from model.entities.fish.boid import Boid
+from model.entities.fish.fishconfigv1 import FishConfigV1, FishType
 from model.world.modelcontext import ModelContext
 
 
 class Fish(Boid):
-    def __init__(self, manager_id: UUID, fish_config: FishConfig, shoal: Rect | None = None) -> None:
+    def __init__(self, manager_id: UUID, fish_config: FishConfigV1, shoal: Rect | None = None) -> None:
         super().__init__(manager_id, fish_config.max_speed, fish_config.max_acceleration, fish_config.boid_config)
         self._fish_type: FishType = fish_config.fish_type
         self._shoal: Rect | None = shoal

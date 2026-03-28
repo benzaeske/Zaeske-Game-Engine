@@ -1,0 +1,14 @@
+{
+  "entity_type": "RED_JELLYFISH",
+  "sprite_width": 96.0,
+  "sprite_height": 96.0,
+  "hitbox_width": 96.0,
+  "hitbox_height": 96.0,
+  "hp": 100.0,
+  "damage": 10.0,
+  "neighbor_cell_range": 1,
+  "avoid_neighbor_dist": 96.0,
+  "avoid_neighbor_k": 2.0,
+  "max_speed": 192.0,
+  "max_acceleration": 256.0
+}

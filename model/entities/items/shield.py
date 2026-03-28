@@ -3,8 +3,8 @@ from uuid import UUID
 from pygame import Rect
 from pygame.math import Vector2
 
-from model.entity.entity import Entity
-from model.entity.fish.fishconfig import FishType
+from model.entities.entity import Entity
+from model.entities.fish.fishconfigv1 import FishType
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.modelcontext import ModelContext
 

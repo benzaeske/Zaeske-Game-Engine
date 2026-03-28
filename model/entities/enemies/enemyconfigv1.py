@@ -1,4 +1,4 @@
-class EnemyConfig:
+class EnemyConfigV1:
     """
     Parameters used to construct a basic Enemy entity
     """

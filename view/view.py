@@ -4,12 +4,12 @@ from uuid import UUID
 import pygame
 from pygame import Surface
 
-from model.entity.enemies.jellyfish import Jellyfish
-from model.entity.entity import Entity
-from model.entity.entitymanagerobserver import EntityManagerObserver
-from model.entity.fish.fish import Fish
+from model.entities.enemies.jellyfish import Jellyfish
+from model.entities.entity import Entity
+from model.entitymanagers.entitymanagerobserver import EntityManagerObserver
+from model.entities.fish.fish import Fish
 from controller.camera import Camera
-from model.entity.items.shield import Shield
+from model.entities.items.shield import Shield
 from model.player.player import Player
 from view.background import Background
 from view.entity.entityview import EntityView

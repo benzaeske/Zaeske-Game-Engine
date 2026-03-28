@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pygame import Vector2
 
-from model.entity.entity import Entity
+from model.entities.entity import Entity
 from model.modelutils import limit_magnitude, safe_normalize
 from model.world.modelcontext import ModelContext
 

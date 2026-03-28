@@ -2,8 +2,8 @@ from uuid import UUID
 
 from pygame import Vector2
 
-from model.entity.enemies.enemy import Enemy
-from model.entity.enemies.jellyfishconfig import JellyfishConfig
+from model.entities.enemies.enemy import Enemy
+from model.entities.enemies.jellyfishconfigv1 import JellyfishConfigV1
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.modelcontext import ModelContext
 
@@ -15,8 +15,9 @@ class Jellyfish(Enemy):
     def __init__(
             self,
             manager_id: UUID,
-            config: JellyfishConfig
+            config: JellyfishConfigV1
     ) -> None:
+        # TODO jellyfish class is obsolete. They are simply an Enemy that has opted into fear behavior in their config
         super().__init__(manager_id, config.enemy_config)
         self._scared_cell_range: int = config.scared_cell_range
         self._scared_dist: float = config.scared_dist

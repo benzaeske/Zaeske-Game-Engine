@@ -1,11 +1,10 @@
-import copy
 from uuid import UUID
 
 from pygame import Vector2
 
 from controller.camerainterface import CameraInterface
-from model.entity.entity import Entity
-from model.entity.entitymanager import EntityManager
+from model.entities.entity import Entity
+from model.entitymanagers.entitymanager import EntityManager
 from model.world.modelcontext import ModelContext
 
 

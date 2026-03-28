@@ -12,6 +12,8 @@ class Entity(ABC):
     Base class for all entities. Entities maintain a position and know how to draw themselves on screen.
     """
     def __init__(self, manager_id: UUID) -> None:
+        # TODO Constructor with config all the way up the hierarchy
+        # TODO add entity type
         self._id: UUID = uuid4()
         self.manager_id: UUID = manager_id
         self._position: Vector2 = Vector2(0,0)

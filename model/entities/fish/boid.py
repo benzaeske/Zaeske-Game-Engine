@@ -2,8 +2,8 @@ from uuid import UUID
 
 from pygame import Vector2
 
-from model.entity.fish.boidconfig import BoidConfig
-from model.entity.physicsentity import PhysicsEntity
+from model.entities.fish.boidconfigv1 import BoidConfigV1
+from model.entities.physicsentity import PhysicsEntity
 from model.world.modelcontext import ModelContext
 
 
@@ -16,10 +16,10 @@ class Boid(PhysicsEntity):
             manager_id: UUID,
             max_speed: float,
             max_acceleration: float,
-            boid_config: BoidConfig
+            boid_config: BoidConfigV1
     ) -> None:
         super().__init__(manager_id, max_speed, max_acceleration)
-        self._boid_config: BoidConfig = boid_config
+        self._boid_config: BoidConfigV1 = boid_config
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         self._flock(context)

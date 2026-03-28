@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from controller.camerainterface import CameraInterface
-from model.entity.entity import Entity
-from model.entity.entitymanagerobserver import EntityManagerObserver
+from model.entities.entity import Entity
+from model.entitymanagers.entitymanagerobserver import EntityManagerObserver
 from model.world.modelcontext import ModelContext
 
 

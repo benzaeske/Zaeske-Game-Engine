@@ -1,14 +1,14 @@
 from uuid import UUID
 
 from controller.camera import Camera
-from model.entity.fish.fishconfig import FishType
-from model.entity.enemies.enemymanager import EnemyManager
-from model.entity.entitymanager import EntityManager
-from model.entity.fish.school import School
-from model.entity.items.itemmanager import ItemManager
+from model.entities.fish.fishconfigv1 import FishType
+from model.entitymanagers.enemies.enemymanager import EnemyManager
+from model.entitymanagers.entitymanager import EntityManager
+from model.entitymanagers.fish.school import School
+from model.entitymanagers.items.itemmanager import ItemManager
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
-from model.entity.entitymanagerobserver import EntityManagerObserver
+from model.entitymanagers.entitymanagerobserver import EntityManagerObserver
 from model.world.modelcontext import ModelContext
 
 

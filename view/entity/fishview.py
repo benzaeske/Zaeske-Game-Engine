@@ -2,8 +2,8 @@ import math
 
 from pygame import Surface, transform
 
-from model.entity.fish.fish import Fish
-from model.entity.fish.fishconfig import FishType
+from model.entities.fish.fish import Fish
+from model.entities.fish.fishconfigv1 import FishType
 from controller.camera import Camera
 from view.entity.entityview import EntityView
 from view.sprite.entityanimation import EntityAnimation

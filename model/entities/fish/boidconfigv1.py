@@ -1,7 +1,4 @@
-from pygame import Vector2
-
-
-class BoidConfig:
+class BoidConfigV1:
     """
     Base properties needed for performing Boids algorithm
     """

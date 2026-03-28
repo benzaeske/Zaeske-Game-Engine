@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from pygame import Vector2, Rect
 
-from model.entity.fish.fishconfig import FishType
+from model.entities.fish.fishconfigv1 import FishType
 from controller.camera import Camera
 
 

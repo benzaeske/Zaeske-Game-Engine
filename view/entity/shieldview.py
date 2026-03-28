@@ -1,7 +1,7 @@
 from pygame import Surface, draw, SRCALPHA
 
 from controller.camera import Camera
-from model.entity.items.shield import Shield
+from model.entities.items.shield import Shield
 from view.entity.entityview import EntityView
 from view.sprite.spritecatalog import SpriteCatalog
 
