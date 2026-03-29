@@ -3,17 +3,16 @@ from uuid import UUID
 from pygame import Rect
 
 from model.entities.fish.boid import Boid
-from model.entities.fish.fishconfigv1 import FishConfigV1, FishType
+from model.entities.fish.fishconfig import FishConfig
 from model.world.modelcontext import ModelContext
 
 
 class Fish(Boid):
-    def __init__(self, manager_id: UUID, fish_config: FishConfigV1, shoal: Rect | None = None) -> None:
-        super().__init__(manager_id, fish_config.max_speed, fish_config.max_acceleration, fish_config.boid_config)
-        self._fish_type: FishType = fish_config.fish_type
+    def __init__(self, config: FishConfig, manager_id: UUID, shoal: Rect | None = None) -> None:
+        super().__init__(config, manager_id)
         self._shoal: Rect | None = shoal
-        self._shoal_radius: float = fish_config.shoal_radius
-        self._shoal_k: float = fish_config.shoal_k
+        self._shoal_radius: float = config.shoal_radius
+        self._shoal_k: float = config.shoal_k
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         super().frame_actions(context, dt)
@@ -30,6 +29,3 @@ class Fish(Boid):
             self.target(diff, self._shoal_k)
         else:
             self.target(diff, -self._shoal_k)
-
-    def get_fish_type(self) -> FishType:
-        return self._fish_type

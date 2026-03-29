@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pygame import Rect, Vector2
 
-from model.entities.enemies.enemyconfigv1 import EnemyConfigV1
+from model.entities.enemies.enemyconfig import EnemyConfig
 from model.entities.physicsentity import PhysicsEntity
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.modelcontext import ModelContext
@@ -16,10 +16,10 @@ class Enemy(PhysicsEntity):
     """
     def __init__(
             self,
+            config: EnemyConfig,
             manager_id: UUID,
-            config: EnemyConfigV1
     ) -> None:
-        super().__init__(manager_id, config.max_speed, config.max_acceleration)
+        super().__init__(config, manager_id)
         # The hitbox is how big the entity actually is when performing hit detection.
         # Can be different from sprite dimensions
         self._hitbox: Rect = Rect(0, 0, config.hitbox_width, config.hitbox_height)
@@ -29,10 +29,18 @@ class Enemy(PhysicsEntity):
         self._avoid_neighbor_k: float = config.avoid_neighbor_k
         self._hp: float = config.hp
         self._damage: float = config.damage
+        # Optional fear behavior:
+        self._is_afraid: bool = config.is_afraid
+        self._afraid_of_index: EntityManagerIndex = config.afraid_of_index
+        self._scared_cell_range: int = config.scared_cell_range
+        self._scared_dist: float = config.scared_dist
+        self._scared_k: float = config.scared_k
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         self._move_towards_player(context)
         self._avoid_close_neighbors(context)
+        if self._is_afraid:
+            self._fear(context)
 
     def _move_towards_player(self, context: ModelContext) -> None:
         self.target(context.player.get_position() - self.get_position(), 1.0)
@@ -51,6 +59,21 @@ class Enemy(PhysicsEntity):
                 count_avoid += 1
         if count_avoid > 0:
             self.target(sum_avoid_neighbors, self._avoid_neighbor_k)
+
+    def _fear(self, context: ModelContext) -> None:
+        sum_avoid: Vector2 = Vector2(0.0, 0.0)
+        count: int = 0
+        for neighbor in context.grid_space.get_neighbors_for_entity(self, self._scared_cell_range,
+                                                                    context.entity_repository.get_manager_ids(self._afraid_of_index)):
+            d: float = self.get_position().distance_to(neighbor.get_position())
+            if 0 < d < self._scared_dist:
+                diff: Vector2 = self.get_position() - neighbor.get_position()
+                diff.normalize_ip()
+                diff /= d
+                sum_avoid += diff
+                count += 1
+        if count > 0:
+            self.target(sum_avoid, self._scared_k)
 
     def move(self, context: ModelContext, dt: float) -> None:
         super().move(context, dt)
@@ -79,4 +102,3 @@ class Enemy(PhysicsEntity):
 
     def get_damage(self) -> float:
         return self._damage
-

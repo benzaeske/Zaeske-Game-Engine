@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pygame import Vector2
 
-from model.entities.fish.boidconfigv1 import BoidConfigV1
+from model.entities.fish.boidconfig import BoidConfig
 from model.entities.physicsentity import PhysicsEntity
 from model.world.modelcontext import ModelContext
 
@@ -11,15 +11,9 @@ class Boid(PhysicsEntity):
     """
     Base implementation of agents that follow Boids algorithm. Uses position/velocity/acceleration to perform movement.
     """
-    def __init__(
-            self,
-            manager_id: UUID,
-            max_speed: float,
-            max_acceleration: float,
-            boid_config: BoidConfigV1
-    ) -> None:
-        super().__init__(manager_id, max_speed, max_acceleration)
-        self._boid_config: BoidConfigV1 = boid_config
+    def __init__(self, config: BoidConfig, manager_id: UUID) -> None:
+        super().__init__(config, manager_id)
+        self._boid_config: BoidConfig = config
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         self._flock(context)

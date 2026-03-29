@@ -6,6 +6,7 @@ from pygame import Surface, Rect
 from model.entities.entity import Entity
 from controller.camera import Camera
 from view.sprite.spritecatalog import SpriteCatalog
+from view.sprite.spritedata import SpriteData
 
 
 class EntityView[T: Entity](ABC):
@@ -42,3 +43,6 @@ class EntityView[T: Entity](ABC):
             # Note: The 'bottom' attribute of a pygame rect is actually the top edge since they are drawn top down
             camera.bottom - self._entity.get_position().y - sprite_h_adj,
         )
+
+    def _get_sprite_data(self) -> SpriteData:
+        return self._sprite_catalog.get_entity_sprite_data(self._entity.get_type())

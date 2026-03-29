@@ -1,5 +1,6 @@
 {
   "entity_type": "YELLOW_FISH",
+  "image_location": "assets/images/yellow_fish.png",
   "sprite_width": 26,
   "sprite_height": 26,
   "max_speed": 224.0,

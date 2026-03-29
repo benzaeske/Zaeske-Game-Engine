@@ -1,4 +1,3 @@
-import copy
 from typing import Tuple
 
 from perlin_numpy import generate_perlin_noise_2d

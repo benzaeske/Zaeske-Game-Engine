@@ -6,3 +6,4 @@ class EntityType(StrEnum):
     YELLOW_FISH = "YELLOW_FISH"
     GREEN_FISH = "GREEN_FISH"
     RED_JELLYFISH = "RED_JELLYFISH"
+    SHIELD = "SHIELD"

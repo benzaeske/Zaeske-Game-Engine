@@ -4,6 +4,8 @@ from uuid import UUID, uuid4
 
 from pygame import Vector2
 
+from model.entities.entityconfig import EntityConfig
+from model.entities.entitytype import EntityType
 from model.world.modelcontext import ModelContext
 
 
@@ -11,9 +13,8 @@ class Entity(ABC):
     """
     Base class for all entities. Entities maintain a position and know how to draw themselves on screen.
     """
-    def __init__(self, manager_id: UUID) -> None:
-        # TODO Constructor with config all the way up the hierarchy
-        # TODO add entity type
+    def __init__(self, config: EntityConfig, manager_id: UUID) -> None:
+        self._type: EntityType = config.entity_type
         self._id: UUID = uuid4()
         self.manager_id: UUID = manager_id
         self._position: Vector2 = Vector2(0,0)
@@ -36,6 +37,9 @@ class Entity(ABC):
         :param dt: The time delta between frames
         """
         pass
+
+    def get_type(self) -> EntityType:
+        return self._type
 
     def get_id(self) -> UUID:
         return self._id

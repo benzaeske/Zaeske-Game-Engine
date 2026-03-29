@@ -1,20 +1,21 @@
 import random
-from abc import abstractmethod, ABC
 
 from pygame import Vector2, Rect
 
 from controller.camerainterface import CameraInterface
 from model.entities.enemies.enemy import Enemy
+from model.entities.enemies.enemyconfig import EnemyConfig
+from model.entities.entityconfig import EntityConfig
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
 
 
-class EnemyManager[T: Enemy](EntityManager, ABC):
-    """
-    Base class for a group of enemies that continue to spawn on a given cooldown interval.
-    """
-    def __init__(self, initial_cooldown: float, initial_spawn_amount: int) -> None:
+class EnemyManager(EntityManager):
+    def __init__(self, enemy_config: EntityConfig, initial_cooldown: float, initial_spawn_amount: int) -> None:
         super().__init__()
-        self._enemies: set[T] = set()
+        if not isinstance(enemy_config, EnemyConfig):
+            raise TypeError("Invalid entity config passed in enemy manager constructor. Config must be an EnemyConfig.")
+        self._enemy_config: EnemyConfig = enemy_config
+        self._enemies: set[Enemy] = set()
         self._cooldown: float = initial_cooldown
         self._spawn_timer: float = 0.0
         self._spawn_amount: int = initial_spawn_amount
@@ -30,7 +31,6 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         # Spawn new enemies
         if self.tick_spawn_timer(dt):
             self.spawn(context, camera)
-        # Accelerate all enemies towards the player and avoid close neighbors
         for enemy in self._enemies:
             enemy.frame_actions(context, dt)
 
@@ -58,19 +58,11 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         as to the grid space.
         """
         for _ in range(self._spawn_amount):
-            new_enemy: T = self.get_new_enemy()
+            new_enemy: Enemy = Enemy(self._enemy_config, self.get_manager_id())
             new_enemy.set_position(self._get_initial_position(camera))
             self._enemies.add(new_enemy)
             context.grid_space.add_entity(new_enemy)
             self._notify_observers_entity_created(new_enemy)
-
-    @abstractmethod
-    def get_new_enemy(self) -> T:
-        """
-        Factory method to create a new Enemy. Initial position/velocity/acceleration should not be set here
-        """
-        # TODO no longer needed. Enemy manager creates entities using configs
-        pass
 
     def _get_initial_position(self, camera: CameraInterface) -> Vector2:
         """
@@ -104,5 +96,3 @@ class EnemyManager[T: Enemy](EntityManager, ABC):
         self._spawn_state += 1
         if self._spawn_state > 3:
             self._spawn_state = 0
-
-

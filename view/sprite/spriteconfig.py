@@ -7,4 +7,4 @@ from model.entities.entityconfig import EntityConfig
 class SpriteConfig(EntityConfig):
     sprite_width: int
     sprite_height: int
-    # TODO define sprite animation data
+    image_location: str

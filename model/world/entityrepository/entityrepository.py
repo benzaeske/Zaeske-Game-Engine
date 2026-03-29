@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from controller.camera import Camera
+from model.entities.entitytype import EntityType
 from model.entities.fish.fishconfigv1 import FishType
 from model.entitymanagers.enemies.enemymanager import EnemyManager
 from model.entitymanagers.entitymanager import EntityManager
@@ -33,11 +34,11 @@ class EntityRepository(EntityRepositoryInterface):
         elif isinstance(entity_manager, School):
             self._entity_manager_indexes[EntityManagerIndex.FISH].add(entity_manager.get_manager_id())
             match entity_manager.get_fish_type():
-                case FishType.RED:
+                case EntityType.RED_FISH:
                     self._entity_manager_indexes[EntityManagerIndex.RED_FISH].add(entity_manager.get_manager_id())
-                case FishType.YELLOW:
+                case EntityType.YELLOW_FISH:
                     self._entity_manager_indexes[EntityManagerIndex.YELLOW_FISH].add(entity_manager.get_manager_id())
-                case FishType.GREEN:
+                case EntityType.GREEN_FISH:
                     self._entity_manager_indexes[EntityManagerIndex.GREEN_FISH].add(entity_manager.get_manager_id())
         elif isinstance(entity_manager, ItemManager):
             self._entity_manager_indexes[EntityManagerIndex.ITEM].add(entity_manager.get_manager_id())

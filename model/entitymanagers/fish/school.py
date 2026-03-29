@@ -3,16 +3,20 @@ import random
 from pygame import Vector2, Rect
 
 from controller.camerainterface import CameraInterface
+from model.entities.entityconfig import EntityConfig
+from model.entities.entitytype import EntityType
 from model.entities.fish.fish import Fish
-from model.entities.fish.fishconfigv1 import FishConfigV1, FishType
+from model.entities.fish.fishconfig import FishConfig
 from model.entitymanagers.entitymanager import EntityManager, ModelContext
 from model.modelutils import limit_magnitude
 
 
 class School(EntityManager):
-    def __init__(self, fish_config: FishConfigV1, amount: int, context: ModelContext) -> None:
+    def __init__(self, fish_config: EntityConfig, amount: int, context: ModelContext) -> None:
         super().__init__()
-        self._fish_config: FishConfigV1 = fish_config
+        if not isinstance(fish_config, FishConfig):
+            raise TypeError("Invalid config passed to School constructor. Config must be a FishConfig.")
+        self._fish_config: FishConfig = fish_config
         self._amount: int = amount
         self._fish: set[Fish] = set()
         # The school has a boundary within a certain range of the player
@@ -48,8 +52,8 @@ class School(EntityManager):
         """
         for _ in range(self._amount):
             new_fish: Fish = Fish(
-                self.get_manager_id(),
                 self._fish_config,
+                self.get_manager_id(),
                 self._shoal
             )
             new_fish.set_position(self._get_random_position_inside_shoal())
@@ -90,5 +94,5 @@ class School(EntityManager):
         self._shoal.centerx = random.uniform(self._boundary.left, self._boundary.right)
         self._shoal.centery = random.uniform(self._boundary.top, self._boundary.bottom)
 
-    def get_fish_type(self) -> FishType:
-        return self._fish_config.fish_type
+    def get_fish_type(self) -> EntityType:
+        return self._fish_config.entity_type

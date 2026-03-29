@@ -5,6 +5,7 @@ from uuid import UUID
 from pygame import Vector2
 
 from model.entities.entity import Entity
+from model.entities.physicsentityconfig import PhysicsEntityConfig
 from model.modelutils import limit_magnitude, safe_normalize
 from model.world.modelcontext import ModelContext
 
@@ -13,17 +14,12 @@ class PhysicsEntity(Entity, ABC):
     """
     Abstract class for entity that move using velocity and acceleration
     """
-    def __init__(
-            self,
-            manager_id: UUID,
-            max_speed: float,
-            max_acceleration: float,
-    ) -> None:
-        super().__init__(manager_id)
+    def __init__(self, config: PhysicsEntityConfig, manager_id: UUID) -> None:
+        super().__init__(config, manager_id)
         self._velocity: Vector2 = Vector2(0.0, 0.0)
         self._acceleration: Vector2 = Vector2(0.0, 0.0)
-        self._max_speed: float = max_speed
-        self._max_acceleration: float = max_acceleration
+        self._max_speed: float = config.max_speed
+        self._max_acceleration: float = config.max_acceleration
 
     def move(self, context: ModelContext, dt: float) -> None:
         self._velocity += (self._acceleration * dt)

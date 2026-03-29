@@ -1,5 +1,6 @@
 {
   "entity_type": "GREEN_FISH",
+  "image_location": "assets/images/green_fish.png",
   "sprite_width": 36,
   "sprite_height": 36,
   "max_speed": 128.0,

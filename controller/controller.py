@@ -8,11 +8,11 @@ from pygame.event import Event
 from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
-from model.entities.fish.boidconfigv1 import BoidConfigV1
-from model.entities.enemies.enemyconfigv1 import EnemyConfigV1
-from model.entities.fish.fishconfigv1 import FishConfigV1, FishType
-from model.entities.enemies.jellyfishconfigv1 import JellyfishType, JellyfishConfigV1
-from model.entities.enemies.jellyfishswarm import JellyfishSwarm
+from controller.entityconfigurations import EntityConfigurations
+from model.entities.entityconfig import EntityConfig
+from model.entities.entitytype import EntityType
+from model.entities.items.shieldconfig import ShieldConfig
+from model.entitymanagers.enemies.enemymanager import EnemyManager
 from model.entitymanagers.fish.school import School
 from controller.camera import Camera
 from model.entitymanagers.items.itemmanager import ItemManager
@@ -48,8 +48,9 @@ class GameController:
         ############################
         # Initialize View and Model:
         ############################
+        self._entity_configurations: EntityConfigurations = EntityConfigurations()
         # The View holds all logic related to drawing entities and rendering on screen
-        self._view: View = View(options.window_options)
+        self._view: View = View(options.window_options, self._entity_configurations.get_configs())
         # The Model holds the simulated world and is responsible for performing updates each frame
         self._model: Model = Model(options.grid_cell_size)
         self._model.register_entity_manager_observer(self._view)
@@ -150,103 +151,63 @@ class GameController:
         more dynamic method that adds/removes entity managers throughout the game based on various factors such as
         player position, game time, world state etc
         """
+        # ORDER MATTERS - Add order determines update order each frame
+        self.add_items()
+        self.add_enemies()
+        self.add_fish()
 
-        # ORDER MATTERS!
-
-        # Item manager first
+    def add_items(self) -> None:
         item_manager: ItemManager = ItemManager()
         self._model.add_entity_manager(item_manager)
+        shield_config: EntityConfig = self._entity_configurations.get_entity_config(EntityType.SHIELD)
+        if not isinstance(shield_config, ShieldConfig):
+            raise TypeError("Invalid shield config loaded in controller")
         item_manager.track_item(
-            Shield(item_manager.get_manager_id(), 128.0, 100.0),
+            Shield(shield_config, item_manager.get_manager_id()),
             self._model.get_model_context(),
         )
 
+    def add_enemies(self) -> None:
         jelly_spawn_cd: float = 5.0
         jelly_spawn_amount: int = 4
-        jelly_config: JellyfishConfigV1 = JellyfishConfigV1(
-            JellyfishType.RED,
-            96.0,
-            96.0,
-            EnemyConfigV1(
-                192.0,
-                256.0,
-                96.0,
-                96.0,
-                100,
-                10,
-                1,
-                96.0,
-                2.0
-            ),
-            2,
-            192.0,
-            3.0
-        )
-        self._model.add_entity_manager(JellyfishSwarm(jelly_spawn_cd, jelly_spawn_amount, jelly_config))
 
-        red_fish: FishConfigV1 = FishConfigV1(
-            FishType.RED,
-            160.0,
-            48.0,
-            BoidConfigV1(
-                128.0,
-                48.0,
-                1,
-                1.0,
-                2.0,
-                1.0
-            ),
-            True,
-            128.0,
-            1.2
+        self._model.add_entity_manager(
+            EnemyManager(
+                self._entity_configurations.get_entity_config(EntityType.RED_JELLYFISH),
+                jelly_spawn_cd,
+                jelly_spawn_amount
+            )
         )
+
+    def add_fish(self) -> None:
         num_red_schools: int = 2
-        for _ in range(num_red_schools):
-            school: School = School(red_fish, 16, self._model.get_model_context())
-            self._model.add_entity_manager(school)
-            school.hatch(self._model.get_model_context())
-
-        yellow_fish: FishConfigV1 = FishConfigV1(
-            FishType.YELLOW,
-            224.0,
-            100.0,
-            BoidConfigV1(
-                128.0,
-                44.0,
-                1,
-                1,
-                2.0,
-                1.0
-            ),
-            True,
-            384.0,
-            1.2
-        )
         num_yellow_schools: int = 2
-        for _ in range(num_yellow_schools):
-            school: School = School(yellow_fish, 16, self._model.get_model_context())
+        num_green_schools: int = 2
+
+        for _ in range(num_red_schools):
+            school: School = School(
+                self._entity_configurations.get_entity_config(EntityType.RED_FISH),
+                16,
+                self._model.get_model_context()
+            )
             self._model.add_entity_manager(school)
             school.hatch(self._model.get_model_context())
 
-        green_fish: FishConfigV1 = FishConfigV1(
-            FishType.GREEN,
-            128.0,
-            32.0,
-            BoidConfigV1(
-                128.0,
-                52.0,
-                1,
-                1.0,
-                2.0,
-                1.0
-            ),
-            True,
-            64.0,
-            1.2
-        )
-        num_green_schools: int = 2
+        for _ in range(num_yellow_schools):
+            school: School = School(
+                self._entity_configurations.get_entity_config(EntityType.YELLOW_FISH),
+                16,
+                self._model.get_model_context()
+            )
+            self._model.add_entity_manager(school)
+            school.hatch(self._model.get_model_context())
+
         for _ in range(num_green_schools):
-            school: School = School(green_fish, 16, self._model.get_model_context())
+            school: School = School(
+                self._entity_configurations.get_entity_config(EntityType.GREEN_FISH),
+                16,
+                self._model.get_model_context()
+            )
             self._model.add_entity_manager(school)
             school.hatch(self._model.get_model_context())
 

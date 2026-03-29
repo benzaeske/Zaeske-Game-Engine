@@ -1,7 +1,9 @@
 from pygame import Surface, image, transform
 
-from view.sprite.entityanimation import EntityAnimation
+from model.entities.entitytype import EntityType
 from view.sprite.playeranimation import PlayerAnimation
+from view.sprite.spriteconfig import SpriteConfig
+from view.sprite.spritedata import SpriteData
 from view.sprite.spritesheet import SpriteSheet
 
 
@@ -9,46 +11,29 @@ class SpriteCatalog:
     """
     Repository containing all sprite sheets needed to draw the player and game entity animations.
     """
-    def __init__(self):
-        # TODO key by EntityType
-        self._entity_animations: dict[EntityAnimation, SpriteSheet] = {}
+    def __init__(self, sprite_configs: list[SpriteConfig]):
+        self._entity_sprites: dict[EntityType, SpriteData] = {} # Basic sprites that don't support animation frames for now
         self._player_animations: dict[PlayerAnimation, SpriteSheet] = {}
-        self._load()
+        self._load(sprite_configs)
 
-    def get_entity_animation(self, animation: EntityAnimation) -> SpriteSheet:
-        return self._entity_animations[animation]
+    def get_entity_sprite_data(self, entity_type: EntityType) -> SpriteData:
+        return self._entity_sprites.get(entity_type, None)
 
     def get_player_animation(self, animation: PlayerAnimation) -> SpriteSheet:
         return self._player_animations[animation]
 
-    def _load(self) -> None:
+    def _load(self, sprite_configs: list[SpriteConfig]) -> None:
         """
         Loads all sprite sheets. Should only be called once in the constructor.
         """
-        self._load_entity_animations()
+        self._load_entity_sprites(sprite_configs)
         self._load_player_animations()
 
-    def _load_entity_animations(self) -> None:
-        self._entity_animations[EntityAnimation.RED_JELLYFISH] = SpriteSheet(
-            [(1.0, self.load_image("assets/images/red_jelly.png", 96.0, 96.0))],
-            96.0,
-            96.0
-        )
-        self._entity_animations[EntityAnimation.RED_FISH] = SpriteSheet(
-            [(1.0, self.load_image("assets/images/red_fish.png", 32.0, 32.0))],
-            32.0,
-            32.0
-        )
-        self._entity_animations[EntityAnimation.YELLOW_FISH] = SpriteSheet(
-            [(1.0, self.load_image("assets/images/yellow_fish.png", 26.0, 26.0))],
-            26.0,
-            26.0
-        )
-        self._entity_animations[EntityAnimation.GREEN_FISH] = SpriteSheet(
-            [(1.0, self.load_image("assets/images/green_fish.png", 36.0, 36.0))],
-            36.0,
-            36.0
-        )
+    def _load_entity_sprites(self, sprite_configs: list[SpriteConfig]) -> None:
+        for config in sprite_configs:
+            self._entity_sprites[config.entity_type] = SpriteData(
+                self.load_image(config.image_location, config.sprite_width, config.sprite_height)
+            )
 
     def _load_player_animations(self) -> None:
         player_width: float = 128.0
