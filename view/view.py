@@ -4,20 +4,23 @@ from uuid import UUID
 import pygame
 from pygame import Surface
 
-from model.entity.enemies.jellyfish import Jellyfish
-from model.entity.entity import Entity
-from model.entity.entitymanagerobserver import EntityManagerObserver
-from model.entity.fish.fish import Fish
+from model.entities.enemies.enemy import Enemy
+from model.entities.entity import Entity
+from model.entities.entityconfig import EntityConfig
+from model.entitymanagers.entitymanagerobserver import EntityManagerObserver
+from model.entities.fish.fish import Fish
 from controller.camera import Camera
-from model.entity.items.shield import Shield
+from model.entities.items.shield import Shield
 from model.player.player import Player
+from model.player.playerconfig import PlayerConfig
 from view.background import Background
+from view.entity.enemyview import EnemyView
 from view.entity.entityview import EntityView
 from view.entity.fishview import FishView
-from view.entity.jellyfishview import JellyfishView
 from view.entity.shieldview import ShieldView
 from view.player.playerview import PlayerView
 from view.sprite.spritecatalog import SpriteCatalog
+from view.sprite.spriteconfig import SpriteConfig
 
 
 class WindowOptions:
@@ -34,7 +37,7 @@ class View(EntityManagerObserver):
     The View is responsible for drawing everything on the screen using pygame functions. It should be noted that pygame
     uses an inverted y-axis.
     """
-    def __init__(self, window_options: WindowOptions) -> None:
+    def __init__(self, window_options: WindowOptions, entity_configs: list[EntityConfig], player_config: PlayerConfig) -> None:
         super().__init__()
         self._options: WindowOptions = window_options
         # Get available display properties from pygame
@@ -52,7 +55,7 @@ class View(EntityManagerObserver):
             self._screen_height,
         )
         self._background: Background = Background(self._display_width, self._display_height)
-        self._sprite_catalog: SpriteCatalog = SpriteCatalog()
+        self._sprite_catalog: SpriteCatalog = SpriteCatalog([c for c in entity_configs if isinstance(c, SpriteConfig)], player_config)
         self._entity_views: dict[UUID, EntityView] = {}
         self._player_view: Optional[PlayerView] = None
 
@@ -104,19 +107,19 @@ class View(EntityManagerObserver):
 
     def notify_entity_created(self, entity: Entity):
         if entity.get_id() not in self._entity_views:
-            self._entity_views[entity.get_id()] = self._initialize_entity_view(entity)
+            self._entity_views[entity.get_id()] = self._get_entity_view(entity)
         else:
             raise RuntimeError(f"Entity with id: {entity.get_id()} is already being tracked in View")
 
-    def _initialize_entity_view(self, entity: Entity) -> EntityView:
+    def _get_entity_view(self, entity: Entity) -> EntityView:
         """
         Helper function to create an EntityView for the provided Entity.
         """
         match entity:
             case Fish():
                 return FishView(entity, self._sprite_catalog)
-            case Jellyfish():
-                return JellyfishView(entity, self._sprite_catalog)
+            case Enemy():
+                return EnemyView(entity, self._sprite_catalog)
             case Shield():
                 return ShieldView(entity, self._sprite_catalog)
             case _:

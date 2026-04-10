@@ -1,13 +1,13 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class EntityManagerIndex(Enum):
+class EntityManagerIndex(StrEnum):
     """
     Indexes that can be used to quickly query for all entity manager ids based on a type of entity
     """
-    FISH = 0
-    RED_FISH = 1,
-    YELLOW_FISH = 2,
-    GREEN_FISH = 3,
-    ENEMY = 4,
-    ITEM = 5
+    FISH = "FISH"
+    RED_FISH = "RED_FISH",
+    YELLOW_FISH = "YELLOW_FISH",
+    GREEN_FISH = "GREEN_FISH",
+    ENEMY = "ENEMY",
+    ITEM = "ITEM"

@@ -1,14 +1,14 @@
 from uuid import UUID
 
 from controller.camera import Camera
-from model.entity.fish.fishconfig import FishType
-from model.entity.enemies.enemymanager import EnemyManager
-from model.entity.entitymanager import EntityManager
-from model.entity.fish.school import School
-from model.entity.items.itemmanager import ItemManager
+from model.entities.entitytype import EntityType
+from model.entitymanagers.enemies.enemymanager import EnemyManager
+from model.entitymanagers.entitymanager import EntityManager
+from model.entitymanagers.fish.school import School
+from model.entitymanagers.items.itemmanager import ItemManager
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.entityrepository.entityrepositoryinterface import EntityRepositoryInterface
-from model.entity.entitymanagerobserver import EntityManagerObserver
+from model.entitymanagers.entitymanagerobserver import EntityManagerObserver
 from model.world.modelcontext import ModelContext
 
 
@@ -33,11 +33,11 @@ class EntityRepository(EntityRepositoryInterface):
         elif isinstance(entity_manager, School):
             self._entity_manager_indexes[EntityManagerIndex.FISH].add(entity_manager.get_manager_id())
             match entity_manager.get_fish_type():
-                case FishType.RED:
+                case EntityType.RED_FISH:
                     self._entity_manager_indexes[EntityManagerIndex.RED_FISH].add(entity_manager.get_manager_id())
-                case FishType.YELLOW:
+                case EntityType.YELLOW_FISH:
                     self._entity_manager_indexes[EntityManagerIndex.YELLOW_FISH].add(entity_manager.get_manager_id())
-                case FishType.GREEN:
+                case EntityType.GREEN_FISH:
                     self._entity_manager_indexes[EntityManagerIndex.GREEN_FISH].add(entity_manager.get_manager_id())
         elif isinstance(entity_manager, ItemManager):
             self._entity_manager_indexes[EntityManagerIndex.ITEM].add(entity_manager.get_manager_id())

@@ -1,3 +1,5 @@
+from copy import copy
+
 from pygame import Rect, Vector2
 
 from controller.camerainterface import CameraInterface
@@ -15,7 +17,10 @@ class Camera(CameraInterface, PlayerMovementListener):
         self._window.center = p
 
     def get_window(self) -> Rect:
-        return self._window
+        """
+        Read only. Returns a shallow copy of the current rectangular camera window.
+        """
+        return copy(self._window)
 
     def get_width(self) -> float:
         return self._window.width

@@ -1,0 +1,17 @@
+{
+  "entity_type": "RED_FISH",
+  "image_location": "assets/images/red_fish.png",
+  "sprite_width": 32,
+  "sprite_height": 32,
+  "max_speed": 160.0,
+  "max_acceleration": 48.0,
+  "cohere_distance": 128.0,
+  "avoid_distance": 48.0,
+  "interaction_cell_range": 1,
+  "cohere_k": 1.0,
+  "avoid_k": 2.0,
+  "align_k": 1.0,
+  "shoal": true,
+  "shoal_radius": 128.0,
+  "shoal_k": 1.2
+}

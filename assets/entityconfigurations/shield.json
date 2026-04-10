@@ -1,0 +1,7 @@
+{
+  "entity_type": "SHIELD",
+  "radius": 128.0,
+  "damage": 100.0,
+  "max_charge": 10,
+  "charge_delay": 0.5
+}

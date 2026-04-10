@@ -4,8 +4,9 @@ import pygame
 from pygame import Vector2, Rect
 from pygame.key import ScancodeWrapper
 
-from model.entity.fish.fishconfig import FishType
+from model.entities.entitytype import EntityType
 from model.modelutils import limit_magnitude
+from model.player.playerconfig import PlayerConfig
 from model.player.playerinterface import PlayerInterface
 from model.player.playermovementlistener import PlayerMovementListener
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
@@ -14,31 +15,24 @@ from model.world.gridspace.grid_cell import GridCell
 from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 
 class Player(PlayerInterface):
-    def __init__(
-        self,
-        hitbox_width: float,
-        hitbox_height: float,
-        max_speed: float,
-        max_acceleration: float,
-        max_health: float
-    ) -> None:
+    def __init__(self, config: PlayerConfig) -> None:
         super().__init__()
         self._position: Vector2 = Vector2(0.0, 0.0)
         self._velocity: Vector2 = Vector2(0.0, 0.0)
-        self._max_speed: float = max_speed
+        self._max_speed: float = config.speed
         self._acceleration: Vector2 = Vector2(0.0, 0.0)
-        self._max_acceleration: float = max_acceleration
-        self._hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
-        self._max_health: float = max_health
+        self._max_acceleration: float = config.acceleration
+        self._hitbox: Rect = Rect(0, 0, config.hitbox_width, config.hitbox_height)
+        self._max_health: float = config.max_health
         self._current_health: float = self._max_health
-        self._fish_coherency: dict[FishType, int] = {}
+        self._fish_coherency: dict[EntityType, int] = {}
         self._movement_listeners: list[PlayerMovementListener] = []
 
     def frame_actions(self, grid_space: GridSpaceInterface, entity_repository: EntityRepositoryInterface, dt: float) -> None:
         self.process_enemy_collisions(grid_space, entity_repository, dt)
         self.process_fish_coherency(grid_space, entity_repository)
         # Temporary until the healing is incorporated into an item
-        self.update_health(self._fish_coherency[FishType.GREEN] * dt)
+        self.update_health(self._fish_coherency[EntityType.GREEN_FISH] * dt)
 
     def move(self, key_presses: ScancodeWrapper, dt: float) -> None:
         self._acceleration = Vector2(0.0, 0.0)
@@ -74,25 +68,25 @@ class Player(PlayerInterface):
                                entity_repository: EntityRepositoryInterface) -> None:
         p_grid_cell: GridCell = grid_space.get_grid_cell(self._position)
         if p_grid_cell is not None:
-            self._fish_coherency[FishType.RED] = len(
+            self._fish_coherency[EntityType.RED_FISH] = len(
                 p_grid_cell.get_entities_by_manager_ids(
                     entity_repository.get_manager_ids(EntityManagerIndex.RED_FISH)
                 )
             )
-            self._fish_coherency[FishType.YELLOW] = len(
+            self._fish_coherency[EntityType.YELLOW_FISH] = len(
                 p_grid_cell.get_entities_by_manager_ids(
                     entity_repository.get_manager_ids(EntityManagerIndex.YELLOW_FISH)
                 )
             )
-            self._fish_coherency[FishType.GREEN] = len(
+            self._fish_coherency[EntityType.GREEN_FISH] = len(
                 p_grid_cell.get_entities_by_manager_ids(
                     entity_repository.get_manager_ids(EntityManagerIndex.GREEN_FISH)
                 )
             )
         else:
-            self._fish_coherency[FishType.RED] = 0
-            self._fish_coherency[FishType.YELLOW] = 0
-            self._fish_coherency[FishType.GREEN] = 0
+            self._fish_coherency[EntityType.RED_FISH] = 0
+            self._fish_coherency[EntityType.YELLOW_FISH] = 0
+            self._fish_coherency[EntityType.GREEN_FISH] = 0
 
     def get_position(self) -> Vector2:
         return copy.deepcopy(self._position)
@@ -119,7 +113,7 @@ class Player(PlayerInterface):
         if self._current_health < 0:
             self._current_health = 0
 
-    def get_fish_coherency(self, fish_type: FishType) -> int:
+    def get_fish_coherency(self, fish_type: EntityType) -> int:
         return self._fish_coherency.get(fish_type, 0)
 
     def add_movement_listener(self, movement_listener: PlayerMovementListener) -> None:

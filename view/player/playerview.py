@@ -6,7 +6,7 @@ from controller.camera import Camera
 from model.player.playerinterface import PlayerInterface
 from view.sprite.playeranimation import PlayerAnimation
 from view.sprite.spritecatalog import SpriteCatalog
-from view.sprite.spritesheet import SpriteSheet
+from view.sprite.spritedata import SpriteData
 
 
 class PlayerView:
@@ -33,10 +33,10 @@ class PlayerView:
         """
         self._update_facing_direction()
         animation_state: PlayerAnimation = self.get_animation_state()
-        sprite_sheet: SpriteSheet = self._sprite_catalog.get_player_animation(animation_state)
+        sprite_data: SpriteData = self._sprite_catalog.get_player_animation(animation_state)
         screen.blit(
-            sprite_sheet.get_sprite(0), # currently only have static sprite sheets with one animation frame
-            self._get_camera_adjusted_position(camera, sprite_sheet)
+            sprite_data.get_surface(), # currently only have static sprite sheets with one animation frame
+            self._get_camera_adjusted_position(camera, sprite_data.get_width_adj(), sprite_data.get_height_adj())
         )
         self._draw_hp_indicator(screen, camera)
 
@@ -79,11 +79,11 @@ class PlayerView:
             ),
         )
 
-    def _get_camera_adjusted_position(self, camera: Camera, sprite_sheet: SpriteSheet) -> Tuple[float, float]:
+    def _get_camera_adjusted_position(self, camera: Camera, sprite_w_adj: float, sprite_h_adj: float) -> Tuple[float, float]:
         return (
-            self._player.get_position().x - camera.get_window().left - sprite_sheet.get_width_adj(),
+            self._player.get_position().x - camera.get_window().left - sprite_w_adj,
             # Note: The 'bottom' attribute of a pygame rect is actually the top edge since they are drawn top down
-            camera.get_window().bottom - self._player.get_position().y - sprite_sheet.get_height_adj(),
+            camera.get_window().bottom - self._player.get_position().y - sprite_h_adj,
         )
 
     def _get_camera_adjusted_hp_pos(self, camera: Camera) -> Tuple[float, float]:

@@ -1,0 +1,67 @@
+from abc import ABC
+from copy import copy
+from uuid import UUID
+
+from pygame import Vector2
+
+from model.entities.entity import Entity
+from model.entities.physicsentityconfig import PhysicsEntityConfig
+from model.modelutils import limit_magnitude, safe_normalize
+from model.world.modelcontext import ModelContext
+
+
+class PhysicsEntity(Entity, ABC):
+    """
+    Abstract class for entity that move using velocity and acceleration
+    """
+    def __init__(self, config: PhysicsEntityConfig, manager_id: UUID) -> None:
+        super().__init__(config, manager_id)
+        self._velocity: Vector2 = Vector2(0.0, 0.0)
+        self._acceleration: Vector2 = Vector2(0.0, 0.0)
+        self._max_speed: float = config.max_speed
+        self._max_acceleration: float = config.max_acceleration
+
+    def move(self, context: ModelContext, dt: float) -> None:
+        self._velocity += (self._acceleration * dt)
+        limit_magnitude(self._velocity, self._max_speed)
+        self._position += self._velocity * dt
+        # Acceleration is reset each frame
+        self._acceleration *= 0.0
+
+    def target(self, target_dir: Vector2, k: float) -> None:
+        """
+        Accelerates this entity in the target direction.
+        """
+        safe_normalize(target_dir)
+        target_dir *= self._max_speed
+        target_dir -= self._velocity
+        limit_magnitude(target_dir, self._max_acceleration)
+        target_dir *= k
+        self._acceleration += target_dir
+
+    def get_velocity(self) -> Vector2:
+        """
+        Read only. Returns a shallow copy of this entity's current velocity.
+        """
+        return copy(self._velocity)
+
+    def set_velocity(self, v: Vector2) -> None:
+        self._velocity = v
+
+    def get_acceleration(self) -> Vector2:
+        """
+        Read only. Returns a shallow copy of this entity's current acceleration.
+        """
+        return copy(self._acceleration)
+
+    def apply_acceleration(self, a: Vector2) -> None:
+        """
+        Adds the provided acceleration vector to this entity's acceleration for the current frame.
+        """
+        self._acceleration += a
+
+    def get_max_speed(self) -> float:
+        return self._max_speed
+
+    def get_max_acceleration(self) -> float:
+        return self._max_acceleration

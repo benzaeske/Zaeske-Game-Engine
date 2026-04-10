@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 
 from pygame import Vector2, Rect
 
-from model.entity.fish.fishconfig import FishType
-from controller.camera import Camera
+from model.entities.entitytype import EntityType
 
 
 class PlayerInterface(ABC):
@@ -63,7 +62,7 @@ class PlayerInterface(ABC):
         pass
 
     @abstractmethod
-    def get_fish_coherency(self, fish_type: FishType) -> int:
+    def get_fish_coherency(self, fish_type: EntityType) -> int:
         """
         Gets the player's current coherency with the given fish type. Coherency is the number of fish in the player's
         coherency radius.

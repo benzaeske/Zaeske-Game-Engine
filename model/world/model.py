@@ -4,8 +4,8 @@ from uuid import UUID
 from pygame.key import ScancodeWrapper
 
 from controller.camera import Camera
-from model.entity.entitymanager import EntityManager, ModelContext
-from model.entity.entitymanagerobserver import EntityManagerObserver
+from model.entitymanagers.entitymanager import EntityManager, ModelContext
+from model.entitymanagers.entitymanagerobserver import EntityManagerObserver
 from model.player.player import Player
 from model.world.entityrepository.entityrepository import EntityRepository
 from model.world.gridspace.gridspace import GridSpace
