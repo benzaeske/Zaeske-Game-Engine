@@ -4,7 +4,7 @@ from pygame import Rect
 from pygame.math import Vector2
 
 from model.entities.entity import Entity
-from model.entities.fish.fishconfigv1 import FishType
+from model.entities.entitytype import EntityType
 from model.entities.items.shieldconfig import ShieldConfig
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.modelcontext import ModelContext
@@ -22,7 +22,7 @@ class Shield(Entity):
         self._damage: float = config.damage
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
-        if context.player.get_fish_coherency(FishType.YELLOW):
+        if context.player.get_fish_coherency(EntityType.YELLOW_FISH):
             self._charge_timer += dt
             if self._charge_timer >= self._charge_delay:
                 self.increment_charge()

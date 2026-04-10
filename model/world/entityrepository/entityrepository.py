@@ -2,7 +2,6 @@ from uuid import UUID
 
 from controller.camera import Camera
 from model.entities.entitytype import EntityType
-from model.entities.fish.fishconfigv1 import FishType
 from model.entitymanagers.enemies.enemymanager import EnemyManager
 from model.entitymanagers.entitymanager import EntityManager
 from model.entitymanagers.fish.school import School

@@ -26,7 +26,7 @@ class EnemyConfig(PhysicsEntityConfig, SpriteConfig):
 
     @classmethod
     def from_dict(cls, data: dict) -> ConfigBase:
-        if data['afraid_of_index'] is not None:
+        if data.get('afraid_of_index', None) is not None:
             data['afraid_of_index'] = EntityManagerIndex(data['afraid_of_index'])
         return super().from_dict(data)
 

@@ -169,7 +169,7 @@ class GameController:
 
     def add_enemies(self) -> None:
         jelly_spawn_cd: float = 5.0
-        jelly_spawn_amount: int = 1
+        jelly_spawn_amount: int = 4
 
         self._model.add_entity_manager(
             EnemyManager(
