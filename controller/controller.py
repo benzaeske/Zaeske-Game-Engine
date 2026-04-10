@@ -19,7 +19,6 @@ from controller.camera import Camera
 from model.entitymanagers.items.itemmanager import ItemManager
 from model.entities.items.shield import Shield
 from model.player.player import Player
-from model.player.turtle import Turtle
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
 from model.world.gridspace.grid_cell import GridCell
 from model.world.model import Model
@@ -61,7 +60,7 @@ class GameController:
         self._model: Model = Model(options.grid_cell_size)
         self._model.register_entity_manager_observer(self._view)
         # Initialize the player and register on View and Model
-        self._player: Player = Turtle()
+        self._player: Player = Player(self._player_configurations.get_config()) # Eventually get config during player selection
         self._view.register_player(self._player)
         self._model.register_player(self._player)
         # Initialize the camera

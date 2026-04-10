@@ -13,5 +13,5 @@
   "hitbox_height": 80.0,
   "speed": 256.0,
   "acceleration": 128.0,
-  "health": 100.0
+  "max_health": 100.0
 }

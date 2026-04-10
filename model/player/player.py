@@ -6,6 +6,7 @@ from pygame.key import ScancodeWrapper
 
 from model.entities.entitytype import EntityType
 from model.modelutils import limit_magnitude
+from model.player.playerconfig import PlayerConfig
 from model.player.playerinterface import PlayerInterface
 from model.player.playermovementlistener import PlayerMovementListener
 from model.world.entityrepository.entitymanagerindex import EntityManagerIndex
@@ -14,22 +15,15 @@ from model.world.gridspace.grid_cell import GridCell
 from model.world.gridspace.gridspaceinterface import GridSpaceInterface
 
 class Player(PlayerInterface):
-    def __init__(
-        self,
-        hitbox_width: float,
-        hitbox_height: float,
-        max_speed: float,
-        max_acceleration: float,
-        max_health: float
-    ) -> None:
+    def __init__(self, config: PlayerConfig) -> None:
         super().__init__()
         self._position: Vector2 = Vector2(0.0, 0.0)
         self._velocity: Vector2 = Vector2(0.0, 0.0)
-        self._max_speed: float = max_speed
+        self._max_speed: float = config.speed
         self._acceleration: Vector2 = Vector2(0.0, 0.0)
-        self._max_acceleration: float = max_acceleration
-        self._hitbox: Rect = Rect(0, 0, hitbox_width, hitbox_height)
-        self._max_health: float = max_health
+        self._max_acceleration: float = config.acceleration
+        self._hitbox: Rect = Rect(0, 0, config.hitbox_width, config.hitbox_height)
+        self._max_health: float = config.max_health
         self._current_health: float = self._max_health
         self._fish_coherency: dict[EntityType, int] = {}
         self._movement_listeners: list[PlayerMovementListener] = []

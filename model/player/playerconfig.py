@@ -12,7 +12,7 @@ class PlayerConfig(ConfigBase):
     hitbox_height: float
     speed: float
     acceleration: float
-    health: float
+    max_health: float
 
     @classmethod
     def from_dict(cls, data: dict) -> ConfigBase:
