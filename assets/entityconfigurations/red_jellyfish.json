@@ -5,7 +5,7 @@
   "sprite_height": 96.0,
   "hitbox_width": 96.0,
   "hitbox_height": 96.0,
-  "max_speed": 192.0,
+  "max_speed": 128.0,
   "max_acceleration": 256.0,
   "hp": 100.0,
   "damage": 10.0,

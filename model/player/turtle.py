@@ -2,9 +2,9 @@ from model.player.player import Player
 
 # Global constants for Turtle
 hitbox_width: float = 100.0
-hitbox_height: float = 100.0
+hitbox_height: float = 80.0
 turtle_speed: float = 256.0
-turtle_acceleration: float = 256.0
+turtle_acceleration: float = 128.0
 turtle_health: float = 100.0
 
 class Turtle(Player):

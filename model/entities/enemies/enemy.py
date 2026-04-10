@@ -63,8 +63,9 @@ class Enemy(PhysicsEntity):
     def _fear(self, context: ModelContext) -> None:
         sum_avoid: Vector2 = Vector2(0.0, 0.0)
         count: int = 0
-        for neighbor in context.grid_space.get_neighbors_for_entity(self, self._scared_cell_range,
-                                                                    context.entity_repository.get_manager_ids(self._afraid_of_index)):
+        neighbors = context.grid_space.get_neighbors_for_entity(self, self._scared_cell_range,
+                                                                    context.entity_repository.get_manager_ids(self._afraid_of_index))
+        for neighbor in neighbors:
             d: float = self.get_position().distance_to(neighbor.get_position())
             if 0 < d < self._scared_dist:
                 diff: Vector2 = self.get_position() - neighbor.get_position()
