@@ -11,6 +11,7 @@ from view.sprite.spriteconfig import SpriteConfig
 class EnemyConfig(PhysicsEntityConfig, SpriteConfig):
     hitbox_width: float
     hitbox_height: float
+    target_player_k: float
     hp: float
     damage: float
     neighbor_cell_range: int

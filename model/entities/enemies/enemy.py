@@ -29,6 +29,7 @@ class Enemy(PhysicsEntity):
         self._avoid_neighbor_k: float = config.avoid_neighbor_k
         self._hp: float = config.hp
         self._damage: float = config.damage
+        self._target_player_k: float = config.target_player_k
         # Optional fear behavior:
         self._is_afraid: bool = config.is_afraid
         self._afraid_of_index: EntityManagerIndex = config.afraid_of_index
@@ -43,7 +44,7 @@ class Enemy(PhysicsEntity):
             self._fear(context)
 
     def _move_towards_player(self, context: ModelContext) -> None:
-        self.target(context.player.get_position() - self.get_position(), 1.0)
+        self.target(context.player.get_position() - self.get_position(), self._target_player_k)
 
     def _avoid_close_neighbors(self, context: ModelContext) -> None:
         sum_avoid_neighbors: Vector2 = Vector2(0.0, 0.0)
