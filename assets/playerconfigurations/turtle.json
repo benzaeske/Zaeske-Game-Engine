@@ -1,0 +1,17 @@
+{
+  "left_sprite": {
+    "sprite_width": 128.0,
+    "sprite_height": 128.0,
+    "image_location": "assets/images/baby_turtle_left.png"
+  },
+  "right_sprite": {
+    "sprite_width": 128.0,
+    "sprite_height": 128.0,
+    "image_location": "assets/images/baby_turtle_right.png"
+  },
+  "hitbox_width": 100.0,
+  "hitbox_height": 80.0,
+  "speed": 256.0,
+  "acceleration": 128.0,
+  "health": 100.0
+}

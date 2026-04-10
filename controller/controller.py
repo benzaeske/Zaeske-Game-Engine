@@ -9,6 +9,7 @@ from pygame.key import ScancodeWrapper
 from pygame.time import Clock
 
 from controller.entityconfigurations import EntityConfigurations
+from controller.playerconfigurations import PlayerConfigurations
 from model.entities.entityconfig import EntityConfig
 from model.entities.entitytype import EntityType
 from model.entities.items.shieldconfig import ShieldConfig
@@ -49,8 +50,13 @@ class GameController:
         # Initialize View and Model:
         ############################
         self._entity_configurations: EntityConfigurations = EntityConfigurations()
+        self._player_configurations: PlayerConfigurations = PlayerConfigurations()
         # The View holds all logic related to drawing entities and rendering on screen
-        self._view: View = View(options.window_options, self._entity_configurations.get_configs())
+        self._view: View = View(
+            options.window_options,
+            self._entity_configurations.get_configs(),
+            self._player_configurations.get_config()
+        )
         # The Model holds the simulated world and is responsible for performing updates each frame
         self._model: Model = Model(options.grid_cell_size)
         self._model.register_entity_manager_observer(self._view)

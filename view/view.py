@@ -12,6 +12,7 @@ from model.entities.fish.fish import Fish
 from controller.camera import Camera
 from model.entities.items.shield import Shield
 from model.player.player import Player
+from model.player.playerconfig import PlayerConfig
 from view.background import Background
 from view.entity.enemyview import EnemyView
 from view.entity.entityview import EntityView
@@ -36,7 +37,7 @@ class View(EntityManagerObserver):
     The View is responsible for drawing everything on the screen using pygame functions. It should be noted that pygame
     uses an inverted y-axis.
     """
-    def __init__(self, window_options: WindowOptions, entity_configs: list[EntityConfig]) -> None:
+    def __init__(self, window_options: WindowOptions, entity_configs: list[EntityConfig], player_config: PlayerConfig) -> None:
         super().__init__()
         self._options: WindowOptions = window_options
         # Get available display properties from pygame
@@ -54,7 +55,7 @@ class View(EntityManagerObserver):
             self._screen_height,
         )
         self._background: Background = Background(self._display_width, self._display_height)
-        self._sprite_catalog: SpriteCatalog = SpriteCatalog([c for c in entity_configs if isinstance(c, SpriteConfig)])
+        self._sprite_catalog: SpriteCatalog = SpriteCatalog([c for c in entity_configs if isinstance(c, SpriteConfig)], player_config)
         self._entity_views: dict[UUID, EntityView] = {}
         self._player_view: Optional[PlayerView] = None
 
