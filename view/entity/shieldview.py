@@ -9,28 +9,24 @@ from view.sprite.spritecatalog import SpriteCatalog
 class ShieldView(EntityView[Shield]):
     def __init__(self, shield: Shield, sprite_catalog: SpriteCatalog) -> None:
         super().__init__(shield, sprite_catalog)
-        self._shield_sprites: dict[int, Surface] = self._load_shield_sprites()
+        self._shield_sprite: Surface = self._load_shield_sprite()
 
-    def _load_shield_sprites(self) -> dict[int, Surface]:
-        shield_sprites: dict[int, Surface] = {}
-        for charge_level in range(1, self._entity.get_max_charge() + 1):
-            shield_sprite: Surface = Surface(
-                (self._entity.get_radius() * 2, self._entity.get_radius() * 2),
-                SRCALPHA # This flag allows the surface to have an opacity setting
-            )
-            draw.circle(
-                shield_sprite,
-                (255, 255, 0, 27 + (charge_level * 5)), # Alpha channel determines opacity
-                (self._entity.get_radius(), self._entity.get_radius()),
-                self._entity.get_radius()
-            )
-            shield_sprite.convert_alpha()
-            shield_sprites[charge_level] = shield_sprite
-        return shield_sprites
+    def _load_shield_sprite(self) -> Surface:
+        shield_sprite: Surface = Surface(
+            (self._entity.get_radius() * 2, self._entity.get_radius() * 2),
+            SRCALPHA  # This flag allows the surface to have an opacity setting
+        )
+        draw.circle(
+            shield_sprite,
+            (255, 255, 0, 64),  # Alpha channel determines opacity
+            (self._entity.get_radius(), self._entity.get_radius()),
+            self._entity.get_radius()
+        )
+        shield_sprite.convert_alpha()
+        return shield_sprite
 
     def draw_entity(self, screen: Surface, camera: Camera, dt: float) -> None:
-        if self._entity.get_current_charge() > 0:
-            screen.blit(
-                self._shield_sprites.get(self._entity.get_current_charge()),
-                self.to_camera_pos(camera.get_window(), self._entity.get_radius(), self._entity.get_radius())
-            )
+        screen.blit(
+            self._shield_sprite,
+            self.to_camera_pos(camera.get_window(), self._entity.get_radius(), self._entity.get_radius())
+        )

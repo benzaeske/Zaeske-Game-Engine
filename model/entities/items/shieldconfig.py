@@ -5,6 +5,6 @@ from model.entities.entityconfig import EntityConfig
 @dataclass
 class ShieldConfig(EntityConfig):
     radius: float
+    cooldown: float
     damage: float
-    max_charge: int
-    charge_delay: float
+    knockback_force: float
