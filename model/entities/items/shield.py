@@ -19,7 +19,7 @@ class Shield(Projectile):
         self._cooldown: float = config.cooldown
         self._hit_cooldowns: dict[UUID, float] = {}
 
-    def collides_with(self, enemy: Enemy) -> bool:
+    def collides_with(self, enemy: Enemy, dt: float) -> bool:
         hitbox: Rect = enemy.get_hitbox()
         # Find the closest point on the enemy's hitbox to the center of the circular shield
         closest_point: Vector2 = Vector2(

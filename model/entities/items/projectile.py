@@ -19,7 +19,7 @@ class Projectile(Entity, ABC):
 
     def frame_actions(self, context: ModelContext, dt: float) -> None:
         self._process_entity_hit_cooldowns(dt)
-        self._process_enemy_collisions(context)
+        self._process_enemy_collisions(context, dt)
 
     def _process_entity_hit_cooldowns(self, dt) -> None:
         """
@@ -30,19 +30,26 @@ class Projectile(Entity, ABC):
             if self._hit_cooldowns[entity_id] <= 0:
                 self._hit_cooldowns.pop(entity_id)
 
-    def _process_enemy_collisions(self, context: ModelContext) -> None:
+    def _process_enemy_collisions(self, context: ModelContext, dt: float) -> None:
+        """
+        Checks for enemies that collide with this projectile. If any are found, decreases their hp and applies knockback
+        according to the stats of this projectile. Will only attempt to detect collisions for enemy entities that are
+        not being tracked in the hit cooldown list.
+        """
         for enemy in context.grid_space.get_neighbors(self.get_position(), self._cell_range,
                                                       context.entity_repository.get_manager_ids(EntityManagerIndex.ENEMY)):
-            if enemy.get_id() not in self._hit_cooldowns and self.collides_with(enemy):
+            if enemy.get_id() not in self._hit_cooldowns and self.collides_with(enemy, dt):
                 enemy.update_hp(-self._damage)
                 enemy.apply_knockback(self._knockback_force)
                 self._hit_cooldowns[enemy.get_id()] = self._cooldown
 
     @abstractmethod
-    def collides_with(self, enemy: Enemy) -> bool:
+    def collides_with(self, enemy: Enemy, dt: float) -> bool:
         """
-        Determines if this projectile collides with the given enemy
+        Determines if this projectile collides with the given enemy in the current frame or at any point during the
+        duration of the frame.
         :param enemy: The enemy to check for collisions
-        :return: True if this projectile collides with the enemy, False otherwise
+        :param dt: Time elapsed of the current frame
+        :return: True when this projectile collides with the enemy, False otherwise
         """
         pass
