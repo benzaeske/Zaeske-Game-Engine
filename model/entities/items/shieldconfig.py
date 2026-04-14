@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 
-from model.entities.entityconfig import EntityConfig
+from model.entities.items.projectileconfig import ProjectileConfig
+
 
 @dataclass
-class ShieldConfig(EntityConfig):
+class ShieldConfig(ProjectileConfig):
     radius: float
-    cooldown: float
-    damage: float
-    knockback_force: float
