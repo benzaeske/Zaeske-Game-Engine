@@ -10,7 +10,7 @@ class ConfigBase(ABC):
     Base class for config data classes.
     """
     @classmethod
-    def from_dict(cls, data: dict) -> ConfigBase:
+    def from_dict(cls, data: dict) -> 'ConfigBase':
         """
         Creates a config from the provided dictionary. Extra keys will not throw errors and will simply not be
         present as attributes the returned data class.
@@ -19,7 +19,7 @@ class ConfigBase(ABC):
         return cls(**{k : v for k, v in data.items() if k in field_names})
 
     @classmethod
-    def from_file(cls, file_path: str) -> ConfigBase:
+    def from_file(cls, file_path: str) -> 'ConfigBase':
         """
         Creates a config from the provided JSON file.
         :param file_path: The path to the JSON file from the project root directory.

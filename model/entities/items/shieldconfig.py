@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 
-from model.entities.entityconfig import EntityConfig
+from model.entities.items.projectileconfig import ProjectileConfig
+from view.sprite.spriteconfig import SpriteConfig
+
 
 @dataclass
-class ShieldConfig(EntityConfig):
+class ShieldConfig(ProjectileConfig, SpriteConfig):
     radius: float
-    damage: float
-    max_charge: int
-    charge_delay: float

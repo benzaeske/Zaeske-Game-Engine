@@ -1,7 +1,11 @@
 {
   "entity_type": "SHIELD",
-  "radius": 128.0,
-  "damage": 100.0,
-  "max_charge": 10,
-  "charge_delay": 0.5
+  "sprite_width": 256.0,
+  "sprite_height": 256.0,
+  "image_location": "assets/images/shield.png",
+  "radius": 127.0,
+  "damage": 25.0,
+  "knockback_force": 0.5,
+  "cooldown": 1.0,
+  "cell_range": 2
 }
