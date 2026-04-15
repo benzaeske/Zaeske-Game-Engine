@@ -1,5 +1,6 @@
 from pygame import Surface, image, transform
 
+from model.entities.entityconfig import EntityConfig
 from model.entities.entitytype import EntityType
 from model.player.playerconfig import PlayerConfig
 from view.sprite.playeranimation import PlayerAnimation
@@ -31,9 +32,12 @@ class SpriteCatalog:
 
     def _load_entity_sprites(self, sprite_configs: list[SpriteConfig]) -> None:
         for config in sprite_configs:
-            self._entity_sprites[config.entity_type] = SpriteData(
-                self.load_image(config.image_location, config.sprite_width, config.sprite_height)
-            )
+            if isinstance(config, EntityConfig):
+                self._entity_sprites[config.entity_type] = SpriteData(
+                    self.load_image(config.image_location, config.sprite_width, config.sprite_height)
+                )
+            else:
+                raise TypeError(f"Entity sprite config missing entity id")
 
     def _load_player_animations(self, player_config: PlayerConfig) -> None:
         self._player_animations[PlayerAnimation.SWIMMING_LEFT] = SpriteData(

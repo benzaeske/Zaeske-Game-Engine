@@ -1,6 +1,9 @@
 {
   "entity_type": "SHIELD",
-  "radius": 128.0,
+  "sprite_width": 256.0,
+  "sprite_height": 256.0,
+  "image_location": "assets/images/shield.png",
+  "radius": 127.0,
   "damage": 25.0,
   "knockback_force": 0.5,
   "cooldown": 1.0,
