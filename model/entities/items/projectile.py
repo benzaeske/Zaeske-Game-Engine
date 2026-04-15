@@ -9,6 +9,11 @@ from model.world.modelcontext import ModelContext
 
 
 class Projectile(Entity, ABC):
+    """
+    Base class for projectile entities. Projectiles have damage, knockback force, and a cooldown that determines how
+    often they can affect enemy entities. Enemy hit detection and damage cooldowns are performed in the frame actions
+    implementation.
+    """
     def __init__(self, config: ProjectileConfig, manager_id: UUID):
         super().__init__(config, manager_id)
         self._damage: float = config.damage
