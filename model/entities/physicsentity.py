@@ -1,6 +1,5 @@
 from abc import ABC
 from copy import copy
-from typing import Optional
 from uuid import UUID
 
 from pygame import Vector2
